@@ -1,0 +1,54 @@
+The End of "Just Prompting": 5 Hard-Won Lessons from High-Stakes AI Agent Orchestration
+
+The popular image of AI development is a dangerous myth. It suggests that a developer can simply type a vague, "magical" prompt and watch a production-ready application materialize. In professional environments, this lazy prompt engineering culture is the fastest route to failure. To survive the hallucination-to-production pipeline, we must move beyond simple chat interfaces toward a rigorous multi-agent orchestration where Ambiguity = Bugs in Production.
+
+1. The Death of Ambiguity (One Question at a Time)
+
+In our orchestration layer, the Product Discovery Agent is governed by "Absolute Rules" that prioritize extreme granularity over conversational speed. It is strictly mandated to ask only one question per message and is explicitly forbidden from using the word "also" to prevent compound logic. This forced constraints ensure that every requirement is isolated, scrutinized, and confirmed before moving to the next phase.
+
+The Power of Forced Discovery By eliminating the word "also," we stop the "brain dump" from contaminating the technical requirements with hidden complexity. The ultimate Success Metric is simple: the builder must be able to implement the entire feature set with zero clarifying questions. If a human needs to step in to explain a detail, the discovery process has failed.
+
+"Ambiguity here = bugs in production."
+
+2. The "Three Strikes" Rule for AI Repair Loops
+
+Autonomous agents can fall into "infinite repair loops," repeatedly attempting the same failed logic. The Application Builder Agent mitigates this through a mandatory Strike Limit Protocol that monitors its internal Repair Mode. This system employs Error Fingerprinting to detect if a failure is functionally identical to a previous attempt.
+
+Engineering the Error Fingerprint A fingerprint is calculated by combining the normalized error text, the specific file and line number, and the error code/type. If the system detects an 80%+ match on these factors, a strike is recorded. After three consecutive strikes, the agent must halt execution and escalate, preventing the wasteful consumption of tokens on circular failures.
+
+* Strike 1: Trigger Repair Mode to attempt the smallest possible fix.
+* Strike 2: Re-run quality gates; if the fingerprint matches, attempt an alternative fix.
+* Strike 3: If the 80%+ match persists, the protocol triggers a hard stop for human intervention.
+
+3. Security is a Hard "Block," Not a Suggestion
+
+In professional orchestration, security operates with an "Assume Breach" mindset. The Application Security Agent holds absolute BLOCK/APPROVE authority, evaluating code against 17 distinct domains including Domain 12: Release Integrity and Domain 13: Client-Side Data & Secrets. It does not offer suggestions; it enforces the physical presence of defense-in-depth before a single line of code can ship.
+
+Launch Impact and Annex Compliance The security agent utilizes specific Blocker Criteria derived from the platform Annexes to determine launch readiness. If a vulnerability appears in a critical domain, the deployment is killed immediately. This ensures that security is a functional requirement, not an afterthought.
+
+Vulnerability	Platform	Launch Impact
+Auth tokens in localStorage	Web	BLOCK
+Unsigned executables or auto-updaters	Windows/macOS	BLOCK
+Remote code execution (JS patches)	iOS	BLOCK
+Exported components/Privilege escalation	Android	BLOCK
+Credentials in plain text config files	Linux	BLOCK
+
+4. The Verifier’s Oath (Guilty Until Proven Innocent)
+
+The Codebase Verifier Agent adopts a posture of radical skepticism, treating every implementation as flawed until proven otherwise. It performs a mandatory Blast Radius Analysis to identify how changes impact shared API contracts across the entire system. Nothing is considered "done" until it passes verification on all six target platforms: Web, Windows, macOS, Linux, iOS, and Android.
+
+Proving System Integrity The Verifier ignores the builder’s summary and instead relies on objective evidence. It checks for parity across different operating systems to ensure that a fix on Windows doesn't break the Linux build. The agent is bound by a strict professional code that rejects any release lacking independent, verified proof.
+
+The Verifier's Oath: "I will not ship what I cannot prove. I will not approve what I have not tested. I will not trust what I have not verified—on any platform."
+
+5. Why Your Code Needs a "Truth-Over-Comfort" Critic
+
+The Product Critic Agent serves as the final Level 2 — Red Team Mode specialist. Its role begins at the Concept Validation Gate, where it has the power to KILL or PAUSE a project before code is even written if the monetization or market differentiation is weak. It evaluates the product's survival in the real world, focusing on "Truth-Over-Comfort" rather than technical completion.
+
+The Mandatory Record of Truth The Critic’s findings are never ephemeral; they are codified in a mandatory CRITICISM.md file in the repository root. This file serves as the canonical record of truth, documenting the uncomfortable risks human teams often ignore. By forcing the project to survive a "Red Team" review of both its code and its business logic, we ensure the system is built for the market, not just the IDE.
+
+Conclusion: The Future of Autonomous Engineering
+
+These agents represent a fundamental shift toward an Autonomous Software Lifecycle. In this model, the human developer transitions from a "writer of code" to an "orchestrator of experts." Success is no longer defined by how fast you can prompt, but by how rigorously you can verify.
+
+As we move toward high-stakes autonomous systems, one question remains for every architect. Are you prepared for a world where your AI agents are more paranoid, more security-conscious, and more brutally honest than the developers who built them?

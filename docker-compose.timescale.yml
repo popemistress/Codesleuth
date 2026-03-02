@@ -1,0 +1,27 @@
+# TimescaleDB for Token Budget Management System
+# Run with: docker-compose -f docker-compose.timescale.yml up -d
+
+version: "3.9"
+
+services:
+  timescaledb:
+    image: timescale/timescaledb:latest-pg17
+    container_name: codesleuth-timescale
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: dbuser
+      POSTGRES_PASSWORD: 1P@55W0rd
+      POSTGRES_DB: codesleuth_metrics
+    ports:
+      - "5433:5432"
+    volumes:
+      - timescale_data:/var/lib/postgresql/data
+      - ./prisma/timescale/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dbuser -d codesleuth_metrics"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  timescale_data:

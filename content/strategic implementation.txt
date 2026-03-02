@@ -1,0 +1,200 @@
+Strategic Implementation Roadmap: Multi-Agent Enterprise Development Lifecycle
+
+1. The Planning & Strategy Layer: Product Discovery and Concept Validation
+
+The Product Discovery Agent (PDA) is the non-negotiable "Single Source of Truth" for the entire enterprise lifecycle. Strategic necessity dictates that discovery must be front-loaded; any attempt to bypass this layer introduces implementation ambiguity that inevitably manifests as high-severity production bugs. This layer is designed to exhaustively define intent, ensuring that downstream agents operate within an immutable, validated specification rather than a vacuum of assumptions.
+
+1.1. Structured Discovery Phases
+
+The discovery process follows a 13-phase sequence. Each phase is gated by specific "Stack Probes"—targeted technical queries that extract implementation-ready details.
+
+* Phase 1: Problem & Outcome: Core problem, success metrics, and primary user identification.
+* Phase 2: Core User Flow [Probes: Full page vs. modal? SSR-critical? Real-time updates?]: Happy path documentation from entry point to success state.
+* Phase 3: Data & State [Probes: Redis caching? User/Org/Global scope? Optimistic updates?]: Inventory of mutations and caching strategies.
+* Phase 4: Scope Boundaries: MVP must-haves vs. v2 exclusions.
+* Phase 5: Roles & Permissions [Probes: API-level vs. Component-level? 403 vs. hidden UI?]: Permission matrix and visibility rules.
+* Phase 6: UX Requirements [Probes: Streaming/Suspense? Skeleton loaders?]: Screen list and responsive UI states.
+* Phase 7: API & Business Logic [Probes: Server Action vs. API Route? Idempotent? Timeout tolerance?]: Endpoint contracts and side effects.
+* Phase 8: Data Model [Probes: Unique/indexed fields? Computed fields? Cascade deletes?]: Entity relationships and lifecycle rules.
+* Phase 9: Non-Functional Requirements [Probes: Edge vs. Node runtime? Rate limiting?]: Quantified performance and cost constraints.
+* Phase 10: Error Handling: Taxonomy of errors (400, 401, 403, 404, 409, 429, 500) and retry strategies.
+* Phase 11: Observability: Metrics, alert thresholds, and log events.
+* Phase 12: Testing Strategy: Critical path identification and test data requirements.
+* Phase 13: Release Plan: Rollout strategy (feature flags vs. big bang) and rollback triggers.
+
+1.2. The Concept Validation Gate (Mandatory)
+
+Before a single architectural blueprint is drawn, the Feature Specification must pass through the Concept Critic. This is a hard gate; failure to secure a "PROCEED" verdict halts the entire roadmap.
+
+Dimension	Key Question	Red Flags (Triggers RETHINK/REVISE)
+Value Clarity	Is the problem real and the solution obvious?	Vague problem statement; solution looking for a problem.
+User Journey	Is the flow intuitive? Where is the friction?	Complex onboarding; unclear next steps or high friction.
+Monetization	Is the pricing and revenue model viable?	No revenue model; pricing disconnected from value.
+Differentiation	Why choose this over alternatives?	"Me-too" features; easily replicated by competitors.
+Scope Alignment	Does effort match the expected return?	Overbuilt MVP; significant risk of scope creep.
+
+1.3. Spec State and Handoff Protocols
+
+The transition from Discovery to Technical Planning requires the !compile command, which aggregates all 13 phases into a finalized Feature Specification. The Technical Planner is forbidden from proceeding without a verified "PROCEED" verdict. This specification serves as the bedrock of the architecture, ensuring that the build phase is an exercise in execution, not interpretation.
+
+Architectural integrity is impossible without a validated product concept. Upon validation, the roadmap transitions to Technical Planning.
+
+
+--------------------------------------------------------------------------------
+
+
+2. The Architecture Layer: Multi-Platform System Design
+
+The Technical Designer translates product requirements into executable technical designs, acting as the primary risk mitigator. The objective is to bridge the gap between "what" (Product Discovery) and "how" (Implementation) by creating a blueprint that accounts for platform-specific nuances and designs for failure gracefully.
+
+2.1. Cross-Platform Scoping and Stack Alignment
+
+The architecture mandates specific tech stacks and communication protocols to ensure performance and parity.
+
+* Web: Next.js 14+ (App Router), TypeScript (Strict), Prisma, and PostgreSQL.
+* Windows: WinUI 3 or .NET MAUI. Primary IPC: Named Pipes/gRPC. Packaging: MSIX.
+* macOS: SwiftUI + AppKit. Primary IPC: XPC Services/Mach ports. Packaging: .app bundle/Notarization. Update: Sparkle.
+* Linux: GTK4 (libadwaita) or Qt 6. Primary IPC: D-Bus/Unix sockets. Packaging: Flatpak/AppImage.
+* iOS: SwiftUI, SwiftData, and Combine. Push: APNs. Auth: Sign in with Apple.
+* Android: Jetpack Compose, Kotlin, and Room. Push: FCM. DI: Hilt/Koin.
+
+2.2. The Technical Design Document (TDD) Suite
+
+Engineering must produce seven mandatory deliverables before implementation:
+
+1. TDD: The master technical specification.
+2. PLATFORM: Platform-specific UI patterns (e.g., Fluent for Windows, HIG for macOS).
+3. IMPL: The step-by-step execution sequence.
+4. MIGRATE: Orchestration for database schema changes.
+5. FEATURES.md: Non-negotiable. Resides in the root of every repository to synchronize shared behaviors across disparate platforms.
+6. AI-INSTRUCTIONS: Tailored prompts for automated Builder Agents.
+7. PREFLIGHT: The final verification checklist.
+
+2.3. Unified Data and Sync Strategy
+
+The system follows a strict Sync Architecture: Local Change → Local DB → Sync Queue → Backend API → Cloud DB. Data integrity is managed through a "Last-write-wins" conflict resolution based on the updatedAt timestamp. All entities must support four distinct Sync States: Synced, Syncing, Pending, Error.
+
+These architectural blueprints provide the strict constraints required for automated building, leading into the implementation phase.
+
+
+--------------------------------------------------------------------------------
+
+
+3. The Building Layer: Automated Implementation and Repair Protocols
+
+The Builder Agent operates under a "Red = Stop, Green = Ship" philosophy. Execution is a verification exercise where code must survive CI to be considered complete. Platform conflicts halt execution immediately; no code is generated until infrastructure is fully discovered.
+
+3.1. Pre-Build Infrastructure Discovery
+
+The Builder MUST satisfy the completion criteria for Phase 0 and Phase 1 before generating code.
+
+Phase 0: Infrastructure Discovery Completion Criteria | Criterion | Status | | :--- | :--- | | Development OS and Runtime OS are known | ☐ | | Application type(s) (e.g., Mobile, Desktop, Web) are known | ☐ | | Primary target platform is confirmed | ☐ | | No unresolved platform conflicts exist | ☐ | | Decision authority for "Not Sure" answers is defined | ☐ |
+
+Phase 1: Environment Configuration Completion Criteria | Criterion | Status | | :--- | :--- | | Database type (PostgreSQL, SQLite, etc.) selected | ☐ | | Connection confirmed or installation path chosen | ☐ | | Redis configuration confirmed (or marked N/A) | ☐ | | All required environment variables documented | ☐ |
+
+3.2. The phases.md Progress Contract
+
+Every implementation must maintain a phases.md file in the project root. This file serves as a live, transparent contract between the agent and the enterprise, tracking vertical slices of development and preventing "dark work" or unverified progress.
+
+3.3. Execution Breakpoints and Quality Gates
+
+Execution Breakpoints: BP-1 (Data/Schema), BP-2 (API/Services), BP-3 (UI/State), BP-4 (Full Suite). Quality Gates: (A) Lint, (B) Typecheck, (C) Tests, (D) Build.
+
+If a gate fails, the system enters Repair Mode. This mode utilizes Error Fingerprinting, comparing the error message text, file/line number, and error code. If there is an 80%+ match, it is identified as a recurring error. The Strike Limit Protocol triggers a hard stop and escalation if the same fingerprint is detected three times.
+
+While the Builder ensures code survives CI, the Security Agent must now ensure it survives the adversary.
+
+
+--------------------------------------------------------------------------------
+
+
+4. The Security Layer: Adversarial Defense and Integrity Domains
+
+The Security Agent operates on an "Assume Breach" philosophy, acting as an independent authority that can block shipment regardless of velocity requirements. The client-side is always treated as adversary-controlled.
+
+4.1. The 17 Security Domains
+
+Security is assessed across 17 distinct domains. The roadmap prioritizes Domain 12 (Release Integrity) and Domain 13 (Client-Side Secrets) as Universal Blockers.
+
+* Universal Principles: Defense in Depth, IAM Least Privilege, Input Validation, and Cryptographic Security (TLS 1.2+).
+* Blocker Rule: Any findings in Release Integrity (unsigned updates) or Client-Side Secrets (plain-text tokens) results in an immediate BLOCK.
+
+4.2. Platform-Specific Annexes
+
+Platform	Security Blocker (Must Be Present)
+Web	HSTS Enforcement, Strict Content Security Policy (CSP).
+Mobile	App Transport Security (ATS), Keychain/Keystore for all tokens.
+Desktop	Authenticode (Windows) / Developer ID (macOS) Signing & Notarization.
+
+4.3. Security Test Case Mandates
+
+Compliance requires executable tests, not just static analysis.
+
+* Web Mandate: 15+ Input Validation tests, 10+ Authorization tests.
+* Native Mandate: 8+ Authorization tests, 10+ Input Validation tests per platform.
+* Pass Rate: < 80% security test coverage results in a NO-LAUNCH verdict.
+
+Security clearance is a prerequisite for the final verification layer, moving to Quality Assurance.
+
+
+--------------------------------------------------------------------------------
+
+
+5. The Verification Layer: Multi-Platform Quality Assurance
+
+Verification is governed by "Evidence over Assertion." The Verifier Agent acts as an objective filter to prove implementation correctness across all target platforms.
+
+5.1. Universal Quality Gates
+
+The Verifier executes six phases, with a primary focus on Plan Compliance. This phase specifically hunts for "unrelated refactors" or "simplified" logic where the Builder deviated from the TDD. Any deviation without documented approval triggers a regression failure.
+
+5.2. Cross-Platform Regression Assessment (Blast Radius)
+
+Changed Area	Potentially Affected	Priority
+Auth/Session	All protected flows across all platforms	🔴 Critical
+Database Schema	Data queries and server-side migrations	🔴 Critical
+API Contracts	All native consumers and mobile apps	🟡 High
+Shared Components	All screens/UIs using the component	🟡 High
+
+5.3. Platform-Specific Failure Patterns
+
+The Verifier uses diagnostic instructions to identify cross-platform inconsistencies:
+
+* Pattern 1: "Works on iOS, crashes on Android" (Usually null safety or lifecycle handling).
+* Pattern 2: "Works in dev, broken in prod" (Environment variable or build config mismatch).
+* Pattern 3: "Works on Chrome, broken on Safari" (CSS/WebKit compatibility).
+
+Technical verification must be paired with product criticism before reaching the Go/No-Go gate.
+
+
+--------------------------------------------------------------------------------
+
+
+6. The Governance Layer: Product Criticism and the Go/No-Go Launch Gate
+
+The final governance layer is the "Truth-Over-Comfort" mandate. The Product Critic Agent evaluates the software as a business asset that must survive market pressure, not just a technical artifact.
+
+6.1. The CRITICISM.md Deliverable
+
+The mandatory CRITICISM.md file is the canonical record of the product's survival probability. It must include:
+
+* System Mapping: Total architecture and data flow description.
+* Assumption Stress Tests: Detailed failure costs for assumptions regarding traffic, data shape, and user discipline.
+* Top 10 Fix-First List: Prioritized technical and product debt.
+
+6.2. Multi-Domain Product Improvement
+
+The Critic provides 3-10 detailed examples. At least 1/3 must be user-facing, and at least one must address monetization or concept clarity.
+
+* Required Format: Each example must include Current State, Proposed Improvement, Why This Matters, Scope & Effort (Small/Med/Large), and Success Criteria.
+
+6.3. The Mandatory Go/No-Go Launch Gate
+
+The final verdict follows strict logic:
+
+* SHIP: All annexes pass, updates are signed, and security coverage is >80%.
+* PAUSE: Irresponsible to ship; high-severity risks remain.
+* REDESIGN: The foundational architecture cannot support the product goals.
+* KILL: The product or feature fails to provide measurable business value.
+
+Next Action: Initialize Pre-Build Phase 0: Infrastructure Discovery to define target OS and application types for the immediate implementation queue.
