@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Component Libraries — CodeSleuth AI Docs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="header" id="site-header"></header>
+  <div class="main-layout">
+    <nav class="sidebar" id="site-sidebar"></nav>
+    <main class="content">
+      <div class="content-inner">
+
+        <div class="breadcrumb">
+          <a href="index.html">Docs</a>
+          <span class="breadcrumb-sep">›</span>
+          <span>Reference</span>
+          <span class="breadcrumb-sep">›</span>
+          <span class="breadcrumb-current">Component Libraries</span>
+        </div>
+
+        <div class="page-tag">🧩 UI Components</div>
+        <h1>Component Libraries</h1>
+        <p class="lead">
+          CodeSleuth ships with two pre-integrated component libraries: <strong>Boron</strong> (a static HTML/Bootstrap admin template with 100+ pages) and <strong>Materialize</strong> (a Material Design component framework). Agents auto-discover these libraries at Planning activation and incorporate them into TDD Section 5A and COMPONENT_MAP.md.
+        </p>
+
+        <!-- Auto-discovery -->
+        <h2>Auto-Discovery</h2>
+        <p>The Planner (Agent 2) automatically discovers component catalogs by scanning <code>components/**/COMPONENT_CATALOG.md</code> at activation. Any <code>COMPONENT_CATALOG.md</code> file found anywhere under <code>components/</code> — at any depth — is loaded and merged into the combined component inventory.</p>
+
+        <div class="callout callout-info">
+          <span class="callout-icon">💡</span>
+          <div class="callout-content">
+            <div class="callout-title">No pipeline changes required</div>
+            <p>A new library dropped into <code>components/</code> with a <code>COMPONENT_CATALOG.md</code> is automatically included in planning with no pipeline changes required. The Planner reads it, the Builder uses it, the Verifier confirms it.</p>
+          </div>
+        </div>
+
+        <!-- Library locations -->
+        <h2>Library Locations</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Library</th><th>Path</th><th>Type</th><th>Catalog</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Boron</strong></td>
+                <td><code>components/Boron/</code></td>
+                <td>Static HTML/Bootstrap admin template</td>
+                <td><code>components/Boron/COMPONENT_CATALOG.md</code></td>
+              </tr>
+              <tr>
+                <td><strong>Materialize</strong></td>
+                <td><code>components/Materialize/next-version/</code></td>
+                <td>Material Design CSS/JS framework</td>
+                <td><code>components/Materialize/next-version/COMPONENT_CATALOG.md</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Boron -->
+        <h2>Boron — Admin Template Library</h2>
+        <p>Boron provides <strong>HTML/CSS layout patterns and UI blueprints</strong> sourced from a Bootstrap-based admin template. It ships with 100+ pre-built HTML pages in <code>components/Boron/dist/</code>.</p>
+
+        <h3>How agents use Boron</h3>
+        <p>Boron is a structural reference, not a framework dependency. Agents translate Boron patterns to the target platform's component system:</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Platform</th><th>How to use Boron patterns</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Next.js / React</strong></td>
+                <td>Translate HTML structure to JSX. Use MUI or shadcn/ui for interactive elements. Apply Tailwind classes for spacing/layout.</td>
+              </tr>
+              <tr>
+                <td><strong>Vue.js</strong></td>
+                <td>Convert to Vue SFC templates. Replace class-based JS with Vue Composition API.</td>
+              </tr>
+              <tr>
+                <td><strong>Angular</strong></td>
+                <td>Convert to Angular templates with <code>@Component</code>. Replace jQuery with Angular directives.</td>
+              </tr>
+              <tr>
+                <td><strong>Svelte</strong></td>
+                <td>Convert to Svelte components. Use <code>&lt;script&gt;</code> for reactive state.</td>
+              </tr>
+              <tr>
+                <td><strong>Vanilla JS / HTML</strong></td>
+                <td>Use directly from <code>dist/</code> HTML files. Adapt CSS as needed.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Boron component inventory</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Component Category</th><th>Source File</th><th>Variants Available</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Buttons</strong></td>
+                <td><code>dist/ui-buttons.html</code></td>
+                <td>Primary, Secondary, Success, Danger, Warning, Info, Light, Dark, Outline, Soft, Link; Small/Default/Large; Disabled, Loading, Icon-only</td>
+              </tr>
+              <tr>
+                <td><strong>Cards</strong></td>
+                <td><code>dist/ui-cards.html</code></td>
+                <td>Basic, header/footer, colored, border-top accent, horizontal, image-top</td>
+              </tr>
+              <tr>
+                <td><strong>Forms</strong></td>
+                <td><code>dist/ui-forms-basic.html</code></td>
+                <td>Text, email, password, number, textarea, select, radio, checkbox, file, date, range, floating label</td>
+              </tr>
+              <tr>
+                <td><strong>Tables</strong></td>
+                <td><code>dist/tables-basic.html</code></td>
+                <td>Striped, bordered, hover, sortable columns, pagination, responsive</td>
+              </tr>
+              <tr>
+                <td><strong>Navigation</strong></td>
+                <td><code>dist/layout-navbar.html</code></td>
+                <td>Fixed top, sticky, dark/light theme, with search, with user avatar</td>
+              </tr>
+              <tr>
+                <td><strong>Sidebar</strong></td>
+                <td><code>dist/layout-sidebar.html</code></td>
+                <td>Collapsed, mini, hidden on mobile, with badge counts, nested items</td>
+              </tr>
+              <tr>
+                <td><strong>Modals</strong></td>
+                <td><code>dist/ui-modals.html</code></td>
+                <td>Basic, confirmation, form, scrollable, fullscreen, drawer</td>
+              </tr>
+              <tr>
+                <td><strong>Alerts</strong></td>
+                <td><code>dist/ui-alerts.html</code></td>
+                <td>Info, Success, Warning, Danger; dismissible, with icon, with action</td>
+              </tr>
+              <tr>
+                <td><strong>Dashboard Metrics</strong></td>
+                <td><code>dist/index.html</code></td>
+                <td>Stat cards (value + delta + icon), KPI cards, trend lines</td>
+              </tr>
+              <tr>
+                <td><strong>Charts</strong></td>
+                <td><code>dist/charts-apexcharts.html</code></td>
+                <td>Line, area, bar, donut, radial (ApexCharts integration)</td>
+              </tr>
+              <tr>
+                <td><strong>Data Tables</strong></td>
+                <td><code>dist/tables-datatables.html</code></td>
+                <td>DataTables.js integration: search, sort, pagination, export</td>
+              </tr>
+              <tr>
+                <td><strong>Login / Register</strong></td>
+                <td><code>dist/pages-login.html</code>, <code>dist/pages-register.html</code></td>
+                <td>Card layout, split layout, background image, social login buttons</td>
+              </tr>
+              <tr>
+                <td><strong>Error Pages</strong></td>
+                <td><code>dist/pages-error-404.html</code></td>
+                <td>404, 500, maintenance mode</td>
+              </tr>
+              <tr>
+                <td><strong>Profile / Settings</strong></td>
+                <td><code>dist/pages-profile.html</code>, <code>dist/pages-settings.html</code></td>
+                <td>Avatar, bio, tabs, form sections</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Referencing Boron patterns in tasks</h3>
+        <p>When a task uses a Boron pattern, agents reference the source file:</p>
+        <pre><code>## Implementation reference
+Use the dashboard stat card pattern from `components/Boron/dist/index.html` — adapt to Next.js/MUI.
+React conversion: use &lt;Card&gt; + &lt;CardContent&gt; with a Box containing value, delta, and icon.</code></pre>
+
+        <!-- Materialize -->
+        <h2>Materialize — Material Design Framework</h2>
+        <p>Materialize provides a Material Design component library. The <code>next-version</code> in the path refers to the version of the library bundled with CodeSleuth.</p>
+
+        <h3>Materialize component inventory</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Component</th><th>Material Design Spec</th><th>Platform compatibility</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Buttons (FAB, Raised, Flat)</td><td>Material Buttons spec</td><td>Web, React (via MUI mapping), Flutter</td></tr>
+              <tr><td>Cards (basic, image, reveal)</td><td>Material Card spec</td><td>Web, React, Android (Jetpack Compose cards)</td></tr>
+              <tr><td>Chips</td><td>Material Chips spec</td><td>Web, React</td></tr>
+              <tr><td>Collections (list items)</td><td>Material List spec</td><td>Web, React</td></tr>
+              <tr><td>Dropdown menus</td><td>Material Menu spec</td><td>Web, React</td></tr>
+              <tr><td>Forms (text fields, select, date picker)</td><td>Material TextField spec</td><td>Web, React</td></tr>
+              <tr><td>Modals / Bottom sheets</td><td>Material Dialog / Bottom Sheet</td><td>Web, React, Android (composable)</td></tr>
+              <tr><td>Navigation (navbar, sidenav, tabs)</td><td>Material NavigationBar / Drawer / TabBar</td><td>Web, React</td></tr>
+              <tr><td>Progress (linear, circular)</td><td>Material ProgressIndicator</td><td>Web, React, Flutter</td></tr>
+              <tr><td>Tooltips / Toasts</td><td>Material Tooltip / Snackbar</td><td>Web, React, Android</td></tr>
+              <tr><td>Table (responsive)</td><td>Material DataTable spec</td><td>Web, React</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Component Library Resolution -->
+        <h2>Component Library Resolution</h2>
+        <p>When multiple libraries exist or a user preference conflicts with the stack default, the Planner runs the Component Library Resolution Step before any artifact is written:</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Situation</th><th>Resolution</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>No catalog exists, no user preference</td>
+                <td>Use the Platform Stack Default (e.g. shadcn/ui for Next.js)</td>
+              </tr>
+              <tr>
+                <td>No catalog exists, user stated a preference</td>
+                <td>Use stated preference</td>
+              </tr>
+              <tr>
+                <td>Catalog exists, matches stack default</td>
+                <td>Use catalog</td>
+              </tr>
+              <tr>
+                <td>Catalog exists, no conflict with stack default</td>
+                <td>Use catalog; log choice in DECISIONS.md</td>
+              </tr>
+              <tr>
+                <td><strong>Catalog exists AND conflicts with stack default</strong></td>
+                <td><strong>Surface conflict to user — pause and wait for Option A or B confirmation</strong></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Conflict output format</h3>
+        <pre><code>⚠️ Component library conflict detected.
+
+Existing catalog: Materialize — 42 components, 0 stories, framework: CSS/JS
+Platform default: shadcn/ui + Tailwind CSS
+
+Option A — Use existing catalog: Materialize
+  Source: components/Materialize/next-version/COMPONENT_CATALOG.md
+  Benefit: 42 components ready; consistent Material Design across app
+  Risk: Bundle size; requires Materialize CSS; no Storybook stories yet
+
+Option B — Use platform default: shadcn/ui
+  Benefit: Tailwind-only, smaller footprint, matches Next.js stack default
+  Risk: 42 components in existing catalog would not be used; starting from zero stories
+
+Type A or B to continue planning.</code></pre>
+
+        <!-- COMPONENT_MAP.md -->
+        <h2>COMPONENT_MAP.md</h2>
+        <p>When a <code>components/</code> folder exists, the Planner generates <code>artifacts/build/COMPONENT_MAP.md</code> — a dependency map linking pages to their required components:</p>
+
+        <pre><code>## Component Dependency Map
+
+| Page / Feature    | Components Used                    | Story Exists | Task (if story missing) |
+|-------------------|------------------------------------|--------------|-------------------------|
+| Booking page      | BookingCalendar, Button, FormField  | ❌ BookingCalendar | TASK-005 |
+| Pricing page      | PricingCard, Button                | ✅ all       | —                       |
+| Dashboard         | DashboardMetric, ProgressChart     | ❌ both      | TASK-006, TASK-007      |</code></pre>
+
+        <p>Rules enforced by the Builder:</p>
+        <ul>
+          <li>Before writing any new UI element, check COMPONENT_MAP.md and COMPONENT_CATALOG.md first</li>
+          <li>If an equivalent component exists in the catalog, use it — never create a duplicate</li>
+          <li>A genuinely new component must be introduced via a <code>component</code> task (story first, then implementation) before it can be used in a page task</li>
+          <li>No page or feature task may reference a component that lacks at least one story</li>
+        </ul>
+
+        <!-- Storybook -->
+        <h2>Storybook Integration</h2>
+        <p>When Storybook is in scope, component tasks follow a dedicated workflow:</p>
+        <ol>
+          <li>Read the catalog entry for the component from <code>COMPONENT_CATALOG.md</code></li>
+          <li>Write stories first — create <code>.stories.tsx</code> files with real prop values (no placeholder text, no empty renders)</li>
+          <li>Run <code>pnpm build-storybook</code> — must exit zero</li>
+          <li>Write visual baseline: <code>pnpm test:visual -- --update-snapshots</code> targeting the component's spec file</li>
+          <li>Implement the component (if it doesn't yet exist) or patch it if story rendering exposed a gap</li>
+          <li>Re-run <code>pnpm build-storybook</code> and <code>pnpm test:visual</code> — both must exit zero</li>
+        </ol>
+
+        <h3>Story naming convention</h3>
+        <pre><code>// File: src/components/BookingCalendar/BookingCalendar.empty.stories.tsx
+// File: src/components/BookingCalendar/BookingCalendar.withSlots.stories.tsx
+// File: src/components/BookingCalendar/BookingCalendar.error.stories.tsx
+
+// Pattern: ComponentName.variant.stories.tsx</code></pre>
+
+      </div>
+    </main>
+  </div>
+  <script src="nav.js"></script>
+</body>
+</html>

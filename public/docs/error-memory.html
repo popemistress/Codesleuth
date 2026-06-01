@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Error Memory — CodeSleuth AI Docs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="header" id="site-header"></header>
+  <div class="main-layout">
+    <nav class="sidebar" id="site-sidebar"></nav>
+    <main class="content">
+      <div class="content-inner">
+
+        <div class="breadcrumb">
+          <a href="index.html">Docs</a>
+          <span class="breadcrumb-sep">›</span>
+          <span>Reference</span>
+          <span class="breadcrumb-sep">›</span>
+          <span class="breadcrumb-current">Error Memory</span>
+        </div>
+
+        <div class="page-tag">🧠 Institutional Memory</div>
+        <h1>Error Memory System</h1>
+        <p class="lead">
+          The Error Memory system is a cross-project, persistent knowledge base of failure patterns.
+          When an agent discovers a non-obvious error, it captures it so no future project wastes
+          time repeating the same debugging path.
+        </p>
+
+        <!-- Overview -->
+        <h2>File Locations</h2>
+        <div class="callout callout-warning">
+          <span class="callout-icon">⚠️</span>
+          <div class="callout-content">
+            <div class="callout-title">Pipeline namespace — agents directory, not project directory</div>
+            <p>Error memory files live in the <strong>agents directory</strong> (<code>/home/user/codesleuth/artifacts/pipeline/</code>), not the project directory. They persist across all projects. Never delete these files without user confirmation.</p>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>File</th><th>Path</th><th>Purpose</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>KNOWN_ERRORS.md</code></td>
+                <td><code>artifacts/pipeline/KNOWN_ERRORS.md</code></td>
+                <td>Full error entries with symptom, root cause, fix, guardrail, and evidence</td>
+              </tr>
+              <tr>
+                <td><code>KNOWN_ERRORS_INDEX.md</code></td>
+                <td><code>artifacts/pipeline/KNOWN_ERRORS_INDEX.md</code></td>
+                <td>Keyword → Error ID mapping for fast grep lookup. Never read KNOWN_ERRORS.md directly — use the index first.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Read policy -->
+        <h2>Lookup Protocol (Read Policy)</h2>
+        <p>No agent ever reads <code>KNOWN_ERRORS.md</code> in full — it could be enormous. The lookup is always index-first:</p>
+
+        <ol>
+          <li>Extract 2–4 keywords from the current error (error code, package name, function name, symptom phrase)</li>
+          <li>Grep the index using the <strong>absolute path</strong>: <code>grep -i "&lt;keyword&gt;" /home/user/codesleuth/artifacts/pipeline/KNOWN_ERRORS_INDEX.md</code> → returns matching Error IDs</li>
+          <li>Read only matching entries: <code>grep -A 30 "## &lt;ERROR-ID&gt;" /home/user/codesleuth/artifacts/pipeline/KNOWN_ERRORS.md</code></li>
+          <li>Apply the <strong>Guardrail</strong> field before any other action — this prevents you from making the known-bad repair attempt</li>
+          <li>Apply the <strong>Fix</strong> field as hypothesis 1 in the repair loop</li>
+        </ol>
+
+        <div class="callout callout-success">
+          <span class="callout-icon">✅</span>
+          <div class="callout-content">
+            <div class="callout-title">Project-local errors</div>
+            <p>Agents also check <code>.agent/KNOWN_ERRORS.md</code> in the project directory for project-specific error patterns. This file is created during the scaffold task and accumulates errors specific to the project's stack.</p>
+          </div>
+        </div>
+
+        <!-- Adding errors -->
+        <h2>Adding an Error — <code>!error-add</code></h2>
+        <p>Triggered by: a user typing <code>!error-add</code>, the Builder after 3+ repair attempts on the same error, or the Verifier after a repeated gate failure.</p>
+
+        <div class="callout callout-info">
+          <span class="callout-icon">💡</span>
+          <div class="callout-content">
+            <div class="callout-title">Script-based — never written by hand</div>
+            <p>KNOWN_ERRORS.md is written by <code>scripts/error_add.py</code>, not by agents using Edit or Write tools directly. This is the same pattern as <code>token_tracker.py</code> and <code>write_log.py</code> — a dedicated script that handles ID assignment, deduplication, and writes to the correct absolute path regardless of the agent's working directory.</p>
+          </div>
+        </div>
+
+        <h3>Command</h3>
+        <pre><code>python /home/user/codesleuth/scripts/error_add.py \
+    --symptom "prisma migrate deploy fails with P3009: migration already applied" \
+    --root-cause "Shadow database out of sync with migration history after manual DB reset" \
+    --fix "Run 'prisma migrate resolve --applied &lt;name&gt;' to mark it applied without re-running" \
+    --guardrail "Do not run 'prisma migrate reset' in production — drops all data" \
+    --keywords "prisma,migrate,P3009,shadow database,migration history" \
+    --stack "Prisma 5 / PostgreSQL" \
+    --evidence "MyProject TASK-003 2026-05-31"</code></pre>
+
+        <p>Output:</p>
+        <pre><code>✅ ERROR-001 added to KNOWN_ERRORS.md and KNOWN_ERRORS_INDEX.md
+   Keywords: prisma, migrate, P3009, shadow database, migration history</code></pre>
+
+        <h3>What the script does</h3>
+        <ol>
+          <li>Reads <code>KNOWN_ERRORS.md</code> to determine the next <code>ERROR-NNN</code> ID</li>
+          <li>Runs a duplicate check — if a similar symptom already exists, it skips the write and reports the existing entry</li>
+          <li>Appends the formatted entry to <code>KNOWN_ERRORS.md</code> at its absolute agents-directory path</li>
+          <li>Appends one index row per keyword to <code>KNOWN_ERRORS_INDEX.md</code></li>
+        </ol>
+
+        <h3>Entry format (as written to KNOWN_ERRORS.md)</h3>
+        <pre><code>## ERROR-042
+**Keywords:** prisma, migrate, P3009, shadow database
+**Stack:** Prisma 5 / PostgreSQL
+**Symptom:** [exact error message or observable failure]
+**Root cause:** [why it happens]
+**Fix:** [exact resolution steps]
+**Guardrail:** [what NOT to do]
+**Evidence:** [project name TASK-NNN date]
+**Added:** 2026-05-31
+
+---</code></pre>
+
+        <h3>Index format</h3>
+        <p>Each keyword gets one row appended to <code>KNOWN_ERRORS_INDEX.md</code>:</p>
+        <pre><code>| prisma           | ERROR-042 |
+| migrate          | ERROR-042 |
+| P3009            | ERROR-042 |
+| shadow database  | ERROR-042 |</code></pre>
+
+        <!-- Looking up errors -->
+        <h2>Checking for Known Errors — <code>!error-check</code></h2>
+        <p>Use <code>!error-check [keywords]</code> to look up relevant entries without reading the full file:</p>
+
+        <pre><code>!error-check prisma migrate P3009</code></pre>
+
+        <h3>Procedure</h3>
+        <ol>
+          <li>Grep the index for each provided keyword</li>
+          <li>Collect unique Error IDs from all matches</li>
+          <li>Display matching full entries from <code>KNOWN_ERRORS.md</code></li>
+          <li>If no match: <code>No known errors match these keywords.</code></li>
+        </ol>
+
+        <!-- Failure mode classification -->
+        <h2>Failure Mode Classification</h2>
+        <p>Before entering the repair loop, the Builder classifies the error to select the right repair strategy:</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Failure Mode</th><th>Pattern to Match</th><th>Repair Strategy</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>compiler_error</code></td>
+                <td><code>undefined</code>, <code>undeclared</code>, <code>syntax error</code>, <code>unexpected token</code>, <code>parse error</code></td>
+                <td>Fix syntax first; after 2 failed attempts, consider switching library</td>
+              </tr>
+              <tr>
+                <td><code>test_assertion</code></td>
+                <td><code>assertion.*failed</code>, <code>expected.*got</code>, <code>FAIL\s</code></td>
+                <td>Re-read the task spec and TC contract; re-derive expected behavior</td>
+              </tr>
+              <tr>
+                <td><code>dependency_missing</code></td>
+                <td><code>cannot find module</code>, <code>no such file</code>, <code>package.*not found</code></td>
+                <td>Re-run bootstrap dependency install before retrying</td>
+              </tr>
+              <tr>
+                <td><code>interface_mismatch</code></td>
+                <td><code>undefined symbol</code>, <code>does not implement</code>, <code>has no field</code></td>
+                <td>Re-read <code>INTERFACES.md</code> and <code>SYMBOL_INDEX.md</code> in full before retrying</td>
+              </tr>
+              <tr>
+                <td><code>timeout</code></td>
+                <td><code>context deadline</code>, <code>timeout</code>, <code>timed out</code></td>
+                <td>Task is too large — split into smaller sub-tasks; escalate to Orchestrator</td>
+              </tr>
+              <tr>
+                <td><code>permission_denied</code></td>
+                <td><code>permission denied</code>, <code>operation not permitted</code></td>
+                <td>Stop and escalate to Orchestrator — requires human intervention</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Repair loop -->
+        <h2>Repair Loop</h2>
+        <p>When a gate fails, the Builder follows a structured 5-attempt repair loop — not random code changes:</p>
+
+        <ol>
+          <li><strong>File a Failure Report</strong>: copy <code>.agent/FAILURE_REPORT_TEMPLATE.md</code>, fill in Task, Expected, Actual, and exact command output. Writing the report is the first repair step — it forces structured diagnosis.</li>
+          <li><strong>Check KNOWN_ERRORS first</strong>: run the index lookup before any other action. If a match is found, apply the Guardrail and Fix.</li>
+          <li><strong>Classify the failure mode</strong> using the table above.</li>
+          <li><strong>Form one fix hypothesis</strong> informed by KNOWN_ERRORS and the classified strategy.</li>
+          <li><strong>Apply the smallest fix</strong> consistent with the strategy.</li>
+          <li><strong>Re-run targeted gate</strong>.</li>
+          <li>Repeat up to 5 attempts. On attempt 3+, if the same failure mode recurs, switch to the next strategy in the table.</li>
+          <li>At attempt 5, set status to <code>BLOCKED</code> and report with recovery details including the classified failure mode.</li>
+        </ol>
+
+        <h3>After repair — capture new errors</h3>
+        <p>If the repair required 3+ attempts and the root cause was non-obvious:</p>
+        <ol>
+          <li>Run <code>!error-add</code> to trigger the Orchestrator's entry formatting</li>
+          <li>Add all new keywords to <code>KNOWN_ERRORS_INDEX.md</code></li>
+          <li>Check for duplicate entries first — never add an entry that's already indexed</li>
+        </ol>
+
+        <!-- Maintenance -->
+        <h2>Maintenance Rules</h2>
+        <ul>
+          <li>Never delete an entry without user confirmation</li>
+          <li>Entries that no longer apply to the current stack should be marked <code>**Status: STALE**</code> rather than deleted — the pattern is preserved for historical reference</li>
+          <li>The index must stay in sync with the main file — any entry without index rows is invisible to agents and effectively doesn't exist</li>
+          <li>If a fix changes (e.g. a library updates its API), update the Fix field and add the old fix under a <code>**Previously tried (incorrect):**</code> note — this becomes the new Guardrail</li>
+        </ul>
+
+      </div>
+    </main>
+  </div>
+  <script src="nav.js"></script>
+</body>
+</html>

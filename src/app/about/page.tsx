@@ -22,7 +22,7 @@ const values = [
     {
         icon: Shield,
         title: "Security First",
-        description: "With 17 security domains and an 'Assume Breach' philosophy, security is not an afterthought—it's a hard gate that blocks shipment.",
+        description: "With 20 security domains and an 'Assume Breach' philosophy, security is not an afterthought—it's a hard gate that blocks shipment.",
     },
     {
         icon: Lightbulb,
@@ -37,42 +37,52 @@ const values = [
 ];
 
 const stats = [
-    { value: "6", label: "Specialized Agents" },
-    { value: "17", label: "Security Domains" },
-    { value: "13", label: "Discovery Phases" },
-    { value: "80%+", label: "Error Match Detection" },
+    { value: "8", label: "Specialized Agents" },
+    { value: "20", label: "Security Domains" },
+    { value: "16", label: "Discovery Phases" },
+    { value: "5", label: "Stage Repair System" },
 ];
 
 const team = [
     {
-        name: "The Orchestrator",
-        role: "Human Developer",
-        description: "Transitions from 'writer of code' to 'orchestrator of experts'—defining intent while agents execute with precision.",
+        name: "The Director",
+        role: "Orchestrator (Agent 0)",
+        description: "Pipeline director and state manager. Never builds code — enforces human gates, routes stage transitions, and owns the Spec Change Protocol.",
     },
     {
         name: "The Discovery Agent",
-        role: "Product Discovery",
-        description: "Governs the 13-phase structured discovery with extreme granularity. The word 'also' is forbidden.",
+        role: "Product Discovery (Agent 1)",
+        description: "Governs the 16-phase structured discovery (Phase 0–15) with extreme granularity. Runs Capability Intelligence Analysis at 4 trigger points.",
     },
     {
         name: "The Architect",
-        role: "Technical Designer",
+        role: "Technical Designer (Agent 2)",
         description: "Translates requirements into cross-platform blueprints spanning Web, Windows, macOS, Linux, iOS, and Android.",
     },
     {
         name: "The Builder",
-        role: "Application Builder",
-        description: "Operates under 'Red = Stop, Green = Ship' with three-strike error fingerprinting to prevent infinite loops.",
+        role: "Application Builder (Agent 3)",
+        description: "Operates under 'Red = Stop, Green = Ship' with a 5-stage repair system — each failure classified by mode, each mode with a prescribed recovery strategy.",
+    },
+    {
+        name: "The Critic",
+        role: "Product Critic (Agent 4)",
+        description: "Truth-Over-Comfort mandate. 12-Dimension Product Scorecard — any dimension scoring 1 is an automatic HOLD. Red Team Mode with power to KILL or PAUSE.",
     },
     {
         name: "The Guardian",
-        role: "Security Agent",
-        description: "Holds absolute BLOCK/APPROVE authority across 17 security domains with platform-specific annexes.",
+        role: "Security Agent (Agent 5)",
+        description: "Holds absolute BLOCK/APPROVE authority across 20 security domains with platform-specific annexes.",
     },
     {
         name: "The Skeptic",
-        role: "Codebase Verifier",
+        role: "Codebase Verifier (Agent 6)",
         description: "Performs blast radius analysis and cross-platform regression detection. Guilty until proven innocent.",
+    },
+    {
+        name: "The Resident",
+        role: "Maintenance Agent (Agent 7)",
+        description: "Always-resident after ship. Handles feature requests and fixes on registered projects through the same quality gates as the original build.",
     },
 ];
 

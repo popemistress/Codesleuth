@@ -14,14 +14,14 @@ import {
 const features = [
     {
         icon: Target,
-        title: "Three Strikes Protocol",
+        title: "5-Stage Repair System",
         description:
-            "Error fingerprinting with 80%+ match detection. After 3 consecutive identical failures, automatic escalation for human intervention.",
+            "Every build failure is classified by mode — compiler error, test assertion, dependency missing, interface mismatch, or timeout — and the corresponding recovery strategy is applied immediately. After 5 attempts the pipeline halts with a full BLOCKED report.",
         highlight: "Prevents infinite repair loops",
     },
     {
         icon: Lock,
-        title: "17 Security Domains",
+        title: "20 Security Domains",
         description:
             "Comprehensive security coverage from Release Integrity to Client-Side Secrets. Platform-specific annexes for Web, Mobile, and Desktop.",
         highlight: "Assume Breach philosophy",

@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Token Budget &amp; Model Tracking — CodeSleuth AI Docs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="header" id="site-header"></header>
+  <div class="main-layout">
+    <nav class="sidebar" id="site-sidebar"></nav>
+    <main class="content">
+      <div class="content-inner">
+
+        <div class="breadcrumb">
+          <a href="index.html">Docs</a>
+          <span class="breadcrumb-sep">›</span>
+          <span>Reference</span>
+          <span class="breadcrumb-sep">›</span>
+          <span class="breadcrumb-current">Token Budget &amp; Model Tracking</span>
+        </div>
+
+        <div class="page-tag">💰 Token Tracking</div>
+        <h1>Token Budget &amp; Model Tracking</h1>
+        <p class="lead">
+          <code>!budget</code> shows what the pipeline can actually measure about session cost — model pricing, task activity, and exact token counts when an external harness supplies them.
+          For real-time token totals, use Claude Code's built-in <code>/cost</code> command.
+        </p>
+
+        <div class="callout callout-warning">
+          <span class="callout-icon">⚠️</span>
+          <div class="callout-content">
+            <div class="callout-title">Why token counts aren't always available</div>
+            <p>LLM agents cannot read their own token counts from inside a response — API usage metadata is not exposed through Claude Code's tool interface. <code>session_tokens.jsonl</code> is only populated when an external harness (a Claude Code hook, CI runner, or wrapper script) supplies real API counts. In most interactive sessions this file will be empty, and <code>!budget</code> will say so explicitly rather than guessing.</p>
+          </div>
+        </div>
+
+        <!-- !budget command -->
+        <h2>The <code>!budget</code> Command</h2>
+        <p>Type <code>!budget</code> (or <code>/budget</code>) at any point. The command runs <code>token_tracker.py budget</code> and displays its output verbatim — no estimates, no freestyle.</p>
+
+        <h3>Output when token telemetry has been recorded</h3>
+        <p>This appears when <code>session_tokens.jsonl</code> has been populated by an external harness:</p>
+        <pre><code>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+💰 Session Budget — claude-sonnet-4-6
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Context window:  200.0k tokens
+Context used:    84.3k tokens
+Progress:        ████████████░░░░░░░░ 42%
+
+Input tokens:    61.2k
+Output tokens:   23.1k
+Cache reads:     18.4k
+Cache writes:     4.8k
+
+Total turns:     23
+Total cost:      $0.4821
+
+Top spender:     Builder ($0.3102)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Source: session_tokens.jsonl (recorded telemetry)</code></pre>
+
+        <h3>Output when no token telemetry exists (typical interactive session)</h3>
+        <p>This is what you see in most sessions. The script is honest about what it can and cannot measure:</p>
+        <pre><code>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+💰 Session Budget — claude-sonnet-4-6
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠  No token telemetry recorded for this session.
+
+   Token counts require API response metadata that
+   LLM agents cannot access from within a response.
+   session_tokens.jsonl is empty or absent.
+
+   ▶  For real token counts and cost:
+      Run  /cost  in Claude Code (shows session total)
+      or check the Anthropic Console → Usage dashboard.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Model pricing (claude-sonnet-4-6):
+  Input:        $3.00 / 1M tokens
+  Output:       $15.00 / 1M tokens
+  Cache read:   $0.30 / 1M tokens
+  Cache write:  $0.75 / 1M tokens
+  Context:      200.0k tokens
+
+Pipeline activity (from tasks.jsonl):
+  Tasks recorded:  18
+  Tasks done:      16
+  Agents active:   Builder, Critic
+  Total repairs:   3
+  Mean task time:  240s
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</code></pre>
+
+        <h3>Per-agent breakdown (when token records exist)</h3>
+        <p>Only available when <code>session_tokens.jsonl</code> has data:</p>
+        <pre><code>Agent                  Turns    Input   Output   Cache↓       Cost
+──────────────────────────────────────────────────────────────────
+  Builder                 14    38.2k    14.2k     8.9k    $0.3102
+  Planning                 3    12.3k     4.8k     5.4k    $0.0921
+  Discovery                3     4.8k     1.2k     2.1k    $0.0312
+  Critic                   2     3.1k     1.8k     1.2k    $0.0284
+  Security                 1     2.8k     1.1k     0.8k    $0.0202
+──────────────────────────────────────────────────────────────────
+  TOTAL                   23                               $0.4821</code></pre>
+
+        <!-- For real numbers -->
+        <h2>Getting Real Token Counts</h2>
+        <p>For exact token counts and cost in an interactive session, use Claude Code's native tracking:</p>
+        <ul>
+          <li><strong>During a session</strong>: type <code>/cost</code> in Claude Code — shows cumulative input tokens, output tokens, and total cost for the current session.</li>
+          <li><strong>After a session</strong>: check the <a href="https://console.anthropic.com">Anthropic Console</a> → Usage dashboard for per-API-key spending.</li>
+        </ul>
+
+        <!-- Token recording -->
+        <h2>How Token Data Is Recorded (external harness)</h2>
+        <p>When an external harness (hook or CI runner) has real token counts, it calls <code>token_tracker.py record</code>:</p>
+        <pre><code>python /home/user/codesleuth/scripts/token_tracker.py record \
+    --agent "Builder" \
+    --task "TASK-003" \
+    --model "claude-sonnet-4-6" \
+    --input-tokens 4821 \
+    --output-tokens 1203 \
+    --cache-read-tokens 18420 \
+    --cache-write-tokens 800 \
+    --log artifacts/telemetry/session_tokens.jsonl</code></pre>
+
+        <p>Token counts must come from the API response metadata — available to the harness that made the API call, not to the LLM inside the response. A Claude Code hook listening to the <code>Stop</code> event (or a wrapper script around the Claude Code CLI) can supply these counts and call <code>record</code>.</p>
+
+        <h3>Storage</h3>
+        <p>Records are appended (newline-delimited JSON) to <code>artifacts/telemetry/session_tokens.jsonl</code> in the <strong>project directory</strong>. Each line is a complete JSON object:</p>
+        <pre><code>{
+  "timestamp": "2026-05-28T14:22:00Z",
+  "agent": "Builder",
+  "task": "TASK-003",
+  "model": "claude-sonnet-4-6",
+  "input_tokens": 4821,
+  "output_tokens": 1203,
+  "cache_read_tokens": 18420,
+  "cache_write_tokens": 800,
+  "turn_cost_usd": 0.02184
+}</code></pre>
+
+        <!-- Script reference -->
+        <h2>token_tracker.py — Full Script Reference</h2>
+        <p>Location: <code>/home/user/codesleuth/scripts/token_tracker.py</code></p>
+
+        <h3>Subcommands</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Subcommand</th><th>Purpose</th><th>Used by</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>record</code></td>
+                <td>Append one turn's token usage to the session log</td>
+                <td>External harness (hook or wrapper) that has real API token counts</td>
+              </tr>
+              <tr>
+                <td><code>budget</code></td>
+                <td>Generate the <code>!budget</code> summary display</td>
+                <td>Orchestrator, on <code>!budget</code> command</td>
+              </tr>
+              <tr>
+                <td><code>breakdown</code></td>
+                <td>Generate the per-agent cost table</td>
+                <td>Orchestrator, on <code>!budget breakdown</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Budget command invocation</h3>
+        <pre><code>python /home/user/codesleuth/scripts/token_tracker.py budget \
+    --log artifacts/telemetry/session_tokens.jsonl \
+    --model "claude-sonnet-4-6" \
+    --pricing /home/user/codesleuth/config/pricing.json</code></pre>
+
+        <h3>Breakdown command invocation</h3>
+        <pre><code>python /home/user/codesleuth/scripts/token_tracker.py breakdown \
+    --log artifacts/telemetry/session_tokens.jsonl \
+    --pricing /home/user/codesleuth/config/pricing.json</code></pre>
+
+        <!-- Pricing table -->
+        <h2>Model Pricing Table</h2>
+        <p>Pricing is stored in <code>/home/user/codesleuth/config/pricing.json</code> and loaded at runtime. The table below reflects current rates (USD per million tokens):</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Model</th><th>Input / MTok</th><th>Output / MTok</th><th>Cache Write / MTok</th><th>Cache Read / MTok</th><th>Context Window</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>claude-opus-4-8</strong></td>
+                <td>$15.00</td>
+                <td>$75.00</td>
+                <td>$3.75</td>
+                <td>$1.50</td>
+                <td>200k</td>
+              </tr>
+              <tr>
+                <td><strong>claude-sonnet-4-6</strong></td>
+                <td>$3.00</td>
+                <td>$15.00</td>
+                <td>$0.75</td>
+                <td>$0.30</td>
+                <td>200k</td>
+              </tr>
+              <tr>
+                <td><strong>claude-haiku-4-5</strong></td>
+                <td>$0.80</td>
+                <td>$4.00</td>
+                <td>$0.20</td>
+                <td>$0.08</td>
+                <td>200k</td>
+              </tr>
+              <tr>
+                <td><strong>gemini-2.5-pro</strong></td>
+                <td>$1.25</td>
+                <td>$10.00</td>
+                <td>—</td>
+                <td>$0.31</td>
+                <td>1,000k</td>
+              </tr>
+              <tr>
+                <td><strong>gemini-2.5-flash</strong></td>
+                <td>$0.15</td>
+                <td>$0.60</td>
+                <td>—</td>
+                <td>$0.04</td>
+                <td>1,000k</td>
+              </tr>
+              <tr>
+                <td><strong>gpt-4o</strong></td>
+                <td>$2.50</td>
+                <td>$10.00</td>
+                <td>—</td>
+                <td>$1.25</td>
+                <td>128k</td>
+              </tr>
+              <tr>
+                <td><strong>gpt-4o-mini</strong></td>
+                <td>$0.15</td>
+                <td>$0.60</td>
+                <td>—</td>
+                <td>$0.08</td>
+                <td>128k</td>
+              </tr>
+              <tr>
+                <td><strong>kimi-k2</strong></td>
+                <td>$0.00</td>
+                <td>$0.00</td>
+                <td>—</td>
+                <td>—</td>
+                <td>131k</td>
+              </tr>
+              <tr>
+                <td><strong>Ollama / local (default)</strong></td>
+                <td>$0.00</td>
+                <td>$0.00</td>
+                <td>—</td>
+                <td>—</td>
+                <td>8k</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout callout-info">
+          <span class="callout-icon">💡</span>
+          <div class="callout-content">
+            <div class="callout-title">Updating pricing</div>
+            <p>When Anthropic or another provider changes pricing, update <code>/home/user/codesleuth/config/pricing.json</code>. The <code>_last_updated</code> field tracks when it was last changed. The tracker uses prefix matching for model families (e.g. "claude-sonnet" matches "claude-sonnet-4-6") with an Ollama fallback for unrecognized models.</p>
+          </div>
+        </div>
+
+        <!-- Model detection -->
+        <h2>Model-Adaptive Behavior</h2>
+        <p>Every agent reads the active model from HANDOFF and adjusts its output format accordingly:</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Model Family</th><th>Detection Pattern</th><th>Behavior</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Claude</strong></td>
+                <td>name contains <code>claude</code></td>
+                <td>XML-style structured output; extended reasoning for complex decisions; inject up to 20k tokens of Pattern Library and INTERFACES context</td>
+              </tr>
+              <tr>
+                <td><strong>Kimi / Moonshot</strong></td>
+                <td>name contains <code>kimi</code> or <code>moonshot</code></td>
+                <td>Explicit <code>## Section</code> headers throughout; inject full Pattern Library content (128k context handles it); include concrete output format examples per artifact</td>
+              </tr>
+              <tr>
+                <td><strong>GPT / OpenAI</strong></td>
+                <td>name contains <code>gpt</code>, <code>o1</code>, or <code>o3</code></td>
+                <td>Clean structured JSON where artifact output is requested; minimal prose; lead with structured data</td>
+              </tr>
+              <tr>
+                <td><strong>Gemini</strong></td>
+                <td>name contains <code>gemini</code></td>
+                <td>Inject larger context windows aggressively (1M token support); include full codebase file lists and complete artifact content</td>
+              </tr>
+              <tr>
+                <td><strong>Ollama / local</strong></td>
+                <td>default (all others)</td>
+                <td>One step at a time; no more than 2 chained reasoning steps per response; explicit output format examples; context injections ≤ 8k tokens</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- HANDOFF budget fields -->
+        <h2>Context Budget in HANDOFF</h2>
+        <p>The Orchestrator maintains a <code>context_budget</code> object in HANDOFF that every agent reads before composing its prompt:</p>
+        <pre><code>{
+  "context_budget": {
+    "total_tokens": 200000,
+    "reserved_pipeline_state": 8000,
+    "reserved_current_task": 40000,
+    "available_history": 152000,
+    "compression_threshold": 0.70,
+    "compressed_tasks": []
+  }
+}</code></pre>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Field</th><th>Purpose</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>total_tokens</code></td><td>Model context window size (from pricing.json)</td></tr>
+              <tr><td><code>reserved_pipeline_state</code></td><td>Tokens reserved for state files (HANDOFF, CHECKPOINT, TASK-GRAPH summary)</td></tr>
+              <tr><td><code>reserved_current_task</code></td><td>Tokens reserved for current task context (interfaces, schema, source files)</td></tr>
+              <tr><td><code>available_history</code></td><td>Remaining tokens available for conversation history</td></tr>
+              <tr><td><code>compression_threshold</code></td><td>When context hits this % (default 70%), rolling compression triggers</td></tr>
+              <tr><td><code>compressed_tasks</code></td><td>List of task IDs whose full exchange has been compressed to one-line summaries</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </main>
+  </div>
+  <script src="nav.js"></script>
+</body>
+</html>

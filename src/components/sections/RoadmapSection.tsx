@@ -10,7 +10,7 @@ const phases = [
         subtitle: "Product Discovery Agent",
         status: "complete",
         items: [
-            "13-phase structured discovery",
+            "16-phase structured discovery (Phase 0–15)",
             "Concept Validation Gate",
             "Feature Specification compilation",
         ],
@@ -34,7 +34,7 @@ const phases = [
         items: [
             "Pre-build infrastructure discovery",
             "Quality gate enforcement",
-            "Strike limit protocol",
+            "5-stage repair system with failure-mode classification",
         ],
     },
     {
@@ -43,7 +43,7 @@ const phases = [
         subtitle: "Security Agent",
         status: "upcoming",
         items: [
-            "17 domain assessment",
+            "20 domain security assessment",
             "Platform-specific annexes",
             "Security test mandates",
         ],

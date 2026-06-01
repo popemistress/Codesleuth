@@ -75,6 +75,17 @@ const nextConfig: NextConfig = {
   // Trailing slashes consistency
   trailingSlash: false,
 
+  // Static HTML docs (agents.v7/documentation) in public/docs/
+  async redirects() {
+    return [
+      {
+        source: "/docs",
+        destination: "/docs/index.html",
+        permanent: false,
+      },
+    ];
+  },
+
   // Reactor strict mode for catching issues early
   reactStrictMode: true,
 };

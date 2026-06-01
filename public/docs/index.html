@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Introduction — CodeSleuth AI Docs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="header" id="site-header"></header>
+  <div class="main-layout">
+    <nav class="sidebar" id="site-sidebar"></nav>
+    <main class="content">
+      <div class="content-inner">
+
+        <!-- Hero -->
+        <div class="hero">
+          <div class="hero-badge">🤖 AI-Powered Pipeline — v3.0</div>
+          <h1>Build production-ready apps,<br>pipeline by pipeline.</h1>
+          <p class="hero-subtitle">
+            CodeSleuth is a 7-agent software engineering pipeline powered by Python scripts and Go goroutines. From product idea to SHIP verdict — with human gates at every critical transition, parallel task execution, staged write approval, continuous SAST, coverage enforcement, and session forking.
+          </p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="quickstart.html">⚡ Get Started</a>
+            <a class="btn btn-secondary" href="architecture.html">🏗️ Architecture</a>
+            <a class="btn btn-secondary" href="commands.html">⌨️ Commands</a>
+          </div>
+        </div>
+
+        <!-- Pipeline Visual -->
+        <div class="pipeline">
+          <div class="pipeline-step">
+            <div class="pipeline-step-circle">🎯</div>
+            <div class="pipeline-step-label">Orchestrator</div>
+            <div class="pipeline-step-num">Agent 0</div>
+          </div>
+          <div class="pipeline-arrow">→</div>
+          <div class="pipeline-step">
+            <div class="pipeline-step-circle">🔍</div>
+            <div class="pipeline-step-label">Discovery</div>
+            <div class="pipeline-step-num">Agent 1</div>
+          </div>
+          <div class="pipeline-arrow">→</div>
+          <div class="pipeline-step">
+            <div class="pipeline-step-circle">📐</div>
+            <div class="pipeline-step-label">Planning</div>
+            <div class="pipeline-step-num">Agent 2</div>
+          </div>
+          <div class="pipeline-arrow">→</div>
+          <div class="pipeline-step">
+            <div class="pipeline-step-circle">🔨</div>
+            <div class="pipeline-step-label">Builder</div>
+            <div class="pipeline-step-num">Agent 3</div>
+          </div>
+          <div class="pipeline-arrow">→</div>
+          <div class="pipeline-step">
+            <div class="pipeline-step-circle">📊</div>
+            <div class="pipeline-step-label">Critic</div>
+            <div class="pipeline-step-num">Agent 4</div>
+          </div>
+          <div class="pipeline-arrow">→</div>
+          <div class="pipeline-step">
+            <div class="pipeline-step-circle">🔒</div>
+            <div class="pipeline-step-label">Security</div>
+            <div class="pipeline-step-num">Agent 5</div>
+          </div>
+          <div class="pipeline-arrow">→</div>
+          <div class="pipeline-step">
+            <div class="pipeline-step-circle">✅</div>
+            <div class="pipeline-step-label">Verifier</div>
+            <div class="pipeline-step-num">Agent 6</div>
+          </div>
+        </div>
+
+        <p style="text-align:center; margin-top: -24px; margin-bottom: 48px; color: var(--color-text-muted); font-size: 13px;">
+          Directed by <strong>Agent 0 — Orchestrator</strong> · human gates between every stage
+        </p>
+
+        <!-- What's New in v3.0 -->
+        <h2>What's New in v3.0</h2>
+        <p class="lead">Eight new capabilities ship in v3.0, powered by 17 Python + Go pipeline scripts that integrate directly into agent workflows.</p>
+        <div class="card-grid">
+          <div class="card">
+            <span class="card-icon">⚡</span>
+            <div class="card-title">Parallel Execution</div>
+            <div class="card-desc">Go goroutines execute independent task batches concurrently via <code>parallel_runner.go</code>. Write-conflict detection automatically splits conflicting tasks into sequential sub-batches.</div>
+          </div>
+          <div class="card">
+            <span class="card-icon">🖊️</span>
+            <div class="card-title">Staged Write Approval</div>
+            <div class="card-desc">Every file write shows a colored terminal diff before touching disk — powered by <code>staged_write.py</code>. No file is modified without explicit approval.</div>
+          </div>
+          <div class="card">
+            <span class="card-icon">🍴</span>
+            <div class="card-title">Session Forking</div>
+            <div class="card-desc">Run two pipeline branches in parallel via <code>!fork</code>. <code>session_fork.py</code> manages isolated copies with git branches. Use <code>!merge</code> to adopt the winner and clean up.</div>
+          </div>
+          <div class="card">
+            <span class="card-icon">⏪</span>
+            <div class="card-title">Pipeline Replay</div>
+            <div class="card-desc">Restore to any task checkpoint and resume from there using <code>!replay TASK-NNN</code>. <code>pipeline_replay.py</code> resets the codebase git state and marks later tasks PENDING.</div>
+          </div>
+          <div class="card">
+            <span class="card-icon">🔎</span>
+            <div class="card-title">Semantic Search</div>
+            <div class="card-desc">RAG-based codebase search using Ollama embeddings before every architecture-class task. <code>semantic_search.py</code> surfaces relevant existing code before new code is written.</div>
+          </div>
+          <div class="card">
+            <span class="card-icon">🐳</span>
+            <div class="card-title">Container Verification</div>
+            <div class="card-desc">Phase 12B of the Verifier builds a Docker image and runs the full test suite inside the container before issuing the final SHIP verdict. Catches environment mismatch bugs.</div>
+          </div>
+          <div class="card">
+            <span class="card-icon">💰</span>
+            <div class="card-title">Token Budget Tracking</div>
+            <div class="card-desc">Per-agent token usage, cumulative cost in USD, and context window % via <code>!budget</code>. <code>token_tracker.py</code> runs after every agent turn to keep spending visible.</div>
+          </div>
+          <div class="card">
+            <span class="card-icon">🛡️</span>
+            <div class="card-title">Migration Safety</div>
+            <div class="card-desc">Schema delta detection with data loss risk assessment and bidirectional SQL generation via <code>migration_safety.py</code>. HIGH severity risks block the pipeline until explicitly approved.</div>
+          </div>
+        </div>
+
+        <!-- Card Grid -->
+        <h2 style="border:none; margin-top:0;">Explore the Docs</h2>
+        <div class="card-grid">
+          <a class="card" href="quickstart.html">
+            <span class="card-icon">⚡</span>
+            <div class="card-title">Quickstart</div>
+            <div class="card-desc">Get up and running in minutes. Load the Orchestrator and start your first pipeline session.</div>
+          </a>
+          <a class="card" href="architecture.html">
+            <span class="card-icon">🏗️</span>
+            <div class="card-title">Architecture</div>
+            <div class="card-desc">RARV cycle, artifact structure, Two-Phase Planning, Pattern Library, and state file system.</div>
+          </a>
+          <a class="card" href="platform-capabilities.html">
+            <span class="card-icon">🌐</span>
+            <div class="card-title">Platform Capabilities</div>
+            <div class="card-desc">Build for Web, Linux, Windows, macOS, Android, and iOS. Full toolchain, signing, and deployment guide.</div>
+          </a>
+          <a class="card" href="orchestrator.html">
+            <span class="card-icon">🎯</span>
+            <div class="card-title">Orchestrator</div>
+            <div class="card-desc">The conductor. Displays the startup banner, enforces human gates, manages Spec Change Protocol.</div>
+          </a>
+          <a class="card" href="planning.html">
+            <span class="card-icon">📐</span>
+            <div class="card-title">Technical Planning</div>
+            <div class="card-desc">Full-contract planning in a single pass: TDD, INTERFACES, SCHEMA, TASK-GRAPH, Machine-Readable Contract Layer, and FILE_OWNERSHIP_MAP.</div>
+          </a>
+          <a class="card" href="builder.html">
+            <span class="card-icon">🔨</span>
+            <div class="card-title">Application Builder</div>
+            <div class="card-desc">Continuous execution engine with Change Impact Tracking, contract validation, and STALE status management.</div>
+          </a>
+          <a class="card" href="verifier.html">
+            <span class="card-icon">✅</span>
+            <div class="card-title">Verifier</div>
+            <div class="card-desc">QA gate with Performance Budget enforcement, Contract Conformance Testing, and SHIP/NO-SHIP verdict.</div>
+          </a>
+          <a class="card" href="critic.html">
+            <span class="card-icon">📊</span>
+            <div class="card-title">Critic</div>
+            <div class="card-desc">12-Dimension Product Scorecard with market intelligence tools and final survival verdict.</div>
+          </a>
+          <a class="card" href="pattern-library.html">
+            <span class="card-icon">🧩</span>
+            <div class="card-title">Pattern Library</div>
+            <div class="card-desc">Compounding knowledge base of reusable implementation patterns, indexed for instant lookup.</div>
+          </a>
+          <a class="card" href="commands.html">
+            <span class="card-icon">⌨️</span>
+            <div class="card-title">Command Reference</div>
+            <div class="card-desc">Every command across all pipeline stages: gates, spec changes, pattern capture, and session control.</div>
+          </a>
+          <a class="card" href="handoff-schema.html">
+            <span class="card-icon">🔗</span>
+            <div class="card-title">HANDOFF.json Schema</div>
+            <div class="card-desc">Six versioned HANDOFF.json schemas — one for each stage of the pipeline, progressively enriched.</div>
+          </a>
+          <a class="card" href="platform-gates.html">
+            <span class="card-icon">🚦</span>
+            <div class="card-title">Platform Gates</div>
+            <div class="card-desc">Tech stacks and quality gates for Web (Next.js), Desktop (Tauri, GTK4), CLI, Python, and AI platforms.</div>
+          </a>
+          <a class="card" href="scripts.html">
+            <span class="card-icon">🐍</span>
+            <div class="card-title">Pipeline Scripts</div>
+            <div class="card-desc">17 Python + Go tools that power v3.0 capabilities: staged writes, SAST scanning, parallel execution, semantic search, container verification, and more.</div>
+          </a>
+          <a class="card" href="suggestions.html">
+            <span class="card-icon">💡</span>
+            <div class="card-title">Suggestion Tracker</div>
+            <div class="card-desc">29 pipeline enhancements implemented across agents and scripts — a living record of improvements and their current status.</div>
+          </a>
+        </div>
+
+        <!-- What is CodeSleuth AI -->
+        <h2>What is CodeSleuth AI?</h2>
+        <p class="lead">
+          CodeSleuth AI is a structured, multi-agent software development system.
+          Each agent has a precisely defined role, a set of absolute rules, and standardized artifact outputs
+          that feed directly into the next stage.
+        </p>
+
+        <ul>
+          <li><strong>No agent auto-advances.</strong> Every stage transition requires a human gate command (<code>!plan</code>, <code>!build</code>, <code>!security</code>, <code>!verify</code>).</li>
+          <li><strong>RARV Cycle.</strong> Every agent follows Reason → Act → Reflect → Verify before producing output.</li>
+          <li><strong>Full-contract Planning.</strong> Agent 2 produces TDD, INTERFACES, SCHEMA, TASK-GRAPH, Zod contracts, and the Parallelism Map in a single pass triggered by <code>!plan</code>.</li>
+          <li><strong>Pattern Library.</strong> Every non-obvious implementation decision is captured in <code>PATTERN_LIBRARY.md</code> and reused across projects automatically.</li>
+          <li><strong>Machine-Readable Contracts.</strong> The Planner emits Zod schemas and OpenAPI stubs that the Verifier independently validates — not just documentation.</li>
+          <li><strong>Spec Change Protocol.</strong> Mid-build scope changes go through a formal <code>!change</code> flow — blast radius report, CHANGE_LOG.md entry, and STALE task marking — before any implementation starts.</li>
+          <li><strong>Performance Budget Gate.</strong> Bundle sizes and API response times are enforced by <code>scripts/perf.mjs</code> with configurable budgets in <code>.agent/PERF_BUDGET.json</code>.</li>
+          <li><strong>12-Dimension Product Scorecard.</strong> The Critic scores every product on 12 dimensions (1–5) before deep-dive critique. A score of 1 on any dimension is an automatic HOLD.</li>
+          <li><strong>Multi-tool compatible.</strong> <code>CLAUDE.md</code> is the canonical agent activation file. Run <code>node .cli/sync/sync-cli-instructions.mjs</code> to propagate rules to Cline, Continue, Cursor, Copilot, Kiro, OpenCode, and 7 other tools. Each rule file embeds the Agent 0 Startup Protocol verbatim so all models produce a consistent banner.</li>
+        </ul>
+
+        <div class="callout callout-info">
+          <span class="callout-icon">ℹ️</span>
+          <div class="callout-content">
+            <div class="callout-title">Getting started</div>
+            <p>Type <strong>"Start agent 0"</strong> in any supported AI CLI or IDE to activate the Orchestrator. It will display the startup banner, initialize pipeline state, and guide you through the first human gate. See the <a href="quickstart.html">Quickstart Guide</a> for full details.</p>
+          </div>
+        </div>
+
+        <h2>Pipeline at a Glance</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Agent</th>
+                <th>Role</th>
+                <th>Gate Command</th>
+                <th>Primary Output</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>0 — Orchestrator</strong></td>
+                <td>Director, never builder</td>
+                <td><code>Start agent 0</code></td>
+                <td>Pipeline state, gate enforcement, CHANGE_LOG.md</td>
+              </tr>
+              <tr>
+                <td><strong>1 — Discovery</strong></td>
+                <td>Spec author</td>
+                <td>Initial prompt</td>
+                <td><code>feature-spec.md</code>, <code>HANDOFF.json v1</code></td>
+              </tr>
+              <tr>
+                <td><strong>2 — Planning</strong></td>
+                <td>Technical architect</td>
+                <td><code>!plan</code></td>
+                <td><code>TDD.md</code>, <code>TASK-GRAPH.md</code>, <code>INTERFACES.md</code>, contracts/</td>
+              </tr>
+              <tr>
+                <td><strong>3 — Builder</strong></td>
+                <td>Implementation engine</td>
+                <td><code>!build</code></td>
+                <td>Complete codebase, <code>CHECKPOINT.md</code>, <code>DECISIONS.md</code></td>
+              </tr>
+              <tr>
+                <td><strong>4 — Critic</strong></td>
+                <td>Product accountability</td>
+                <td><code>!critic</code></td>
+                <td><code>CRITICISM.md</code>, 12-D scorecard, product verdict</td>
+              </tr>
+              <tr>
+                <td><strong>5 — Security</strong></td>
+                <td>20-domain auditor</td>
+                <td><code>!security</code></td>
+                <td><code>SECURITY_REPORT.md</code>, <code>HANDOFF.json v5</code></td>
+              </tr>
+              <tr>
+                <td><strong>6 — Verifier</strong></td>
+                <td>QA &amp; release gate</td>
+                <td><code>!verify</code></td>
+                <td><code>VERIFICATION_REPORT.md</code>, SHIP/NO-SHIP verdict</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>v3.0 Upgrades at a Glance</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Feature</th><th>What It Adds</th><th>Agents</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>Full-Contract Planning</strong></td><td>Single-pass: TDD, INTERFACES, SCHEMA, TASK-GRAPH, Zod contracts, Parallelism Map</td><td>2</td></tr>
+              <tr><td><strong>Spec Change Protocol</strong></td><td><code>!change</code> → blast radius → STALE marking</td><td>0, 3</td></tr>
+              <tr><td><strong>Pattern Library</strong></td><td>Compounding PATTERN-NNN knowledge across projects</td><td>2, 3</td></tr>
+              <tr><td><strong>Machine-Readable Contracts</strong></td><td>Zod + OpenAPI stubs validated by Verifier</td><td>2, 3, 5</td></tr>
+              <tr><td><strong>Performance Budget Gate</strong></td><td>Bundle KB + API p50/p95 enforcement</td><td>3, 5</td></tr>
+              <tr><td><strong>12-Dimension Scorecard</strong></td><td>D1–D12 product scores with auto-HOLD at 1</td><td>6</td></tr>
+              <tr><td><strong>Change Impact Tracking</strong></td><td>Reverse CIA — file ownership regression detection</td><td>3</td></tr>
+              <tr><td><strong>Living Documentation</strong></td><td><code>!docs</code> generates human-readable changelogs</td><td>0</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout callout-info">
+          <span class="callout-icon">ℹ️</span>
+          <div class="callout-content">
+            <div class="callout-title">New in v3.0 — Pipeline Scripts and Suggestion Tracker</div>
+            <p>v3.0 ships 17 Python + Go scripts wired into agent workflows and a tracker of 29 implemented enhancements. See <a href="scripts.html">Pipeline Scripts</a> and <a href="suggestions.html">Suggestion Tracker</a> for the full details.</p>
+          </div>
+        </div>
+
+        <h2>Quick Links</h2>
+        <ul>
+          <li><a href="quickstart.html">⚡ Quickstart — run your first session</a></li>
+          <li><a href="architecture.html">🏗️ Architecture — RARV cycle, artifacts, tiers</a></li>
+          <li><a href="commands.html">⌨️ Command Reference — all commands in one place</a></li>
+          <li><a href="pattern-library.html">🧩 Pattern Library — reusable implementation patterns</a></li>
+          <li><a href="platform-capabilities.html">🌐 Platform Capabilities — build targets, toolchains, and requirements</a></li>
+          <li><a href="handoff-schema.html">🔗 HANDOFF.json Schema — v1 through v6 specification</a></li>
+          <li><a href="scripts.html">🐍 Pipeline Scripts — 17 Python + Go tools reference</a></li>
+          <li><a href="suggestions.html">💡 Suggestion Tracker — 29 implemented enhancements</a></li>
+        </ul>
+
+      </div>
+    </main>
+  </div>
+  <script src="nav.js"></script>
+</body>
+</html>

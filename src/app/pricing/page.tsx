@@ -39,12 +39,12 @@ const plans = [
         icon: Rocket,
         popular: true,
         features: [
-            { name: "6 AI Agent types", included: true },
+            { name: "8 AI Agent types", included: true },
             { name: "Unlimited build minutes", included: true },
             { name: "Up to 10 team members", included: true },
             { name: "Priority support", included: true },
             { name: "Full quality gates", included: true },
-            { name: "17 security domains", included: true },
+            { name: "20 security domains", included: true },
             { name: "Slack integration", included: true },
             { name: "Custom integrations", included: false },
         ],
@@ -56,7 +56,7 @@ const plans = [
         icon: Building,
         popular: false,
         features: [
-            { name: "All 6 AI Agents", included: true },
+            { name: "All 8 AI Agents", included: true },
             { name: "Unlimited everything", included: true },
             { name: "Unlimited team members", included: true },
             { name: "24/7 dedicated support", included: true },
@@ -79,7 +79,7 @@ const faqs = [
     },
     {
         question: "What's included in the security scanning?",
-        answer: "Security scanning covers all 17 security domains including Release Integrity, Client-Side Secrets, authentication flows, and platform-specific annexes.",
+        answer: "Security scanning covers all 20 security domains including Release Integrity, Client-Side Secrets, authentication flows, and platform-specific annexes.",
     },
     {
         question: "Do you offer discounts for startups?",

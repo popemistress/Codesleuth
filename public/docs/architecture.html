@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Architecture — CodeSleuth AI Docs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="header" id="site-header"></header>
+  <div class="main-layout">
+    <nav class="sidebar" id="site-sidebar"></nav>
+    <main class="content">
+      <div class="content-inner">
+
+        <div class="breadcrumb">
+          <a href="index.html">Docs</a>
+          <span class="breadcrumb-sep">›</span>
+          <span>Getting Started</span>
+          <span class="breadcrumb-sep">›</span>
+          <span class="breadcrumb-current">Architecture</span>
+        </div>
+
+        <div class="page-tag">🏗️ Getting Started</div>
+        <h1>Architecture Overview</h1>
+        <p class="lead">
+          CodeSleuth AI is built around four core concepts: the RARV cycle, versioned handoffs, a structured
+          artifact directory, and a compounding knowledge base. Understanding these makes every agent's
+          behavior predictable.
+        </p>
+
+        <h2>The RARV Cycle</h2>
+        <p>Every agent follows the same four-step micro-loop before producing any output:</p>
+
+        <div class="domain-list">
+          <div class="domain-item"><span class="domain-num">R</span> Reason — analyze inputs, form a plan</div>
+          <div class="domain-item"><span class="domain-num">A</span> Act — execute the plan</div>
+          <div class="domain-item"><span class="domain-num">R</span> Reflect — check the output against rules</div>
+          <div class="domain-item"><span class="domain-num">V</span> Verify — confirm acceptance criteria are met</div>
+        </div>
+
+        <p>No agent produces output that skips the Reflect or Verify step. This prevents silent failures and half-complete tasks.</p>
+
+        <h2>Complexity Tiers</h2>
+        <p>Every project is automatically assigned a complexity tier at Discovery. The tier governs how many security domains are reviewed, how many test contracts are required, and which performance budget thresholds apply.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Tier</th><th>Criteria</th><th>Security Domains</th><th>TC Requirement</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="badge badge-green">Simple</span></td>
+                <td>Single platform, no auth, no payments, no external APIs</td>
+                <td>5 (LOW only)</td>
+                <td>1 TC per task minimum</td>
+              </tr>
+              <tr>
+                <td><span class="badge badge-yellow">Standard</span></td>
+                <td>Auth, database, 1–2 platforms, standard API integrations</td>
+                <td>HIGH+ domains</td>
+                <td>2 TC per task minimum</td>
+              </tr>
+              <tr>
+                <td><span class="badge badge-red">Complex</span></td>
+                <td>Multi-platform, payments, multi-tenant, ML/AI components</td>
+                <td>All 20 domains</td>
+                <td>Full test contract suite</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Two-Phase Planning</h2>
+        <p>Agent 2 (Technical Planning) produces all implementation artifacts in a single pass triggered by <code>!plan</code>.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Output</th><th>Human Action</th><th>Purpose</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>TDD, INTERFACES, SCHEMA, TASK-GRAPH, contracts/</td>
+                <td><span class="cmd">!build</span></td>
+                <td>Full implementation blueprint with test contracts, Zod schemas, and OpenAPI stubs.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout callout-info">
+          <span class="callout-icon">ℹ️</span>
+          <div class="callout-content">
+            <div class="callout-title">Why two phases?</div>
+            <p>Phase A catches scope disagreements early — when they're cheap to fix. Without it, the Planner could spend thousands of tokens on full contracts before the human realizes the task count is wrong or a platform was missed.</p>
+          </div>
+        </div>
+
+        <h2>Spec Change Protocol</h2>
+        <p>Mid-build scope changes go through a formal review before any implementation changes. This prevents silent drift between the spec and the codebase.</p>
+
+        <ol class="steps">
+          <li class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <div class="step-title">Human issues <span class="cmd">!change [description]</span></div>
+              <div class="step-desc">Describes what needs to change — a new feature, a removed feature, or a design pivot.</div>
+            </div>
+          </li>
+          <li class="step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <div class="step-title">Orchestrator produces Blast Radius Report</div>
+              <div class="step-desc">Lists every affected task, file, contract, and test. Estimates scope as Small / Medium / Large.</div>
+            </div>
+          </li>
+          <li class="step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <div class="step-title">Human approves with <span class="cmd">!change-approve</span> or cancels with <span class="cmd">!change-cancel</span></div>
+              <div class="step-desc">No implementation changes happen until approved.</div>
+            </div>
+          </li>
+          <li class="step">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <div class="step-title">Affected tasks marked STALE; CHANGE_LOG.md updated</div>
+              <div class="step-desc">Builder detects STALE tasks and re-plans them before executing. The changelog is permanent record.</div>
+            </div>
+          </li>
+        </ol>
+
+        <h2>Artifact Directory Structure</h2>
+        <p>All pipeline artifacts are written relative to the active project directory, never the agents directory itself.</p>
+
+        <div class="artifact-tree">
+<span class="tree-dir">artifacts/</span>
+<span class="tree-dir">├── discovery/</span>
+<span class="tree-file">│   ├── feature-spec.md          </span><span class="tree-comment"># discovery output</span>
+<span class="tree-file">│   └── design-contract.md       </span><span class="tree-comment"># web design system spec</span>
+<span class="tree-dir">├── build/</span>
+<span class="tree-file">│   ├── TDD.md                   </span><span class="tree-comment"># technical design document</span>
+<span class="tree-file">│   ├── INTERFACES.md            </span><span class="tree-comment"># API and component contracts</span>
+<span class="tree-file">│   ├── SCHEMA.md                </span><span class="tree-comment"># database schema</span>
+<span class="tree-file">│   ├── TASK-GRAPH.md            </span><span class="tree-comment"># ordered implementation tasks</span>
+<span class="tree-file">│   ├── FILE_OWNERSHIP_MAP.md    </span><span class="tree-comment"># file → owning task mapping</span>
+<span class="tree-dir">│   └── contracts/</span>
+<span class="tree-file">│       ├── [module].contracts.ts </span><span class="tree-comment"># Zod schemas per module</span>
+<span class="tree-file">│       └── openapi.yaml          </span><span class="tree-comment"># OpenAPI stubs</span>
+<span class="tree-dir">├── security/</span>
+<span class="tree-file">│   └── SECURITY_REPORT.md</span>
+<span class="tree-dir">├── verification/</span>
+<span class="tree-file">│   ├── VERIFICATION_REPORT.md</span>
+<span class="tree-file">│   ├── PERF_REPORT.md           </span><span class="tree-comment"># performance budget results</span>
+<span class="tree-dir">│   └── screenshots/</span>
+<span class="tree-dir">│       └── baselines/           </span><span class="tree-comment"># visual regression baselines</span>
+<span class="tree-dir">├── critique/</span>
+<span class="tree-file">│   └── CRITICISM.md</span>
+<span class="tree-dir">└── pipeline/</span>
+<span class="tree-file">    ├── HANDOFF.json             </span><span class="tree-comment"># progressively versioned (v1–v6)</span>
+<span class="tree-file">    ├── CHECKPOINT.md            </span><span class="tree-comment"># builder progress snapshots</span>
+<span class="tree-file">    ├── DECISIONS.md             </span><span class="tree-comment"># architectural decisions log</span>
+<span class="tree-file">    ├── CHANGE_LOG.md            </span><span class="tree-comment"># spec change history</span>
+<span class="tree-file">    ├── PATTERN_LIBRARY.md       </span><span class="tree-comment"># reusable PATTERN-NNN entries</span>
+<span class="tree-file">    └── KNOWN_ERRORS.md          </span><span class="tree-comment"># error memory for Builder</span>
+        </div>
+
+        <h2>Pattern Library</h2>
+        <p>The Pattern Library is a compounding knowledge base. Every time an agent solves a non-obvious problem, it captures the solution as a <code>PATTERN-NNN</code> entry. Future projects query the library before writing new code, preventing the same problem from being solved twice.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Field</th><th>Purpose</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>domain</code></td><td>Technology area (e.g., auth, database, payments)</td></tr>
+              <tr><td><code>stack</code></td><td>Specific libraries involved</td></tr>
+              <tr><td><code>context</code></td><td>When this pattern applies</td></tr>
+              <tr><td><code>pattern</code></td><td>The implementation — code, config, or approach</td></tr>
+              <tr><td><code>pitfall_avoided</code></td><td>What goes wrong without this pattern</td></tr>
+              <tr><td><code>reuse_signal</code></td><td>Keywords that should trigger lookup</td></tr>
+              <tr><td><code>evidence</code></td><td>Source project or commit reference</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>Use <span class="cmd">!pattern-add</span> to capture the current implementation as a pattern. The Planner automatically queries <code>PATTERN_INDEX.md</code> at build start.</p>
+
+        <h2>Machine-Readable Contract Layer</h2>
+        <p>The Planner emits two types of contracts that serve as ground truth for the Builder and Verifier:</p>
+
+        <ul>
+          <li><strong>Zod schemas</strong> at <code>artifacts/build/contracts/[module].contracts.ts</code> — runtime-validated type shapes for every major data model and API response</li>
+          <li><strong>OpenAPI stubs</strong> at <code>artifacts/build/contracts/openapi.yaml</code> — endpoint signatures, request/response shapes, and authentication requirements</li>
+        </ul>
+
+        <p>The Builder validates its output against these contracts after every task. The Verifier re-runs contract conformance independently in Phase 6C.</p>
+
+        <h2>HANDOFF.json — Versioned State</h2>
+        <p>Agents communicate via a single <code>HANDOFF.json</code> file that is progressively enriched as the pipeline advances. Each agent reads the current version and writes the next.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Version</th><th>Written by</th><th>Key additions</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><span class="badge badge-gray">v1</span></td><td>Discovery</td><td>spec_hash, platforms, complexity_tier, tech_stack</td></tr>
+              <tr><td><span class="badge badge-gray">v2</span></td><td>Planning</td><td>task_count, contracts_path, schema_hash, stack_versions, component_library</td></tr>
+              <tr><td><span class="badge badge-gray">v3</span></td><td>Builder</td><td>tasks_completed, tasks_stale, patterns_used, perf_budget_path</td></tr>
+              <tr><td><span class="badge badge-gray">v4</span></td><td>Critic</td><td>scorecard_mean, scorecard_verdict, critical_flaws, next_action</td></tr>
+              <tr><td><span class="badge badge-gray">v5</span></td><td>Security</td><td>security_tier, domains_reviewed, critical_findings, blockers</td></tr>
+              <tr><td><span class="badge badge-gray">v6</span></td><td>Verifier</td><td>ship_verdict, perf_verdict, contract_verdict, visual_baseline</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Parallel Task Execution</h2>
+        <p>The Planner annotates every task with four parallelism fields that the Builder uses to schedule concurrent work:</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Field</th><th>Values</th><th>Purpose</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>task_type</code></td><td>api | auth | data | infra | ui | config | feature | cicd | obs</td><td>Determines which scripts and Pattern Library queries apply</td></tr>
+              <tr><td><code>depends_on</code></td><td>[TASK-NNN] or "none"</td><td>Explicit dependency edges — drives batch ordering</td></tr>
+              <tr><td><code>can_parallel</code></td><td>true | false</td><td>Whether this task may run concurrently with sibling tasks in the same batch</td></tr>
+              <tr><td><code>output_files</code></td><td>[list of files]</td><td>Used for write-conflict detection between parallel tasks</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>The TASK-GRAPH ends with a Parallelism Map that groups tasks into dependency-ordered batches. Tasks with no shared <code>output_files</code> and <code>can_parallel: true</code> are placed in the same batch.</p>
+
+        <h3>Method A — Go Goroutines (parallel_runner.go)</h3>
+        <pre><code>go run scripts/parallel_runner.go \
+    -tasks TASK-003,TASK-004,TASK-005 \
+    -task-graph artifacts/build/TASK-GRAPH.md \
+    -output artifacts/telemetry/batch_results.json</code></pre>
+
+        <div class="callout callout-info">
+          <span class="callout-icon">ℹ️</span>
+          <div class="callout-content">
+            <div class="callout-title">Built-in write-conflict detection</div>
+            <p>Before launching goroutines, <code>parallel_runner.go</code> compares <code>output_files</code> across the batch. Tasks that write to the same file are automatically split into sequential sub-batches — no manual intervention required.</p>
+          </div>
+        </div>
+
+        <h3>Method B — Parallel Sub-Agents</h3>
+        <p>Multiple <code>Agent(...)</code> calls in a single Claude Code response execute concurrently. The Builder uses this for architecture-class tasks that benefit from independent context windows. Results are merged back into the main task graph on completion.</p>
+
+        <h2>Pipeline Scripts Integration</h2>
+        <p>18 Python and Go scripts are wired directly into agent workflows. Each script is called at a specific point in the pipeline — agents do not call them ad-hoc.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Script</th><th>Called by</th><th>Pipeline point</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>bootstrap.py</code></td><td>Agent 3</td><td><code>!build</code> activation</td></tr>
+              <tr><td><code>spec_validate.py</code></td><td>Agent 2</td><td>Before <code>!build</code> unlocks</td></tr>
+              <tr><td><code>staged_write.py</code></td><td>Agent 3</td><td>Before every file write</td></tr>
+              <tr><td><code>secret_scan.py</code></td><td>Agent 3</td><td>Pre-write (blocks on detection)</td></tr>
+              <tr><td><code>write_log.py</code></td><td>Agent 3</td><td>After each approved write</td></tr>
+              <tr><td><code>sast_scan.py</code></td><td>Agent 3</td><td>After each write is applied</td></tr>
+              <tr><td><code>check_coverage.py</code></td><td>Agent 3, Agent 6</td><td>After TC tests pass; Phase 3A</td></tr>
+              <tr><td><code>parallel_runner.go</code></td><td>Agent 3</td><td>Multi-task batches</td></tr>
+              <tr><td><code>semantic_search.py</code></td><td>Agent 3</td><td>Before every arch-class task</td></tr>
+              <tr><td><code>migration_safety.py</code></td><td>Agent 2, Agent 3</td><td>Schema changes</td></tr>
+              <tr><td><code>pipeline_replay.py</code></td><td>Agent 0 (<code>!replay</code>)</td><td>On demand</td></tr>
+              <tr><td><code>session_fork.py</code></td><td>Agent 0 (<code>!fork</code>)</td><td>On demand</td></tr>
+              <tr><td><code>pipeline_improve.py</code></td><td>Agent 3, Agent 0</td><td>Post-build, post-run</td></tr>
+              <tr><td><code>container_verify.py</code></td><td>Agent 6</td><td>Phase 12B (before final SHIP)</td></tr>
+              <tr><td><code>contract_test.py</code></td><td>Agent 6</td><td>Phase 6D (live endpoint validation)</td></tr>
+              <tr><td><code>commit_by_task.py</code></td><td>Agent 6</td><td>Post-SHIP</td></tr>
+              <tr><td><code>register_project.py</code></td><td>Agents 3–6, Agent 7</td><td>Build completion and each stage advancement</td></tr>
+              <tr><td><code>token_tracker.py</code></td><td>All agents</td><td>After every turn</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>See <a href="scripts.html">Pipeline Scripts</a> for the full reference including parameters, exit codes, and integration notes.</p>
+
+        <h2>HANDOFF Version Evolution</h2>
+        <p>Each agent enriches HANDOFF.json with fields its downstream consumers require. The full v1–v6 field progression:</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Version</th><th>Written by</th><th>Key additions</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="badge badge-gray">v1</span></td>
+                <td>Discovery</td>
+                <td><code>project</code>, <code>platform</code>, <code>user_stories</code>, <code>capability_intelligence</code>, <code>design_contract</code></td>
+              </tr>
+              <tr>
+                <td><span class="badge badge-gray">v2</span></td>
+                <td>Planning</td>
+                <td><code>stack_versions</code>, <code>task_graph_path</code>, <code>parallelism_map</code>, <code>bootstrap</code>, <code>component_library</code></td>
+              </tr>
+              <tr>
+                <td><span class="badge badge-gray">v3</span></td>
+                <td>Builder</td>
+                <td><code>build_status</code>, <code>task_checkpoints</code>, <code>coverage_pct</code>, <code>secret_blocks</code>, <code>semantic_index_path</code></td>
+              </tr>
+              <tr>
+                <td><span class="badge badge-gray">v4</span></td>
+                <td>Critic</td>
+                <td><code>critique_verdict</code>, <code>scorecard_mean</code>, <code>market_context</code></td>
+              </tr>
+              <tr>
+                <td><span class="badge badge-gray">v5</span></td>
+                <td>Security</td>
+                <td><code>security_verdict</code>, <code>finding_counts</code>, <code>dependency_intelligence_summary</code></td>
+              </tr>
+              <tr>
+                <td><span class="badge badge-gray">v6</span></td>
+                <td>Verifier</td>
+                <td><code>verification_verdict</code>, <code>coverage_verdict</code>, <code>runtime_contract_testing</code>, <code>container_verification</code>, <code>review_rubric_score</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout callout-info">
+          <span class="callout-icon">ℹ️</span>
+          <div class="callout-content">
+            <div class="callout-title">Full schema reference</div>
+            <p>See <a href="handoff-schema.html">HANDOFF.json Schema</a> for the complete field-by-field specification for all six versions.</p>
+          </div>
+        </div>
+
+        <h2>Performance Budget</h2>
+        <p>Every project template ships with <code>.agent/PERF_BUDGET.json</code> defining thresholds:</p>
+
+        <pre><code>{
+  "bundle": { "total_kb": 500, "initial_chunk_kb": 200 },
+  "api":    { "p50_ms": 200, "p95_ms": 800, "timeout_ms": 3000 },
+  "build":  { "max_warnings": 0 }
+}</code></pre>
+
+        <p>The Verifier runs <code>scripts/perf.mjs</code> to measure actual values and compare against budget. A budget violation is a NO-SHIP blocker. Use <code>--update</code> flag to rebaseline after deliberate changes.</p>
+
+        <div class="doc-footer">
+          <a class="doc-footer-link" href="quickstart.html">
+            <span class="doc-footer-dir">← Previous</span>
+            <span class="doc-footer-title">Quickstart</span>
+          </a>
+          <a class="doc-footer-link next" href="platform-capabilities.html">
+            <span class="doc-footer-dir">Next →</span>
+            <span class="doc-footer-title">Templates</span>
+          </a>
+        </div>
+
+      </div>
+    </main>
+  </div>
+  <script src="nav.js"></script>
+</body>
+</html>

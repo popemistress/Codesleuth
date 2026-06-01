@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Discovery — CodeSleuth AI Docs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="header" id="site-header"></header>
+  <div class="main-layout">
+    <nav class="sidebar" id="site-sidebar"></nav>
+    <main class="content">
+      <div class="content-inner">
+
+        <div class="breadcrumb">
+          <a href="index.html">Docs</a>
+          <span class="breadcrumb-sep">›</span>
+          <span>Agents</span>
+          <span class="breadcrumb-sep">›</span>
+          <span class="breadcrumb-current">Discovery</span>
+        </div>
+
+        <div class="page-tag">🔍 Agent 1</div>
+        <h1>Discovery Agent</h1>
+        <p class="lead">
+          The Discovery Agent transforms a rough project idea into an implementation-ready specification.
+          It asks one structured question per message, advances through up to 15 discovery phases,
+          and produces a <code>feature-spec.md</code> that the Technical Planner can act on directly.
+        </p>
+
+        <h2>Discovery Phases</h2>
+        <div class="domain-list">
+          <div class="domain-item"><span class="domain-num">1</span> Core Concept &amp; Value Proposition</div>
+          <div class="domain-item"><span class="domain-num">2</span> Target Users &amp; Personas</div>
+          <div class="domain-item"><span class="domain-num">3</span> Platform &amp; Distribution</div>
+          <div class="domain-item"><span class="domain-num">4</span> Core Feature Set (MVP)</div>
+          <div class="domain-item"><span class="domain-num">5</span> Authentication &amp; Authorization</div>
+          <div class="domain-item"><span class="domain-num">6</span> Data Model &amp; Persistence</div>
+          <div class="domain-item"><span class="domain-num">7</span> Integrations &amp; APIs</div>
+          <div class="domain-item"><span class="domain-num">8</span> Monetization &amp; Pricing</div>
+          <div class="domain-item"><span class="domain-num">9</span> Non-Functional Requirements</div>
+          <div class="domain-item"><span class="domain-num">10</span> Design &amp; Branding</div>
+          <div class="domain-item"><span class="domain-num">11</span> Compliance &amp; Privacy</div>
+          <div class="domain-item"><span class="domain-num">12</span> Content &amp; Localization</div>
+          <div class="domain-item"><span class="domain-num">13</span> Growth &amp; Analytics</div>
+          <div class="domain-item"><span class="domain-num">14</span> Launch &amp; Deployment</div>
+          <div class="domain-item"><span class="domain-num">15</span> Risks &amp; Constraints</div>
+        </div>
+
+        <h2>Fast-Track Mode</h2>
+        <p>If the initial brief is over 500 words and covers most of the discovery phases, the agent activates fast-track mode: it skips phases already answered, focuses only on gaps, and may complete discovery in 3–5 exchanges instead of 15.</p>
+
+        <div class="callout callout-info">
+          <span class="callout-icon">ℹ️</span>
+          <div class="callout-content">
+            <div class="callout-title">Use !braindump for long briefs</div>
+            <p>Issue <span class="cmd">!braindump</span> to dump everything you know about the project at once. The Discovery Agent will process the dump, identify covered phases, and only ask follow-up questions for missing information.</p>
+          </div>
+        </div>
+
+        <h2>Discovery Commands</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Command</th><th>Behavior</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><span class="cmd">!braindump</span></td><td>Enter context ingestion mode — dump everything you know at once. Discovery identifies covered phases and asks only for missing information.</td></tr>
+              <tr><td><span class="cmd">!spec</span></td><td>Compile <code>feature-spec.md</code> and <code>HANDOFF.json v1</code>. Triggers the Spec Enhancement Loop automatically before showing the Discovery Complete banner.</td></tr>
+              <tr><td><span class="cmd">!enhance</span></td><td>Trigger a Spec Enhancement round on demand — surfaces premium feature suggestions and updates the spec after selection.</td></tr>
+              <tr><td><span class="cmd">!state</span></td><td>Show internal discovery state (which phases are complete, Spec State contents).</td></tr>
+              <tr><td><span class="cmd">!plan</span></td><td>Human gate: advance from Discovery to Technical Planning. Only available after the Enhancement Loop exits.</td></tr>
+              <tr><td><span class="cmd">!reset</span></td><td>Reset discovery state and restart from the beginning.</td></tr>
+              <tr><td><span class="cmd">!platforms</span></td><td>Show locked platform scope.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Spec Enhancement Loop -->
+        <h2>Spec Enhancement Loop</h2>
+        <p>
+          After <code>!spec</code> compiles the initial specification and Concept Validation passes,
+          Discovery automatically asks:
+        </p>
+        <div class="callout callout-success" style="margin-bottom:24px;">
+          <span class="callout-icon">✨</span>
+          <div class="callout-content">
+            <div class="callout-title">Would you like suggestions on how to improve your project specification?</div>
+            <p>Answer <strong>yes</strong> to get a curated table of premium feature recommendations. Answer <strong>no</strong> to proceed to <code>!plan</code>.</p>
+          </div>
+        </div>
+
+        <h3>How it works</h3>
+        <ol>
+          <li>You answer <strong>yes</strong>.</li>
+          <li>Discovery internally analyzes the spec to identify high-value capabilities that would make this a top-1% product in its category. This analysis is not shown to you — only the results are.</li>
+          <li>Recommendations are presented in a numbered table you can select from.</li>
+          <li>Selected features are fully woven into every relevant section of <code>feature-spec.md</code> — not appended as a list.</li>
+          <li>The question repeats. Continue adding features in rounds, or decline to proceed to <code>!plan</code>.</li>
+        </ol>
+
+        <h3>Recommendation table format</h3>
+        <pre><code>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✨ Spec Enhancement Suggestions — MyApp
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ #  Feature                          Category          Value Added                             Complexity   Priority
+ ─  ──────────────────────────────   ───────────────   ─────────────────────────────────────   ──────────   ────────
+ 1  AI-powered onboarding wizard     AI / Intelligence  Learns user goals; personalizes flow    Medium       🔴 High
+ 2  In-app referral engine           Monetization       Viral growth loop with reward tiers     Low          🔴 High
+ 3  Real-time collaboration cursors  UX / Onboarding    Multi-user live editing (Figma-style)   High         🟡 Medium
+ 4  Advanced usage analytics         Analytics          Heatmaps, funnel drop-off, cohort view  Medium       🟡 Medium
+ 5  Offline-first sync engine        Performance        Full functionality without network       High         🟡 Medium
+ 6  Accessibility audit dashboard    Accessibility      WCAG compliance score + auto-fixes       Low          🟢 Low
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Enter the numbers of features to add (e.g. 1, 3, 5) — or "all" — or "none" to skip.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</code></pre>
+
+        <h3>After selection</h3>
+        <p>Each selected feature is integrated into all sections it affects — not appended at the bottom:</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Feature type</th><th>Spec sections updated</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Any feature</td><td>Core Features (§3), User Stories (§4), Definition of Done (§20)</td></tr>
+              <tr><td>Changes user journey</td><td>Core User Flow (§5)</td></tr>
+              <tr><td>Creates new data</td><td>Data &amp; State Requirements (§6)</td></tr>
+              <tr><td>Requires new API</td><td>API / Business Logic (§10)</td></tr>
+              <tr><td>Adds UI surface</td><td>UX Requirements (§9)</td></tr>
+              <tr><td>Affects permissions</td><td>Roles &amp; Permissions (§12)</td></tr>
+              <tr><td>Changes revenue model</td><td>Monetization (§14)</td></tr>
+              <tr><td>Has security implications</td><td>Authentication &amp; Security (§11)</td></tr>
+              <tr><td>Requires observability</td><td>Observability &amp; Release Strategy (§17)</td></tr>
+              <tr><td>Platform-specific</td><td>Platform Scope Matrix (§7), Native Capabilities (§8)</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>!enhance on demand</h3>
+        <p>
+          Type <code>!enhance</code> at any point after the spec has been compiled to trigger another enhancement round.
+          Each round surfaces new recommendations — features already offered are never re-suggested.
+          The loop terminates automatically when all meaningful recommendations have been offered.
+        </p>
+
+        <h2>Outputs</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Artifact</th><th>Path</th><th>Contents</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>feature-spec.md</code></td>
+                <td><code>artifacts/discovery/</code></td>
+                <td>Full product specification: overview, users, features, data model, APIs, monetization, NFRs, risks, and open questions</td>
+              </tr>
+              <tr>
+                <td><code>HANDOFF.json v1</code></td>
+                <td><code>artifacts/pipeline/</code></td>
+                <td>Machine-readable summary: spec_hash, platforms[], complexity_tier, tech_stack{}, open_questions[]</td>
+              </tr>
+              <tr>
+                <td><code>design-contract.md</code></td>
+                <td><code>artifacts/discovery/</code></td>
+                <td>Web projects only. Design system contract: brand colors, fonts, component library, spacing rules.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>CIA — Competitive Intelligence Analysis</h2>
+        <p>During Phase 1 (Core Concept), Discovery can run an optional Competitive Intelligence Analysis using the APIs listed in <code>available_apis.md</code>. This surfaces named competitors, pricing anchors, and positioning gaps before the spec is written — so the product can be differentiated from the start.</p>
+
+        <div class="callout callout-info">
+          <span class="callout-icon">ℹ️</span>
+          <div class="callout-content">
+            <div class="callout-title">CIA is optional but valuable</div>
+            <p>Request it with <span class="cmd">!cia</span> during Phase 1. Results are embedded in <code>feature-spec.md</code> under the Competitive Landscape section.</p>
+          </div>
+        </div>
+
+        <h2>Complexity Tier Assignment</h2>
+        <p>At the end of discovery, the agent assigns a complexity tier that governs downstream behavior:</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Tier</th><th>Criteria</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><span class="badge badge-green">Simple</span></td><td>Single platform, no auth, no payments, no external APIs, &lt;10 features</td></tr>
+              <tr><td><span class="badge badge-yellow">Standard</span></td><td>Auth required, database, 1–2 platforms, standard API integrations, 10–25 features</td></tr>
+              <tr><td><span class="badge badge-red">Complex</span></td><td>Multi-platform, payments, multi-tenant, ML/AI components, &gt;25 features, compliance requirements</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Multi-Modal Image Analysis</h2>
+        <p>Whenever an image is attached to any message during a Discovery session, the agent analyzes it immediately before responding to the user's text. No special command is required — Claude supports multimodal input natively.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Image type</th><th>Analysis output</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>UI screenshot</strong></td>
+                <td>Extract UI components, layout patterns, and implied User Stories. Components are added to the design contract draft.</td>
+              </tr>
+              <tr>
+                <td><strong>Competitor screenshot</strong></td>
+                <td>For each visible feature: classify as MATCH (build equivalent), EXCEED (build better), or SKIP (not needed for MVP).</td>
+              </tr>
+              <tr>
+                <td><strong>Architecture / flow diagram</strong></td>
+                <td>Extract entities, relationships, and data flows. Add to the TDD outline and SCHEMA.md draft.</td>
+              </tr>
+              <tr>
+                <td><strong>Text / whiteboard photo</strong></td>
+                <td>Parse as a structured braindump. Extract requirements, user stories, and constraints as if typed text.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>The analysis is emitted as an <strong>Image Analysis</strong> block at the top of the agent's response, before any reply to the user's text content.</p>
+
+        <div class="callout callout-info">
+          <span class="callout-icon">ℹ️</span>
+          <div class="callout-content">
+            <div class="callout-title">Model-adaptive output</div>
+            <p>The Discovery agent adjusts its output format based on the active model family. Claude models use full artifact Markdown. Kimi and GPT-family models use a streamlined format. Ollama local models use plain-text output without Unicode callout blocks.</p>
+          </div>
+        </div>
+
+        <div class="doc-footer">
+          <a class="doc-footer-link" href="orchestrator.html">
+            <span class="doc-footer-dir">← Previous</span>
+            <span class="doc-footer-title">Orchestrator</span>
+          </a>
+          <a class="doc-footer-link next" href="planning.html">
+            <span class="doc-footer-dir">Next →</span>
+            <span class="doc-footer-title">Technical Planning</span>
+          </a>
+        </div>
+
+      </div>
+    </main>
+  </div>
+  <script src="nav.js"></script>
+</body>
+</html>

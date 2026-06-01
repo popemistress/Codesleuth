@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Application Builder — CodeSleuth AI Docs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="header" id="site-header"></header>
+  <div class="main-layout">
+    <nav class="sidebar" id="site-sidebar"></nav>
+    <main class="content">
+      <div class="content-inner">
+
+        <div class="breadcrumb">
+          <a href="index.html">Docs</a>
+          <span class="breadcrumb-sep">›</span>
+          <span>Agents</span>
+          <span class="breadcrumb-sep">›</span>
+          <span class="breadcrumb-current">Application Builder</span>
+        </div>
+
+        <div class="page-tag">🔨 Agent 3</div>
+        <h1>Application Builder</h1>
+        <p class="lead">
+          The Builder is a continuous execution engine. It reads <code>TASK-GRAPH.md</code>,
+          implements tasks one by one, validates output against contracts, tracks change impact,
+          and never voluntarily pauses until every task is DONE or a genuine blocker is hit.
+        </p>
+
+        <div class="callout callout-info">
+          <span class="callout-icon">ℹ️</span>
+          <div class="callout-content">
+            <div class="callout-title">The Builder never stops voluntarily except for:</div>
+            <p>sudo/root access required · blocked for 5+ consecutive attempts · required secret is missing · task is marked STALE and needs human re-approval · SHIP declaration issued</p>
+          </div>
+        </div>
+
+        <h2>Task Status Values</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Status</th><th>Meaning</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><span class="badge badge-gray">PENDING</span></td><td>Not yet started; dependencies not satisfied</td></tr>
+              <tr><td><span class="badge badge-blue">IN-PROGRESS</span></td><td>Currently being implemented</td></tr>
+              <tr><td><span class="badge badge-green">DONE</span></td><td>Implemented, tested, and gate commands passed</td></tr>
+              <tr><td><span class="badge badge-red">BLOCKED</span></td><td>Cannot proceed; reason documented; awaiting human input</td></tr>
+              <tr><td><span class="badge badge-yellow">STALE</span></td><td>Previously DONE but invalidated by a spec change (<code>!change</code>). Must be re-derived before re-execution.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout callout-warning">
+          <span class="callout-icon">⚠️</span>
+          <div class="callout-content">
+            <div class="callout-title">STALE tasks require human review</div>
+            <p>When the Builder encounters a STALE task, it presents the original implementation and the change context, then waits for human confirmation before re-implementing. A STALE task is never automatically re-executed.</p>
+          </div>
+        </div>
+
+        <h2>Per-Task Execution Cycle</h2>
+        <ol class="steps">
+          <li class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <div class="step-title">Read task and dependencies</div>
+              <div class="step-desc">Confirm all declared dependencies are DONE. Read the test contract and acceptance criteria before writing any code.</div>
+            </div>
+          </li>
+          <li class="step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <div class="step-title">Query Pattern Library</div>
+              <div class="step-desc">Search <code>PATTERN_INDEX.md</code> for the task's domain and stack keywords. Apply any matched patterns before writing new code.</div>
+            </div>
+          </li>
+          <li class="step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <div class="step-title">Implement &amp; write tests</div>
+              <div class="step-desc">Write tests first when TC entries exist. Implement feature code. Never mark DONE without passing test contracts.</div>
+            </div>
+          </li>
+          <li class="step">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <div class="step-title">Validate against contracts (step 10b)</div>
+              <div class="step-desc">If the task touches an API endpoint or data model, run Zod schema validation and verify OpenAPI stub conformance. A contract failure blocks DONE marking.</div>
+            </div>
+          </li>
+          <li class="step">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <div class="step-title">Run gate commands</div>
+              <div class="step-desc"><code>pnpm agent:check</code> (or stack equivalent) must exit zero. UI tasks additionally require <code>pnpm agent:visual</code>.</div>
+            </div>
+          </li>
+          <li class="step">
+            <div class="step-num">6</div>
+            <div class="step-body">
+              <div class="step-title">Change Impact Check (step 13b)</div>
+              <div class="step-desc">Cross-reference modified files against <code>FILE_OWNERSHIP_MAP.md</code>. If any other task owns a modified file, re-run that task's targeted tests.</div>
+            </div>
+          </li>
+          <li class="step">
+            <div class="step-num">7</div>
+            <div class="step-body">
+              <div class="step-title">Mark DONE &amp; emit status line</div>
+              <div class="step-desc">Update TASK-GRAPH.md status, write status line to CHECKPOINT.md. Proceed to the next PENDING task.</div>
+            </div>
+          </li>
+        </ol>
+
+        <h2>Change Impact Tracking</h2>
+        <p>After every task, the Builder performs a Reverse CIA (Change Impact Analysis):</p>
+        <ol>
+          <li>Collect every file modified in this task</li>
+          <li>Look each file up in <code>FILE_OWNERSHIP_MAP.md</code></li>
+          <li>Find all other tasks that own those same files</li>
+          <li>Re-run the targeted test commands for each affected task</li>
+          <li>If any prior test fails, the affected task is marked STALE and the Builder halts to report the regression</li>
+        </ol>
+
+        <div class="callout callout-info">
+          <span class="callout-icon">ℹ️</span>
+          <div class="callout-content">
+            <div class="callout-title">Why Change Impact Tracking?</div>
+            <p>A task that passes its own tests can still break a previously DONE task that shares a database model, utility function, or API client. Without this check, regressions accumulate silently and surface only at Verifier time — when they're expensive to fix.</p>
+          </div>
+        </div>
+
+        <h2>Status Line Format</h2>
+        <p>After each task, the Builder emits a structured status line to CHECKPOINT.md:</p>
+
+        <pre><code>--- Task 5: User Authentication → DONE ✅
+    TC: 3/3 pass (1 unit, 2 integration)
+    Contracts: ✅ Zod schema valid | OpenAPI: ✅ conformant
+    Regression: ✅ no cross-task failures
+    Gates: ✅ lint  ✅ types  ✅ tests  ✅ build
+    Patterns applied: PATTERN-001 (NextAuth v5 + Prisma sessions)
+    Notes: Used database sessions per PATTERN-001; JWT mode disabled.</code></pre>
+
+        <h2>Checkpoint Cadence</h2>
+        <p>Every 3–5 completed tasks, the Builder writes a full checkpoint to <code>CHECKPOINT.md</code>:</p>
+        <ul>
+          <li>Tasks completed since last checkpoint</li>
+          <li>Tasks remaining (PENDING count)</li>
+          <li>BLOCKED tasks and their reasons</li>
+          <li>STALE tasks and their change context</li>
+          <li>Patterns applied in this batch</li>
+          <li>Cross-task regression status</li>
+        </ul>
+
+        <h2>DECISIONS.md</h2>
+        <p>When the Builder makes a non-obvious implementation choice that differs from the plan or represents a trade-off, it logs an entry to <code>DECISIONS.md</code>:</p>
+
+        <pre><code>## DECISION-007: Used optimistic locking instead of row-level locks
+Date: 2025-06-01
+Task: TASK-018
+Context: Row-level locks caused deadlocks under concurrent booking requests in load testing.
+Decision: Switch to optimistic locking with retry (max 3 attempts).
+Trade-off: Slightly higher retry overhead vs. elimination of deadlock risk.
+Pattern: Candidate for PATTERN-007.
+</code></pre>
+
+        <h2>Builder Rules (Key)</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Rule</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>Rule 1</strong></td><td>Never mark a task DONE without all TC tests passing</td></tr>
+              <tr><td><strong>Rule 2</strong></td><td>Never skip <code>pnpm agent:check</code> with bypass flags</td></tr>
+              <tr><td><strong>Rule 3</strong></td><td>Never write code for a task whose dependencies are not DONE</td></tr>
+              <tr><td><strong>Rule 4</strong></td><td>Never auto-resolve a STALE task — wait for human re-approval</td></tr>
+              <tr><td><strong>Rule 5</strong></td><td>Check Pattern Library before implementing any auth, database, or payment integration</td></tr>
+              <tr><td><strong>Rule 6</strong></td><td>Contract validation (Zod + OpenAPI) is mandatory for all API-touching tasks</td></tr>
+              <tr><td><strong>Rule 7</strong></td><td>Change Impact Check runs after every task, not only after suspected regressions</td></tr>
+              <tr><td><strong>Rule 8</strong></td><td>Log every non-obvious decision to DECISIONS.md</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Pipeline Script Integration</h2>
+        <p>Every file write by the Builder passes through a 5-step pipeline powered by dedicated scripts. These steps run automatically — no manual invocation required.</p>
+
+        <h3>Step 1: Pre-write Secret Scan</h3>
+        <p>Before any file is written, <code>secret_scan.py</code> scans the proposed content against 14 regex patterns.</p>
+        <pre><code>python scripts/secret_scan.py &lt;file&gt;</code></pre>
+        <p>Patterns include OpenAI keys, Anthropic keys, AWS access keys, GitHub tokens, Stripe keys, Twilio tokens, and generic high-entropy strings. If a match is found, the write is hard-blocked and repair context is returned to the Builder for remediation before retrying.</p>
+
+        <h3>Step 2: Write Gate — Staged Write</h3>
+        <p>After the secret scan passes, the proposed write is staged for human review with a colored terminal diff.</p>
+        <pre><code>python scripts/staged_write.py stage --task TASK-NNN --file path/to/file --content /tmp/proposed.txt</code></pre>
+        <p>The human selects one of three options:</p>
+        <ul>
+          <li><strong>Apply</strong> — write proceeds; <code>write_log.py record</code> is called immediately after</li>
+          <li><strong>Edit</strong> — human modifies the proposed content; revised version is applied</li>
+          <li><strong>Reject</strong> — write is refused; exit 1 is returned with repair context; Builder re-enters the implementation step for this task</li>
+        </ul>
+
+        <h3>Step 3: Post-write Hot Compilation</h3>
+        <p>Immediately after each approved write, the Builder runs a fast compile check before proceeding to tests.</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Stack</th><th>Command</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Go</td><td><code>go build ./...</code></td></tr>
+              <tr><td>TypeScript / Node.js</td><td><code>npx tsc --noEmit</code></td></tr>
+              <tr><td>Rust</td><td><code>cargo check</code></td></tr>
+              <tr><td>Python</td><td><code>python -m py_compile &lt;file&gt;</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>If compilation fails, the Builder re-enters the implementation step without proceeding to the test or SAST steps. The hot check catches type errors and syntax mistakes at the lowest possible cost.</p>
+
+        <h3>Step 4: Post-write SAST Scan</h3>
+        <p>After the hot compilation check passes, a non-blocking SAST scan runs in the background.</p>
+        <pre><code>python scripts/sast_scan.py &lt;file&gt; --task TASK-NNN</code></pre>
+        <p>The scan always exits 0 and never blocks the Builder. Findings are appended to <code>SAST_FINDINGS.jsonl</code>. The Security agent reads this file during its 20-domain review, giving it a complete history of static analysis findings across all task writes.</p>
+
+        <h3>Step 5: Post-write Write Log</h3>
+        <p>Every approved write is recorded to <code>WRITE_LOG.jsonl</code> for later consumption by <code>commit_by_task.py</code>.</p>
+        <pre><code>python scripts/write_log.py record --task TASK-NNN --file path/to/file.py</code></pre>
+        <p>The write log enables <code>commit_by_task.py</code> to group all writes by task and create one conventional git commit per task. It also provides the checkpoint references needed by <code>pipeline_replay.py</code> for <code>!replay</code> operations.</p>
+
+        <h2>Parallel Task Execution</h2>
+        <p>The Builder supports two parallel execution methods for tasks that have no write-file overlap.</p>
+
+        <h3>Method A: Go Goroutines</h3>
+        <p>For independent build and test commands, <code>parallel_runner.go</code> runs tasks simultaneously using Go goroutines.</p>
+        <pre><code>go run scripts/parallel_runner.go -tasks TASK-001,TASK-002 -cmd "pnpm test" -task-graph artifacts/build/TASK-GRAPH.md</code></pre>
+        <p>Before executing, the runner reads <code>FILE_OWNERSHIP_MAP.md</code> and refuses any batch where two tasks write to the same file. Per-task output is captured and reported on completion. Exit 0 means all tasks passed; exit 1 means at least one failed.</p>
+
+        <h3>Method B: Parallel Agent Tool Calls</h3>
+        <p>For independent file writes across non-overlapping task groups, Agent 3 issues multiple parallel tool calls in a single response. This leverages Claude Code's native parallel execution rather than an external process. Method B is preferred for write-heavy tasks; Method A is preferred for test-heavy tasks.</p>
+
+        <div class="callout callout-info">
+          <span class="callout-icon">ℹ️</span>
+          <div class="callout-content">
+            <div class="callout-title">Write-conflict check is mandatory before any parallel batch</div>
+            <p>Before starting either method, the Builder cross-references the <code>output_files</code> fields of all candidate tasks against <code>FILE_OWNERSHIP_MAP.md</code>. Tasks that share output files are never run in parallel — they are sequenced instead.</p>
+          </div>
+        </div>
+
+        <h2>Coverage Enforcement</h2>
+        <p>After all TC test contracts pass for a task, <code>check_coverage.py</code> runs to verify the 70% coverage threshold.</p>
+        <pre><code>python scripts/check_coverage.py --threshold 70 --task TASK-NNN</code></pre>
+        <p>If coverage is below threshold, the task cannot be marked DONE. The Builder adds missing test cases until coverage meets or exceeds 70%, then re-runs the check. The threshold applies per-task, not globally — a single poorly-covered task blocks its own DONE status without affecting other tasks.</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Stack</th><th>Coverage backend</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Go</td><td><code>go test -cover ./...</code></td></tr>
+              <tr><td>Node.js / TypeScript</td><td>nyc or c8</td></tr>
+              <tr><td>Python</td><td>pytest-cov</td></tr>
+              <tr><td>Rust</td><td>cargo-tarpaulin</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Coverage is also checked by the Verifier in Phase 3A as a project-wide gate. A task that barely meets 70% locally may still contribute to a project-wide shortfall caught at verification time.</p>
+
+        <div class="doc-footer">
+          <a class="doc-footer-link" href="planning.html">
+            <span class="doc-footer-dir">← Previous</span>
+            <span class="doc-footer-title">Technical Planning</span>
+          </a>
+          <a class="doc-footer-link next" href="security.html">
+            <span class="doc-footer-dir">Next →</span>
+            <span class="doc-footer-title">Security</span>
+          </a>
+        </div>
+
+      </div>
+    </main>
+  </div>
+  <script src="nav.js"></script>
+</body>
+</html>

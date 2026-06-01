@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Parallel Execution — CodeSleuth AI Docs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="header" id="site-header"></header>
+  <div class="main-layout">
+    <nav class="sidebar" id="site-sidebar"></nav>
+    <main class="content">
+      <div class="content-inner">
+
+        <div class="breadcrumb">
+          <a href="index.html">Docs</a>
+          <span class="breadcrumb-sep">›</span>
+          <span>Reference</span>
+          <span class="breadcrumb-sep">›</span>
+          <span class="breadcrumb-current">Parallel Execution</span>
+        </div>
+
+        <div class="page-tag">⚡ Multi-Agent Workloads</div>
+        <h1>Parallel Execution</h1>
+        <p class="lead">
+          CodeSleuth runs multiple tasks and even multiple pipeline branches concurrently.
+          This page covers every mechanism: the goroutine runner for shell-level parallelism,
+          sub-agent spawning for agent-level parallelism, and session forking for architecture-level parallelism.
+        </p>
+
+        <!-- Overview -->
+        <h2>Three Levels of Parallelism</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Level</th><th>Mechanism</th><th>Scope</th><th>When used</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Shell</strong></td>
+                <td>Go goroutine runner (<code>parallel_runner.go</code>)</td>
+                <td>Multiple build tasks within one pipeline branch</td>
+                <td>Parallel batches in TASK-GRAPH Parallelism Map</td>
+              </tr>
+              <tr>
+                <td><strong>Agent</strong></td>
+                <td>Sub-agent spawning via Claude Code Agent tool</td>
+                <td>Multiple tasks with full agent context</td>
+                <td>Architecture-class tasks that benefit from isolated context</td>
+              </tr>
+              <tr>
+                <td><strong>Pipeline</strong></td>
+                <td>Session forking (<code>session_fork.py</code>)</td>
+                <td>Two complete pipeline branches exploring different architectures</td>
+                <td><code>!fork [description]</code> — exploring alternative approaches</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Parallelism Map -->
+        <h2>Reading the Parallelism Map</h2>
+        <p>The Planner (Agent 2) writes a <strong>Parallelism Map</strong> at the end of <code>TASK-GRAPH.md</code>. The Builder reads this map at activation to know which tasks can run concurrently:</p>
+        <pre><code>## Parallelism Map
+Batch 1 (no dependencies): [TASK-001]
+Batch 2 (depends on Batch 1): [TASK-002, TASK-003, TASK-004]
+Batch 3 (depends on Batch 2): [TASK-005, TASK-006]
+Batch 4 (depends on Batch 3): [TASK-007]</code></pre>
+        <ul>
+          <li><strong>Batch with 1 task</strong> → run sequentially (standard Per-Task Cycle)</li>
+          <li><strong>Batch with 2+ tasks</strong> → run in parallel using Method A or Method B below</li>
+          <li>Tasks within a batch must not write the same output file — the Planner ensures this via <code>can_parallel: true/false</code> on each task</li>
+        </ul>
+
+        <!-- Task type annotations -->
+        <h3>Task Dependency Annotations</h3>
+        <p>Every task in TASK-GRAPH carries these fields to enable correct parallel scheduling:</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Field</th><th>Values</th><th>Purpose</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>task_type</code></td><td><code>api | auth | data | infra | ui | config | feature | cicd | obs</code></td><td>Pattern Library matching and domain routing</td></tr>
+              <tr><td><code>depends_on</code></td><td>TASK-NNN list or "none"</td><td>Declares prerequisite tasks — batch placement</td></tr>
+              <tr><td><code>can_parallel</code></td><td><code>true | false</code></td><td>Whether this task can run alongside siblings in the same batch</td></tr>
+              <tr><td><code>output_files</code></td><td>List of file paths</td><td>Conflict detection — two tasks writing the same file must be sequential</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p><code>can_parallel: false</code> when: the task writes files also written by another task in the same batch, or the task requires reading output produced by another task in the same batch.</p>
+
+        <!-- Method A -->
+        <h2>Method A — Go Goroutine Runner</h2>
+        <p>Preferred for <strong>shell-level parallelism</strong>. The Go runner spawns each task as a goroutine, detects write conflicts, and writes structured results to JSON.</p>
+
+        <h3>How to invoke</h3>
+        <pre><code># Write batch config
+cat &gt; /tmp/batch.json &lt;&lt; 'EOF'
+{
+  "tasks": ["TASK-003", "TASK-004", "TASK-005"],
+  "cmd_template": "python /path/to/agents/scripts/run_task_worker.py --task {task_id} --project-dir {project_dir}",
+  "project_dir": "/path/to/project",
+  "timeout_seconds": 300
+}
+EOF
+
+# Run all tasks concurrently with goroutines
+go run /home/user/codesleuth/scripts/parallel_runner.go \
+    -batch-file /tmp/batch.json \
+    -task-graph artifacts/build/TASK-GRAPH.md \
+    -output artifacts/telemetry/batch_results.json</code></pre>
+
+        <h3>Conflict detection (run before the batch)</h3>
+        <pre><code>go run /home/user/codesleuth/scripts/parallel_runner.go \
+    -tasks TASK-003,TASK-004,TASK-005 \
+    -task-graph artifacts/build/TASK-GRAPH.md \
+    -cmd "echo {task_id}" \
+    -output /dev/null 2&gt;&amp;1 | grep "conflict"</code></pre>
+        <p>Any reported conflict means those tasks must be split into separate sequential batches. The runner handles this automatically — conflicting tasks are moved into sub-batches and run sequentially within the batch, while non-conflicting tasks still run in parallel.</p>
+
+        <h3>Output</h3>
+        <p>After completion, read <code>artifacts/telemetry/batch_results.json</code> and mark each task's status in TASK-GRAPH.md accordingly. Each task result carries:</p>
+        <pre><code>{
+  "task_id": "TASK-003",
+  "status": "done" | "blocked" | "conflict",
+  "exit_code": 0,
+  "stdout": "...",
+  "stderr": "...",
+  "duration_seconds": 42
+}</code></pre>
+
+        <!-- Method B -->
+        <h2>Method B — Parallel Sub-Agents</h2>
+        <p>Preferred for <strong>agent-level parallelism</strong> — when each task needs full model reasoning, INTERFACES.md context, or complex multi-file implementation. Sub-agents run completely concurrently because <strong>all Agent tool calls appear in the same response</strong>.</p>
+
+        <h3>How to invoke</h3>
+        <pre><code>Agent(description="Implement TASK-003: Auth module",  prompt="...")
+Agent(description="Implement TASK-004: User API",     prompt="...")
+Agent(description="Implement TASK-005: Booking form", prompt="...")</code></pre>
+
+        <div class="callout callout-info">
+          <span class="callout-icon">💡</span>
+          <div class="callout-content">
+            <div class="callout-title">All Agent calls in a single response</div>
+            <p>Claude Code executes multiple Agent tool calls in a single response concurrently. If Agent calls appear in separate responses, they run sequentially. The Builder always groups parallel batch Agent calls into one response.</p>
+          </div>
+        </div>
+
+        <h3>Sub-agent prompt requirements</h3>
+        <p>Each sub-agent prompt must include — because the sub-agent starts with no session context:</p>
+        <ul>
+          <li>The full task entry from TASK-GRAPH.md</li>
+          <li>The relevant INTERFACES.md section for this task's module</li>
+          <li>The relevant SCHEMA.md section (if the task touches data)</li>
+          <li>Instructions to record results in TASK-GRAPH.md</li>
+          <li>Instructions to append a telemetry record to <code>artifacts/build/WRITE_LOG.jsonl</code></li>
+          <li>The project directory path (to enforce the agents directory isolation rule)</li>
+        </ul>
+
+        <h3>After sub-agents complete</h3>
+        <ol>
+          <li>Collect all sub-agent results</li>
+          <li>Run SAST scan on every changed file: <code>python scripts/sast_scan.py &lt;file&gt; --task TASK-NNN</code></li>
+          <li>Run coverage check for each task: <code>python scripts/check_coverage.py --task TASK-NNN</code></li>
+          <li>Run Change Impact Check: cross-reference modified files against FILE_OWNERSHIP_MAP.md</li>
+          <li>Append telemetry records to <code>artifacts/telemetry/tasks.jsonl</code></li>
+        </ol>
+
+        <!-- Session Forking -->
+        <h2>Session Forking — Pipeline-Level Parallelism</h2>
+        <p>The <code>!fork</code> command creates two isolated pipeline branches from the current project state. Branch A continues with the existing plan; Branch B explores an alternative approach. Both run concurrently as separate agent processes.</p>
+
+        <h3>When to use <code>!fork</code></h3>
+        <ul>
+          <li>Undecided between two architectures (e.g., PostgreSQL vs SQLite, REST vs GraphQL)</li>
+          <li>Multi-platform projects where each platform needs its own pipeline run</li>
+          <li>Exploring a risky refactor without committing to it before seeing the result</li>
+        </ul>
+
+        <h3>Step 1 — Create the fork</h3>
+        <pre><code># The Orchestrator runs this automatically when !fork is typed
+python /home/user/codesleuth/scripts/session_fork.py create \
+    --project-dir [project_dir] \
+    --session-file artifacts/build/FORK_SESSION.json \
+    --branch-b-desc "use PostgreSQL instead of SQLite"</code></pre>
+        <p>The script creates <code>[project]-fork-a/</code> and <code>[project]-fork-b/</code> as isolated copies of the project directory. HANDOFF.json is present in both.</p>
+
+        <h3>Step 2 — Run both forks concurrently</h3>
+        <p>The Orchestrator spawns two Agent calls in a <strong>single response</strong>:</p>
+        <pre><code>Agent(
+  description="Fork-A pipeline run: original SQLite approach",
+  prompt="You are Agent 3 (Builder) operating in project directory [fork-a-dir].
+          HANDOFF.json is already present. Run the full pipeline from the current
+          state using the original plan. Record pipeline_verdict in HANDOFF.json
+          when complete. Do not interact with the user — run to completion."
+)
+Agent(
+  description="Fork-B pipeline run: PostgreSQL alternative",
+  prompt="You are Agent 3 (Builder) operating in project directory [fork-b-dir].
+          HANDOFF.json is already present. Run the full pipeline using this
+          alternative approach: use PostgreSQL instead of SQLite.
+          Record pipeline_verdict in HANDOFF.json when complete."
+)</code></pre>
+
+        <h3>Step 3 — Compare results</h3>
+        <pre><code>python /home/user/codesleuth/scripts/session_fork.py compare \
+    --session-file artifacts/build/FORK_SESSION.json</code></pre>
+        <p>The comparison report shows: build success rate, test coverage, SHIP/NO-SHIP verdict, task durations, and open blockers for each fork side by side.</p>
+
+        <h3>Step 4 — Merge the winner</h3>
+        <pre><code># After the user types !merge fork-a or !merge fork-b
+python /home/user/codesleuth/scripts/session_fork.py merge fork-a \
+    --session-file artifacts/build/FORK_SESSION.json</code></pre>
+        <p>The script copies the winning fork's project directory back to the canonical project path, commits the merge to git, removes both fork directories, and archives the session file.</p>
+
+        <div class="callout callout-warning">
+          <span class="callout-icon">⚠️</span>
+          <div class="callout-content">
+            <div class="callout-title">!fork vs !nofork</div>
+            <p>When the Orchestrator detects a multi-platform project or an undecided architecture choice, it presents a fork plan and waits. Type <code>!fork</code> to approve and start both branches, or <code>!nofork</code> to decline and proceed with a single branch.</p>
+          </div>
+        </div>
+
+        <!-- Pipeline Replay -->
+        <h2>Pipeline Replay — Point-in-Time Restore</h2>
+        <p><code>!replay TASK-NNN</code> is the recovery mechanism for bad task outcomes — it restores the codebase to the git commit created after TASK-NNN completed, marks all subsequent tasks PENDING, and resumes the Builder from the next task.</p>
+
+        <h3>When to use <code>!replay</code></h3>
+        <ul>
+          <li>A task produced incorrect output and all earlier work was correct</li>
+          <li>A <code>!change</code> event requires rebuilding from a known-good checkpoint</li>
+          <li>Trying a different implementation strategy from a specific point</li>
+        </ul>
+
+        <div class="callout callout-info">
+          <span class="callout-icon">💡</span>
+          <div class="callout-content">
+            <div class="callout-title">Checkpoints require commit_by_task.py</div>
+            <p>Replay works because <code>commit_by_task.py</code> records one git commit per completed task. Each task's commit hash is written to TASK-GRAPH.md under a <code>**Checkpoint:**</code> field. If no checkpoints exist, replay falls back to searching <code>git log</code> for a commit referencing the task ID.</p>
+          </div>
+        </div>
+
+        <h3>How to invoke</h3>
+        <pre><code>python /home/user/codesleuth/scripts/pipeline_replay.py \
+    --task TASK-003 \
+    --task-graph artifacts/build/TASK-GRAPH.md \
+    --project-dir [project directory]</code></pre>
+
+        <h3>Output</h3>
+        <pre><code>✅ Replay ready
+   Codebase:    restored to state after TASK-003 (commit abc1234)
+   Tasks reset: 4 task(s) marked PENDING
+   Resume from: TASK-004
+
+   Type !build to resume.</code></pre>
+
+        <!-- Builder progress bar -->
+        <h2>Build Progress Display</h2>
+        <p>During parallel and sequential builds, the Builder outputs a two-line status after every task — a status line and a progress bar. The bar is always 20 characters wide.</p>
+
+        <div class="callout callout-warning">
+          <span class="callout-icon">⚠️</span>
+          <div class="callout-content">
+            <div class="callout-title">Precondition: Builder must be active</div>
+            <p>This display only appears when Agent 3 (Builder) is running tasks — meaning the pipeline has been activated (<code>Start agent 0</code>) and has advanced through Discovery → Planning → <code>!build</code>. Asking Claude to build something directly without going through pipeline activation produces no progress display.</p>
+          </div>
+        </div>
+
+        <p>The format is embedded directly in step 15 of the Builder's Per-Task Cycle so it fires after every task:</p>
+        <pre><code>--- Task 5: Auth module → DONE ✅ | TC: 4/4 pass | Regression: ✅ 2 tasks checked | Gates: ✅ lint ✅ types ✅ tests ✅ build
+    ████████████░░░░░░░░  12 / 24 tasks complete  ·  50%
+
+--- Task 6: User API → DONE ✅ | TC: EXEMPT (config) | Gates: ✅ lint ✅ build
+    ███░░░░░░░░░░░░░░░░░   3 / 24 tasks complete  ·  12%
+
+--- Task 7: Booking form → DONE ✅ | TC: 5/5 pass (3 visual) | Baselines: created | Gates: ✅ visual ✅ build
+    ████████████████████  24 / 24 tasks complete  · 100% 🎉</code></pre>
+
+        <h3>Progress bar rules</h3>
+        <ul>
+          <li>Bar width: always 20 characters. Filled: <code>█</code>. Empty: <code>░</code></li>
+          <li>Formula: <code>filled = round(done / total × 20)</code></li>
+          <li><code>done</code> = tasks with status DONE or DONE_WITH_CONCERNS</li>
+          <li>BLOCKED and STALE tasks are not counted as done</li>
+          <li>Dead-lettered (skipped) tasks count toward total but not done</li>
+          <li>At 100%, appends 🎉</li>
+        </ul>
+
+        <h3>TC status codes in the status line</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Code</th><th>Meaning</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>TC: N/N pass</code></td><td>N test contracts confirmed failing before implementation; all N passing after</td></tr>
+              <tr><td><code>TC: EXEMPT (category)</code></td><td>Task was in a valid exempt category (scaffold, install, config, types, migration, ci)</td></tr>
+              <tr><td><code>TC: DERIVED N/N pass</code></td><td>Builder derived the contract from acceptance criteria because Planner omitted it</td></tr>
+              <tr><td><code>TC: N/N pass (N visual)</code></td><td>Includes visual regression tests — Playwright screenshot comparisons</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Staged write overlay -->
+        <h2>Staged Write Overlay</h2>
+        <p>Every file write in the pipeline goes through an approval gate before hitting disk. This prevents accidental overwrites, secret leakage, and incorrect implementations from persisting.</p>
+
+        <h3>The write cycle for every file</h3>
+        <ol>
+          <li><strong>Secret scan</strong>: <code>python scripts/secret_scan.py &lt;proposed_content&gt;</code> — blocks on any detected secret pattern</li>
+          <li><strong>Stage the write</strong>: <code>python scripts/staged_write.py stage --task TASK-NNN --file &lt;path&gt; --content &lt;temp_file&gt; --rationale "..."</code></li>
+          <li><strong>Approval result</strong>: exit 0 (applied) → proceed; exit 1 (rejected) → re-enter implementation with rejection reason</li>
+          <li><strong>Hot compile check</strong>: immediately after every file write, run the compile command (<code>go build ./...</code>, <code>npx tsc --noEmit</code>, <code>cargo check</code>, etc.)</li>
+          <li><strong>Write log record</strong>: <code>python scripts/write_log.py record --task TASK-NNN --file &lt;path&gt;</code></li>
+          <li><strong>SAST scan</strong>: <code>python scripts/sast_scan.py &lt;file&gt; --task TASK-NNN</code> (non-blocking)</li>
+        </ol>
+
+        <div class="callout callout-info">
+          <span class="callout-icon">💡</span>
+          <div class="callout-content">
+            <div class="callout-title">CI mode: --auto-apply</div>
+            <p>In non-interactive CI environments, pass <code>--auto-apply</code> to <code>staged_write.py</code> to skip the prompt. The secret scan still runs — staged_write is the approval gate, not the security gate.</p>
+          </div>
+        </div>
+
+        <!-- RARV cycle -->
+        <h2>RARV Cycle — Per-Task Test Loop</h2>
+        <p>Every non-exempt task follows the RARV cycle: <strong>R</strong>ead → <strong>A</strong>ssert → <strong>R</strong>epair → <strong>V</strong>erify. This is the inner loop that catches implementation errors before the full gate suite runs.</p>
+
+        <ol>
+          <li><strong>Read</strong> — Load task context: CHECKPOINT.md, task entry, INTERFACES.md section, SCHEMA.md section, owned source files</li>
+          <li><strong>Assert</strong> — Write failing tests first. Run the targeted test command. Confirm tests exit non-zero before writing any implementation.</li>
+          <li><strong>Repair loop</strong> — Implement the minimum working change. Run scoped tests. If fail → repair (up to 3 self-repair attempts, then Repair Mode).</li>
+          <li><strong>Verify</strong> — Run the full targeted gate suite. Coverage check. SAST scan. Visual baseline (UI tasks). Change Impact Check.</li>
+        </ol>
+
+      </div>
+    </main>
+  </div>
+  <script src="nav.js"></script>
+</body>
+</html>

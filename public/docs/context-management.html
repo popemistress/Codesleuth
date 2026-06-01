@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Context Management — CodeSleuth AI Docs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="header" id="site-header"></header>
+  <div class="main-layout">
+    <nav class="sidebar" id="site-sidebar"></nav>
+    <main class="content">
+      <div class="content-inner">
+
+        <div class="breadcrumb">
+          <a href="index.html">Docs</a>
+          <span class="breadcrumb-sep">›</span>
+          <span>Reference</span>
+          <span class="breadcrumb-sep">›</span>
+          <span class="breadcrumb-current">Context Management</span>
+        </div>
+
+        <div class="page-tag">🧠 Context &amp; Compression</div>
+        <h1>Context Management</h1>
+        <p class="lead">
+          CodeSleuth proactively manages the model's context window throughout a build.
+          Instead of reacting to overflow, the Orchestrator compresses earlier history at 70% usage —
+          ensuring agents always have room to complete the current task and produce clean handoffs.
+        </p>
+
+        <!-- Rolling compression -->
+        <h2>Rolling Compression</h2>
+        <p>Context compression is triggered proactively at <strong>70% usage</strong> — not at 95% when it's too late to compress cleanly. This threshold ensures there's always room to complete the current task and generate the compressed summary.</p>
+
+        <h3>Compression trigger</h3>
+        <p>When context usage reaches 70%, the Orchestrator's compression manager:</p>
+        <ol>
+          <li>Identifies message history older than the last 2 completed tasks</li>
+          <li>Summarizes each completed task's full exchange into a one-line entry:<br>
+              <code>TASK-NNN [DONE]: [what was built, key decisions made]</code></li>
+          <li>Replaces the full exchange with the summary in the active context window</li>
+          <li>Archives the full exchange to <code>artifacts/build/CONTEXT_ARCHIVE.md</code> in the project directory — content is never deleted, only moved out of active context</li>
+          <li>Logs a compression event to <code>artifacts/telemetry/tasks.jsonl</code>:<br>
+              <code>{"event":"context_compression","tokens_freed":N,"tasks_compressed":["TASK-NNN"]}</code></li>
+        </ol>
+
+        <div class="callout callout-success">
+          <span class="callout-icon">✅</span>
+          <div class="callout-content">
+            <div class="callout-title">Content is never lost</div>
+            <p>Full exchange content is always archived to <code>CONTEXT_ARCHIVE.md</code> before compression. The archive is a permanent project artifact — the summary is what disappears from active context, not the underlying work.</p>
+          </div>
+        </div>
+
+        <!-- Between-agent compression -->
+        <h2>Between-Agent Compression</h2>
+        <p>At every gate transition, the Orchestrator compresses the previous agent's history before handing off to the next agent. Each new agent starts with a clean, focused context window.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Gate</th><th>Compression event</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Discovery → Planning (<code>!plan</code>)</td><td>Discovery history compressed; Planning starts fresh with feature-spec.md and HANDOFF.json</td></tr>
+              <tr><td>Planning → Builder (<code>!build</code>)</td><td>Planning history compressed; Builder starts with TDD.md, INTERFACES.md, TASK-GRAPH.md</td></tr>
+              <tr><td>Builder → Critic (automatic)</td><td>Build history compressed; Critic starts with HANDOFF v3 and built codebase reference</td></tr>
+              <tr><td>Critic → Security (<code>!security</code>)</td><td>Critic history compressed; Security starts with CRITICISM.md and HANDOFF v4</td></tr>
+              <tr><td>Security → Verifier (<code>!verify</code>)</td><td>Security history compressed; Verifier starts with SECURITY_REPORT.md and HANDOFF v5</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Context budget HANDOFF -->
+        <h2>Context Budget Fields in HANDOFF</h2>
+        <p>The Orchestrator maintains a <code>context_budget</code> object in HANDOFF that every agent reads before composing its prompt:</p>
+        <pre><code>{
+  "context_budget": {
+    "total_tokens": 200000,
+    "reserved_pipeline_state": 8000,
+    "reserved_current_task": 40000,
+    "available_history": 152000,
+    "compression_threshold": 0.70,
+    "compressed_tasks": ["TASK-001", "TASK-002", "TASK-003"]
+  }
+}</code></pre>
+
+        <!-- Builder context rules -->
+        <h2>Builder Context Loading Rules</h2>
+        <p>The Builder never loads everything — it follows strict per-task context rules to conserve the window:</p>
+
+        <h3>Always loaded (every task)</h3>
+        <ul>
+          <li>HANDOFF (active version)</li>
+          <li>CHECKPOINT.md</li>
+          <li>Current task entry from TASK-GRAPH.md</li>
+          <li>Relevant INTERFACES.md sections (only the module(s) the task touches)</li>
+          <li>COMPONENT_MAP.md (loaded once at build start)</li>
+          <li><code>.codeintel/FILE_MAP.md</code> (loaded once at build start on existing projects)</li>
+        </ul>
+
+        <h3>Loaded selectively by task type</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Task type</th><th>Extra files to load</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Routes / pages / navigation</td><td><code>.codeintel/ROUTES.md</code></td></tr>
+              <tr><td>API handlers / controllers</td><td><code>.codeintel/API_ENDPOINTS.md</code></td></tr>
+              <tr><td>Database / schema / migrations</td><td><code>.codeintel/DATABASE_SCHEMA.md</code></td></tr>
+              <tr><td>Components / UI</td><td><code>.codeintel/COMPONENT_INDEX.md</code></td></tr>
+              <tr><td>Tests</td><td><code>.codeintel/TEST_INDEX.md</code></td></tr>
+              <tr><td>Environment / secrets / config</td><td><code>.codeintel/ENV_VARS.md</code></td></tr>
+              <tr><td>Scaffold (Task 1)</td><td>Run <code>pnpm codeintel</code> after scaffold completes; load <code>FILE_MAP.md</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Never loaded during a task</h3>
+        <ul>
+          <li>Full TDD.md (unless specifically needed)</li>
+          <li>Full INTERFACES.md (only relevant sections)</li>
+          <li>Modules unrelated to the current task</li>
+          <li>Raw source directories when a codeintel map covers the same ground</li>
+          <li>Old conversation context (use CHECKPOINT.md summaries instead)</li>
+        </ul>
+
+        <!-- Codeintel maps -->
+        <h2>Repo Intelligence Maps (<code>.codeintel/</code>)</h2>
+        <p>The <code>.codeintel/</code> directory contains pre-generated structural summaries of the project. Agents read these maps instead of scanning raw source files — faster, cheaper on context budget, and consistent across all agents.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Map</th><th>Path</th><th>Contents</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>File Map</td><td><code>.codeintel/FILE_MAP.md</code></td><td>Project layout — every source file with its module and purpose</td></tr>
+              <tr><td>Web Routes</td><td><code>.codeintel/ROUTES.md</code></td><td>All declared routes with HTTP method and handler</td></tr>
+              <tr><td>API Endpoints</td><td><code>.codeintel/API_ENDPOINTS.md</code></td><td>All API endpoints with request/response shapes</td></tr>
+              <tr><td>Database Schema</td><td><code>.codeintel/DATABASE_SCHEMA.md</code></td><td>Current schema — tables, columns, indexes, relationships</td></tr>
+              <tr><td>Component Index</td><td><code>.codeintel/COMPONENT_INDEX.md</code></td><td>All UI components with props and story status</td></tr>
+              <tr><td>Test Index</td><td><code>.codeintel/TEST_INDEX.md</code></td><td>All test files grouped by type (unit, integration, e2e, visual, stories)</td></tr>
+              <tr><td>Env Vars</td><td><code>.codeintel/ENV_VARS.md</code></td><td>All required environment variables with documentation</td></tr>
+              <tr><td>Dependency Graph</td><td><code>.codeintel/DEPENDENCY_GRAPH.md</code></td><td>Module import graph — which modules depend on which</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Generating maps</h3>
+        <pre><code># Generate all codeintel maps for the current project
+pnpm codeintel
+
+# This runs scripts/codeintel.mjs which produces all .codeintel/ files</code></pre>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Situation</th><th>Action</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Existing project with source files</td><td>Run <code>pnpm codeintel</code> in Planner Activation Flow step 4</td></tr>
+              <tr><td>Greenfield project (no source yet)</td><td>Skip — Builder initializes <code>.codeintel/</code> after scaffold task</td></tr>
+              <tr><td>Maps older than the last git commit</td><td>Re-run <code>pnpm codeintel</code> to refresh</td></tr>
+              <tr><td><code>codeintel</code> script absent from package.json</td><td>Builder adds <code>scripts/codeintel.mjs</code> and registers it in Task 1</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Symbol index -->
+        <h2>Symbol Index</h2>
+        <p>At Planner activation, before producing any artifact, a codebase symbol index scan runs:</p>
+        <pre><code># Universal ctags (preferred)
+ctags --output-format=json -R . --fields=+n &gt; .ctags_raw.json
+
+# Language-specific fallbacks when ctags unavailable
+go doc ./...           # Go
+python -m ast ...      # Python
+grep -rn "^export\s" src/  # JS/TS</code></pre>
+
+        <p>Produces <code>artifacts/build/SYMBOL_INDEX.md</code>: a structured map of <code>file path → exported symbols → signatures</code>. Tasks in TASK-GRAPH are annotated with <code>reuse_existing: [SymbolName]</code> where applicable — the Builder is told what already exists and must reuse it.</p>
+
+        <!-- Semantic search -->
+        <h2>Semantic Codebase Search</h2>
+        <p>
+          For architecture-class tasks (<code>task_type: api | auth | data | infra</code>), the Builder
+          uses semantic search to avoid duplicating existing implementations.
+          The active backend is set during setup and recorded in <code>config/context.json</code> under
+          <code>active.semantic_search</code>. The Builder reads this field at activation to determine
+          which search path to use.
+        </p>
+
+        <h3>JSON index backend (<code>active.semantic_search: "json"</code>)</h3>
+        <p>Keyword-based search. No extra packages required.</p>
+        <pre><code># Build the index after scaffold task (first run)
+python scripts/semantic_search.py index \
+    --project-dir . \
+    --output artifacts/build/SEMANTIC_INDEX.json
+
+# Search before writing anything new
+python scripts/semantic_search.py search \
+    --query "user authentication JWT middleware" \
+    --index artifacts/build/SEMANTIC_INDEX.json \
+    --top 5
+
+# Update the index after every file write
+python scripts/semantic_search.py update \
+    --file path/to/changed/file \
+    --index artifacts/build/SEMANTIC_INDEX.json</code></pre>
+
+        <h3>Chroma local backend (<code>active.semantic_search: "chroma_local"</code>)</h3>
+        <p>
+          Meaning-based vector search using ChromaDB. Setup installs <code>chromadb</code> automatically.
+          On systems with an externally-managed Python (Debian, Ubuntu, etc.), it is installed into
+          <code>.venv</code> — the path is recorded in <code>active.venv</code> in
+          <code>config/context.json</code>. Use the venv's Python when invoking the script directly:
+        </p>
+        <pre><code># If active.venv is set, use its Python binary
+.venv/bin/python scripts/semantic_search.py index --project-dir . --backend chroma
+.venv/bin/python scripts/semantic_search.py search --query "JWT middleware" --backend chroma --top 5
+.venv/bin/python scripts/semantic_search.py update --file path/to/changed/file --backend chroma
+
+# If packages are in the system Python (active.venv is null)
+python3 scripts/semantic_search.py index --project-dir . --backend chroma</code></pre>
+
+        <div class="callout callout-info">
+          <span class="callout-icon">💡</span>
+          <div class="callout-content">
+            <div class="callout-title">Backend is resolved at setup time</div>
+            <p>
+              Agents read <code>active.semantic_search</code> from <code>config/context.json</code>
+              and select the correct invocation automatically — you do not need to pass <code>--backend</code>
+              manually during a pipeline run. The commands above are for direct use outside the pipeline
+              (e.g. debugging, manual index rebuilds).
+            </p>
+          </div>
+        </div>
+
+        <p>If matching chunks are returned from the search, the Builder reads them and reuses the existing implementation instead of writing a duplicate.</p>
+
+      </div>
+    </main>
+  </div>
+  <script src="nav.js"></script>
+</body>
+</html>

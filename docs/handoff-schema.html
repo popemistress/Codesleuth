@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HANDOFF.json Schema — CodeSleuth AI Docs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="header" id="site-header"></header>
+  <div class="main-layout">
+    <nav class="sidebar" id="site-sidebar"></nav>
+    <main class="content">
+      <div class="content-inner">
+
+        <div class="breadcrumb">
+          <a href="index.html">Docs</a>
+          <span class="breadcrumb-sep">›</span>
+          <span>Reference</span>
+          <span class="breadcrumb-sep">›</span>
+          <span class="breadcrumb-current">HANDOFF.json Schema</span>
+        </div>
+
+        <div class="page-tag">🔗 Reference</div>
+        <h1>HANDOFF.json Schema</h1>
+        <p class="lead">
+          <code>HANDOFF.json</code> is the single state file that carries context between pipeline stages.
+          Each agent reads the current version and writes the next — never writing a lower version number
+          than it found. The file lives at <code>artifacts/pipeline/HANDOFF.json</code>.
+        </p>
+
+        <div class="callout callout-info">
+          <span class="callout-icon">ℹ️</span>
+          <div class="callout-content">
+            <div class="callout-title">Progressive enrichment</div>
+            <p>Each version adds fields — it never removes or overwrites fields from prior versions. A v5 file contains all fields from v1 through v5.</p>
+          </div>
+        </div>
+
+        <h2>v1 — Discovery Output</h2>
+        <p>Written by Agent 1 (Discovery) after <span class="cmd">!compile</span>.</p>
+        <pre><code>{
+  "version": 1,
+  "project_name": "InvoiceFlow",
+  "spec_hash": "sha256:a1b2c3...",
+  "spec_path": "artifacts/discovery/feature-spec.md",
+  "platforms": ["web"],
+  "complexity_tier": "Standard",
+  "tech_stack": {
+    "web": "Next.js 15 + Prisma + NextAuth v5 + Stripe"
+  },
+  "open_questions": [],
+  "design_contract_path": "artifacts/discovery/design-contract.md",
+  "cia_completed": true
+}</code></pre>
+
+        <h2>v2 — Planning Output</h2>
+        <p>Written by Agent 2 (Planning) after planning completes.</p>
+        <pre><code>{
+  "version": 2,
+  // ...v1 fields preserved...
+  "task_count": 24,
+  "task_graph_path": "artifacts/build/TASK-GRAPH.md",
+  "tdd_path": "artifacts/build/TDD.md",
+  "schema_hash": "sha256:d4e5f6...",
+  "contracts_path": "artifacts/build/contracts/",
+  "file_ownership_map_path": "artifacts/build/FILE_OWNERSHIP_MAP.md",
+  "patterns_applied": ["PATTERN-001", "PATTERN-002", "PATTERN-003"],
+  "change_log_path": "artifacts/pipeline/CHANGE_LOG.md"
+}</code></pre>
+
+        <h2>v3 — Builder Output</h2>
+        <p>Written by Agent 3 (Builder) on SHIP declaration.</p>
+        <pre><code>{
+  "version": 3,
+  // ...v2 fields preserved...
+  "tasks_completed": 24,
+  "tasks_stale": 0,
+  "tasks_blocked": 0,
+  "patterns_used": ["PATTERN-001", "PATTERN-002", "PATTERN-003"],
+  "decisions_log_path": "artifacts/pipeline/DECISIONS.md",
+  "checkpoint_path": "artifacts/pipeline/CHECKPOINT.md",
+  "perf_budget_path": ".agent/PERF_BUDGET.json",
+  "cross_task_regressions_detected": 0
+}</code></pre>
+
+        <h2>v4 — Critic Output</h2>
+        <p>Written by Agent 4 (Critic) after completing the full product review.</p>
+        <pre><code>{
+  "version": 4,
+  // ...v3 fields preserved...
+  "scorecard_mean": 3.7,
+  "scorecard_verdict": "CONDITIONAL",
+  "dimensions_at_risk": ["D9"],
+  "auto_hold_triggers": [],
+  "critical_flaws": [],
+  "top_priority_fix": "D9: Empty states on 3 screens show raw no-data messages with no CTA or guidance",
+  "overall_verdict": "CONDITIONAL",
+  "criticism_path": "artifacts/critique/CRITICISM.md",
+  "next_action": "Add guided empty states with CTA to Bookings, Invoices, and Clients screens"
+}</code></pre>
+
+        <h2>v5 — Security Output</h2>
+        <p>Written by Agent 5 (Security) after completing the domain review.</p>
+        <pre><code>{
+  "version": 5,
+  // ...v4 fields preserved...
+  "security_tier": "Standard",
+  "domains_reviewed": 12,
+  "critical_findings": 0,
+  "high_findings": 1,
+  "medium_findings": 3,
+  "low_findings": 5,
+  "blockers": [],
+  "accepted_risks": [
+    {
+      "id": "SEC-H01",
+      "finding": "Rate limiting not implemented on /api/auth/login",
+      "rationale": "Accepted for MVP; tracked in TASK-GRAPH for v1.1",
+      "accepted_by": "human"
+    }
+  ],
+  "security_report_path": "artifacts/security/SECURITY_REPORT.md"
+}</code></pre>
+
+        <h2>v6 — Verifier Output</h2>
+        <p>Written by Agent 6 (Verifier) after all verification phases complete.</p>
+        <pre><code>{
+  "version": 6,
+  // ...v5 fields preserved...
+  "ship_verdict": "SHIP",
+  "spec_compliance_pct": 100,
+  "tc_pass_rate": 1.0,
+  "contract_verdict": "CONFORMANT",
+  "perf_verdict": "PERF_PASS",
+  "perf_report_path": "artifacts/verification/PERF_REPORT.md",
+  "visual_baseline_path": "artifacts/verification/screenshots/baselines/",
+  "design_contract_score": 94,
+  "accessibility_violations": 0,
+  "verification_report_path": "artifacts/verification/VERIFICATION_REPORT.md",
+  "conditional_notes": []
+}</code></pre>
+
+        <h2>Field Reference</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Field</th><th>Type</th><th>Added in</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>version</code></td><td>number</td><td>v1</td><td>Schema version (1–6). Always increments.</td></tr>
+              <tr><td><code>spec_hash</code></td><td>string</td><td>v1</td><td>SHA-256 of feature-spec.md at time of compile. Used to detect spec drift.</td></tr>
+              <tr><td><code>complexity_tier</code></td><td>string</td><td>v1</td><td>"Simple" | "Standard" | "Complex"</td></tr>
+              <tr><td><code>patterns_applied</code></td><td>string[]</td><td>v2</td><td>PATTERN-NNN IDs applied during planning</td></tr>
+              <tr><td><code>tasks_stale</code></td><td>number</td><td>v3</td><td>Count of tasks marked STALE by spec changes</td></tr>
+              <tr><td><code>scorecard_mean</code></td><td>number</td><td>v4</td><td>Mean of D1–D12 scores (1.0–5.0)</td></tr>
+              <tr><td><code>scorecard_verdict</code></td><td>string</td><td>v4</td><td>"SHIP_READY" | "CONDITIONAL" | "HOLD"</td></tr>
+              <tr><td><code>accepted_risks</code></td><td>object[]</td><td>v5</td><td>HIGH/MEDIUM findings formally accepted with rationale</td></tr>
+              <tr><td><code>contract_verdict</code></td><td>string</td><td>v6</td><td>"CONFORMANT" | "VIOLATIONS" — Phase 6C result</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="doc-footer">
+          <a class="doc-footer-link" href="global-contract.html">
+            <span class="doc-footer-dir">← Previous</span>
+            <span class="doc-footer-title">Global Contract</span>
+          </a>
+          <a class="doc-footer-link next" href="platform-gates.html">
+            <span class="doc-footer-dir">Next →</span>
+            <span class="doc-footer-title">Platform Gates</span>
+          </a>
+        </div>
+
+      </div>
+    </main>
+  </div>
+  <script src="nav.js"></script>
+</body>
+</html>

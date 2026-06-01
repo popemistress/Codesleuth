@@ -4,7 +4,14 @@ const getRedisUrl = () => {
     if (process.env.REDIS_URL) {
         return process.env.REDIS_URL;
     }
-    throw new Error("REDIS_URL is not defined");
+    const host = process.env.REDIS_HOST;
+    if (host) {
+        const port = process.env.REDIS_PORT ?? "6379";
+        const password = process.env.REDIS_PASSWORD;
+        const auth = password ? `:${encodeURIComponent(password)}@` : "";
+        return `redis://${auth}${host}:${port}`;
+    }
+    throw new Error("REDIS_URL or REDIS_HOST is not defined");
 };
 
 const globalForRedis = globalThis as unknown as {

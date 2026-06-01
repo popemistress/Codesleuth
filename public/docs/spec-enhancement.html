@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spec Enhancement Loop — CodeSleuth AI Docs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="header" id="site-header"></header>
+  <div class="main-layout">
+    <nav class="sidebar" id="site-sidebar"></nav>
+    <main class="content">
+      <div class="content-inner">
+
+        <div class="breadcrumb">
+          <a href="index.html">Docs</a>
+          <span class="breadcrumb-sep">›</span>
+          <a href="discovery.html">Discovery</a>
+          <span class="breadcrumb-sep">›</span>
+          <span class="breadcrumb-current">Spec Enhancement Loop</span>
+        </div>
+
+        <div class="page-tag">✨ Discovery — Agent 1</div>
+        <h1>Spec Enhancement Loop</h1>
+        <p class="lead">
+          After the Discovery Agent compiles your initial specification, it asks whether you'd
+          like suggestions to improve it. This loop surfaces premium, high-leverage features
+          you may not have thought to request — the kind that separate top-1% products from
+          ordinary ones — and integrates whichever ones you choose directly into your spec
+          before planning begins.
+        </p>
+
+        <!-- The question -->
+        <h2>The Question</h2>
+        <p>
+          After <code>!spec</code> compiles the spec and Concept Validation passes,
+          the Discovery Agent automatically presents this prompt before unlocking <code>!plan</code>:
+        </p>
+
+        <div class="callout callout-success">
+          <span class="callout-icon">✨</span>
+          <div class="callout-content">
+            <div class="callout-title">Would you like suggestions on how to improve your project specification?</div>
+            <p>
+              Answer <strong>yes</strong> to receive a curated table of premium feature recommendations.<br>
+              Answer <strong>no</strong> (or skip) to proceed directly to <code>!plan</code>.
+            </p>
+          </div>
+        </div>
+
+        <!-- When it runs -->
+        <h2>When It Runs</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Trigger</th><th>When</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Automatic</strong></td>
+                <td>Immediately after <code>!spec</code> compiles successfully and Concept Validation returns <code>PROCEED</code> — before the Discovery Complete banner is shown</td>
+              </tr>
+              <tr>
+                <td><strong><code>!enhance</code></strong></td>
+                <td>On demand at any point after the spec exists — including between <code>!spec</code> and <code>!plan</code>, or after adding features in a previous round</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- How it works -->
+        <h2>How It Works</h2>
+
+        <ol class="steps">
+          <li class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <div class="step-title">Internal analysis</div>
+              <div class="step-desc">
+                The agent analyzes your compiled specification against metrics targeting
+                top-1% product quality — evaluating functionality gaps, UX opportunities,
+                automation potential, integrations, scalability, monetization, and competitive
+                positioning.
+              </div>
+            </div>
+          </li>
+          <li class="step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <div class="step-title">Recommendation table</div>
+              <div class="step-desc">10–20 recommendations are presented in a numbered table. Each row shows the feature name, category, a one-sentence value statement, implementation complexity, and recommended priority.</div>
+            </div>
+          </li>
+          <li class="step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <div class="step-title">You select by number</div>
+              <div class="step-desc">Enter the numbers of features you want (e.g. <code>1, 3, 5</code>), or <code>all</code>, or <code>none</code> to skip this round.</div>
+            </div>
+          </li>
+          <li class="step">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <div class="step-title">Spec is updated</div>
+              <div class="step-desc">Selected features are woven into every relevant section of <code>feature-spec.md</code> — not appended as a list at the bottom. Each feature lands in the right sections: scope, user flows, data, API logic, security, monetization, observability, and platform requirements as applicable.</div>
+            </div>
+          </li>
+          <li class="step">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <div class="step-title">Loop repeats</div>
+              <div class="step-desc">The question is asked again. Continue adding features in rounds, or decline to unlock <code>!plan</code>. Each round surfaces only new recommendations — features already offered are never re-suggested.</div>
+            </div>
+          </li>
+        </ol>
+
+        <!-- Recommendation table format -->
+        <h2>Recommendation Table Format</h2>
+        <pre><code>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✨ Spec Enhancement Suggestions — MyApp
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ #  Feature                          Category          Value Added                             Complexity   Priority
+ ─  ──────────────────────────────   ───────────────   ─────────────────────────────────────   ──────────   ────────
+ 1  AI-powered onboarding wizard     AI / Intelligence  Learns user goals; personalizes flow    Medium       🔴 High
+ 2  In-app referral engine           Monetization       Viral growth loop with reward tiers     Low          🔴 High
+ 3  Real-time collaboration cursors  UX / Onboarding    Multi-user live editing (Figma-style)   High         🟡 Medium
+ 4  Advanced usage analytics         Analytics          Heatmaps, funnel drop-off, cohort view  Medium       🟡 Medium
+ 5  Offline-first sync engine        Performance        Full functionality without network       High         🟡 Medium
+ 6  Accessibility audit dashboard    Accessibility      WCAG compliance score + auto-fixes       Low          🟢 Low
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Enter the numbers of features to add (e.g. 1, 3, 5) — or "all" — or "none" to skip.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</code></pre>
+
+        <h3>Column definitions</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Column</th><th>Values</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>#</strong></td>
+                <td>Selection number — type it to include the feature</td>
+              </tr>
+              <tr>
+                <td><strong>Feature</strong></td>
+                <td>Short descriptive name of the capability</td>
+              </tr>
+              <tr>
+                <td><strong>Category</strong></td>
+                <td>
+                  <code>UX / Onboarding</code> · <code>AI / Intelligence</code> · <code>Automation</code> ·
+                  <code>Integration</code> · <code>Monetization</code> · <code>Security</code> ·
+                  <code>Performance</code> · <code>Analytics</code> · <code>Social / Community</code> ·
+                  <code>Accessibility</code> · <code>Personalization</code> · <code>Mobile Native</code> ·
+                  <code>Compliance</code> · <code>Scalability</code> · <code>Retention</code> ·
+                  <code>Discoverability</code>
+                </td>
+              </tr>
+              <tr>
+                <td><strong>Value Added</strong></td>
+                <td>One sentence explaining the concrete improvement to the product</td>
+              </tr>
+              <tr>
+                <td><strong>Complexity</strong></td>
+                <td><code>Low</code> · <code>Medium</code> · <code>High</code></td>
+              </tr>
+              <tr>
+                <td><strong>Priority</strong></td>
+                <td>🔴 <code>High</code> · 🟡 <code>Medium</code> · 🟢 <code>Low</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Spec update behaviour -->
+        <h2>How Selected Features Are Added to the Spec</h2>
+        <p>
+          Features are integrated into <code>feature-spec.md</code> properly — woven into every section they
+          affect, not listed at the end. After selection the agent confirms which sections were updated:
+        </p>
+        <pre><code>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ Spec updated with 3 feature(s):
+   • AI-powered onboarding wizard  → added to Sections 3, 5, 9
+   • In-app referral engine        → added to Sections 3, 9, 14
+   • Advanced usage analytics      → added to Sections 3, 10, 17
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</code></pre>
+
+        <h3>Section routing rules</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Feature characteristic</th><th>Spec sections updated</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Any feature</td><td>§3 Core Features · §4 User Stories · §20 Definition of Done</td></tr>
+              <tr><td>Changes the user journey</td><td>§5 Core User Flow</td></tr>
+              <tr><td>Creates new data</td><td>§6 Data &amp; State Requirements</td></tr>
+              <tr><td>Requires a new API endpoint</td><td>§10 API / Business Logic</td></tr>
+              <tr><td>Adds UI surface</td><td>§9 UX Requirements</td></tr>
+              <tr><td>Affects permissions or roles</td><td>§12 Roles &amp; Permissions</td></tr>
+              <tr><td>Affects revenue model</td><td>§14 Monetization</td></tr>
+              <tr><td>Has security implications</td><td>§11 Authentication &amp; Security</td></tr>
+              <tr><td>Requires observability</td><td>§17 Observability &amp; Release Strategy</td></tr>
+              <tr><td>Platform-specific</td><td>§7 Platform Scope Matrix · §8 Native Capabilities</td></tr>
+              <tr><td>Has compliance implications</td><td>§11 Authentication &amp; Security</td></tr>
+              <tr><td>Scoped to V2</td><td>§18 Scope Boundaries</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Loop flow -->
+        <h2>Full Loop Flow</h2>
+        <pre><code>!spec compiles feature-spec.md
+  └─ Concept Validation: PROCEED
+       └─ "Would you like suggestions on how to improve your project specification?" (yes / no)
+            ├─ yes → internal analysis → recommendation table (10–20 items)
+            │         └─ user selects numbers / "all" / "none"
+            │              ├─ selected → features woven into spec → confirmation → ask again
+            │              └─ none     → ask again
+            └─ no  → Discovery Complete banner → wait for !plan</code></pre>
+
+        <div class="callout callout-info">
+          <span class="callout-icon">💡</span>
+          <div class="callout-content">
+            <div class="callout-title">The loop auto-terminates</div>
+            <p>
+              If the agent has surfaced all meaningful recommendations and has nothing new to offer,
+              it outputs <em>"No additional enhancement suggestions — the specification is comprehensive."</em>
+              and exits the loop automatically, unlocking <code>!plan</code>.
+            </p>
+          </div>
+        </div>
+
+        <!-- !enhance on demand -->
+        <h2><code>!enhance</code> — On-Demand Rounds</h2>
+        <p>
+          You can trigger another enhancement round at any time after the spec exists by typing
+          <code>!enhance</code> — even after a previous round ended, or after you've already
+          reached the <code>!plan</code> prompt. The agent tracks which recommendations
+          have already been offered and surfaces only new ones.
+        </p>
+        <pre><code>!enhance</code></pre>
+
+        <div class="callout callout-warning">
+          <span class="callout-icon">⚠️</span>
+          <div class="callout-content">
+            <div class="callout-title">!plan is only available after the loop exits</div>
+            <p>
+              The Discovery Complete banner and <code>!plan</code> gate are shown only after you decline
+              an enhancement round (or the agent exhausts its recommendations). You cannot skip
+              the initial question — but you can immediately answer <strong>no</strong> to proceed without
+              any suggestions.
+            </p>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+  <script src="nav.js"></script>
+</body>
+</html>

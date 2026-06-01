@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Platform Gates — CodeSleuth AI Docs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="header" id="site-header"></header>
+  <div class="main-layout">
+    <nav class="sidebar" id="site-sidebar"></nav>
+    <main class="content">
+      <div class="content-inner">
+
+        <div class="breadcrumb">
+          <a href="index.html">Docs</a>
+          <span class="breadcrumb-sep">›</span>
+          <span>Reference</span>
+          <span class="breadcrumb-sep">›</span>
+          <span class="breadcrumb-current">Platform Gates</span>
+        </div>
+
+        <div class="page-tag">🚦 Reference</div>
+        <h1>Platform Gates</h1>
+        <p class="lead">
+          Every platform has a specific set of required libraries, quality gate commands, and
+          Verifier checks. The Planner reads the active template's <code>.agent/</code> config
+          to know which gates apply. The Builder must pass all platform gates before marking any
+          task DONE.
+        </p>
+
+        <h2>Next.js / Web Platform</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Category</th><th>Requirement</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Framework</td><td>Next.js 15 (App Router)</td></tr>
+              <tr><td>Runtime</td><td>Node.js 22 LTS</td></tr>
+              <tr><td>Language</td><td>TypeScript strict mode</td></tr>
+              <tr><td>Styling</td><td>Tailwind CSS v4 (or MUI v6 for admin templates)</td></tr>
+              <tr><td>Testing</td><td>Vitest (unit/integration) + Playwright (E2E + visual)</td></tr>
+              <tr><td>Gate command</td><td><code>pnpm agent:check</code> (lint + types + test + build)</td></tr>
+              <tr><td>E2E gate</td><td><code>pnpm agent:e2e</code></td></tr>
+              <tr><td>Visual gate</td><td><code>pnpm agent:visual</code></td></tr>
+              <tr><td>Perf gate</td><td><code>pnpm test:perf</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Required Next.js Libraries (by category)</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Category</th><th>Libraries</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Auth</td><td>next-auth v5 (beta) with Prisma adapter</td></tr>
+              <tr><td>Database ORM</td><td>Prisma 6 + PostgreSQL (production) / SQLite (dev)</td></tr>
+              <tr><td>Validation</td><td>Zod ^3.23 (runtime + schema)</td></tr>
+              <tr><td>UI Components</td><td>shadcn/ui (Radix primitives + Tailwind)</td></tr>
+              <tr><td>State</td><td>Zustand ^5 (client) + React Query (server state)</td></tr>
+              <tr><td>Email</td><td>Resend + React Email</td></tr>
+              <tr><td>Payments</td><td>Stripe v16 (webhooks required)</td></tr>
+              <tr><td>Animation</td><td>Framer Motion ^11</td></tr>
+              <tr><td>AI</td><td>Anthropic SDK ^0.26 / Vercel AI SDK ^3</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Tauri (Linux Desktop)</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Category</th><th>Requirement</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Framework</td><td>Tauri v2</td></tr>
+              <tr><td>Frontend</td><td>React + Vite + TypeScript</td></tr>
+              <tr><td>Styling</td><td>Tailwind CSS v4</td></tr>
+              <tr><td>Backend</td><td>Rust (2021 edition)</td></tr>
+              <tr><td>Database</td><td>better-sqlite3 in WAL mode (PATTERN-004)</td></tr>
+              <tr><td>Rust test gate</td><td><code>cargo test</code></td></tr>
+              <tr><td>Frontend test gate</td><td><code>pnpm agent:check</code></td></tr>
+              <tr><td>Build gate</td><td><code>cargo tauri build</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Python Desktop (ML/Audio)</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Category</th><th>Requirement</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>GUI</td><td>PySide6 ^6.7</td></tr>
+              <tr><td>ML</td><td>PyTorch ^2.3 (CUDA/MPS/CPU auto-detection)</td></tr>
+              <tr><td>Package manager</td><td>Poetry (pyproject.toml)</td></tr>
+              <tr><td>Config</td><td>pydantic-settings (env-driven)</td></tr>
+              <tr><td>Test gate</td><td><code>pytest</code></td></tr>
+              <tr><td>Lint gate</td><td><code>ruff check .</code></td></tr>
+              <tr><td>Type gate</td><td><code>mypy .</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Rust GTK4 (Linux Native)</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Category</th><th>Requirement</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>GUI</td><td>gtk4 ^0.9 + libadwaita ^0.7</td></tr>
+              <tr><td>Design</td><td>Adwaita HIG (human interface guidelines)</td></tr>
+              <tr><td>Async</td><td>Tokio full runtime</td></tr>
+              <tr><td>Config</td><td>serde_json + directories ^5.0</td></tr>
+              <tr><td>Error handling</td><td>thiserror (structured errors)</td></tr>
+              <tr><td>Test gate</td><td><code>cargo test</code></td></tr>
+              <tr><td>Lint gate</td><td><code>cargo clippy -- -D warnings</code></td></tr>
+              <tr><td>Build gate</td><td><code>cargo build --release</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Python CLI</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Category</th><th>Requirement</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>CLI framework</td><td>Typer[all] ^0.12</td></tr>
+              <tr><td>Output</td><td>Rich ^13.7</td></tr>
+              <tr><td>HTTP</td><td>httpx</td></tr>
+              <tr><td>Secrets</td><td>keyring (OS keychain integration)</td></tr>
+              <tr><td>Config</td><td>platformdirs (user_config_dir)</td></tr>
+              <tr><td>Test gate</td><td><code>pytest</code></td></tr>
+              <tr><td>Lint gate</td><td><code>ruff check .</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Node.js CLI (AI-Powered)</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Category</th><th>Requirement</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>CLI framework</td><td>Commander ^12</td></tr>
+              <tr><td>TUI</td><td>Ink ^5 (React-based terminal UI)</td></tr>
+              <tr><td>AI</td><td>Anthropic SDK ^0.26</td></tr>
+              <tr><td>Secrets</td><td>Keytar (OS keychain)</td></tr>
+              <tr><td>Test gate</td><td><code>pnpm test</code> (Vitest)</td></tr>
+              <tr><td>Build gate</td><td><code>pnpm build</code> (tsup)</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Verifier Platform Checks</h2>
+        <p>In addition to the standard QA phases, the Verifier performs platform-specific checks:</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Platform</th><th>Verifier checks</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Next.js web</td><td>Bundle size, Core Web Vitals, CSP headers, HTTPS enforcement</td></tr>
+              <tr><td>Tauri desktop</td><td>App signing, permissions manifest, auto-update config</td></tr>
+              <tr><td>Python desktop</td><td>Packaging with PyInstaller/cx_Freeze, dependency isolation</td></tr>
+              <tr><td>Rust GTK4</td><td>Release build size, AppImage packaging, .desktop entry</td></tr>
+              <tr><td>CLI (any)</td><td>Binary size, help text completeness, exit code correctness</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="doc-footer">
+          <a class="doc-footer-link" href="handoff-schema.html">
+            <span class="doc-footer-dir">← Previous</span>
+            <span class="doc-footer-title">HANDOFF.json Schema</span>
+          </a>
+          <a class="doc-footer-link next" href="design-contract.html">
+            <span class="doc-footer-dir">Next →</span>
+            <span class="doc-footer-title">Design Contract</span>
+          </a>
+        </div>
+
+      </div>
+    </main>
+  </div>
+  <script src="nav.js"></script>
+</body>
+</html>

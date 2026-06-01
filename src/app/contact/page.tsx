@@ -335,8 +335,8 @@ export default function ContactPage() {
                                         a: "Multi-agent orchestration is a development methodology where specialized AI agents work together, each with distinct responsibilities and absolute authority in their domain.",
                                     },
                                     {
-                                        q: "How does the Three Strikes Protocol work?",
-                                        a: "When an agent encounters repeated errors (80%+ fingerprint match), it escalates after three attempts to prevent infinite repair loops.",
+                                        q: "How does the 5-Stage Repair System work?",
+                                        a: "Every build failure is classified by mode — compiler error, test assertion, dependency missing, interface mismatch, or timeout — and the prescribed recovery strategy is applied immediately. After 5 failed attempts the pipeline halts with a full BLOCKED report.",
                                     },
                                     {
                                         q: "What platforms are supported?",

@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Command Reference — CodeSleuth AI Docs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="header" id="site-header"></header>
+  <div class="main-layout">
+    <nav class="sidebar" id="site-sidebar"></nav>
+    <main class="content">
+      <div class="content-inner">
+
+        <div class="breadcrumb">
+          <a href="index.html">Docs</a>
+          <span class="breadcrumb-sep">›</span>
+          <span>Reference</span>
+          <span class="breadcrumb-sep">›</span>
+          <span class="breadcrumb-current">Command Reference</span>
+        </div>
+
+        <div class="page-tag">⌨️ Reference</div>
+        <h1>Command Reference</h1>
+        <p class="lead">
+          Every command available across all pipeline stages. Commands are issued as plain text
+          in the AI conversation. Gate commands advance the pipeline; utility commands query or
+          modify state without advancing.
+        </p>
+
+        <h2>Agent Activation</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Phrase</th><th>Effect</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><span class="cmd">Start agent 0</span></td><td>Activate Orchestrator — read <code>0__Orchestrator_Agent.md</code></td></tr>
+              <tr><td><span class="cmd">Start agent 1</span></td><td>Activate Discovery — read <code>1__Product_Discovery_Agent.md</code></td></tr>
+              <tr><td><span class="cmd">Start agent 2</span></td><td>Activate Planner — read <code>2__Technical_Planning_Agent.md</code></td></tr>
+              <tr><td><span class="cmd">Start agent 3</span></td><td>Activate Builder — read <code>3__Application_Builder_Agent.md</code></td></tr>
+              <tr><td><span class="cmd">Start agent 4</span></td><td>Activate Critic — read <code>4__Codebase_Product_Critic_Agent.md</code></td></tr>
+              <tr><td><span class="cmd">Start agent 5</span></td><td>Activate Security — read <code>5__Application_Security_Agent.md</code></td></tr>
+              <tr><td><span class="cmd">Start agent 6</span></td><td>Activate Verifier — read <code>6__Codebase_Verifier_Agent.md</code></td></tr>
+              <tr><td><span class="cmd">Start agent 7</span></td><td>Activate Maintenance Agent — read <code>7__Maintenance_Agent.md</code> (registered projects only)</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Pipeline Gate Commands</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Command</th><th>Transition</th><th>Prerequisites</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="cmd">!plan</span></td>
+                <td>Discovery → Planning Phase A</td>
+                <td><code>feature-spec.md</code> must exist; <code>!compile</code> must have been issued</td>
+              </tr>
+              <tr>
+                <td><span class="cmd">!build</span></td>
+                <td>Planning → Builder</td>
+                <td><code>TASK-GRAPH.md</code>, contracts/, and <code>FILE_OWNERSHIP_MAP.md</code> must exist</td>
+              </tr>
+              <tr>
+                <td><span class="cmd">!critic</span></td>
+                <td>Builder → Critic</td>
+                <td>Builder must have issued SHIP declaration or been paused by human</td>
+              </tr>
+              <tr>
+                <td><span class="cmd">!security</span></td>
+                <td>Critic → Security</td>
+                <td>Critic must have issued SHIP_READY, CONDITIONAL, or HOLD verdict; <code>HANDOFF.json v4</code> must exist</td>
+              </tr>
+              <tr>
+                <td><span class="cmd">!verify</span></td>
+                <td>Security → Verifier</td>
+                <td><code>SECURITY_REPORT.md</code> must exist; no unresolved CRITICAL findings; <code>HANDOFF.json v5</code> must exist</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Migration Sub-Commands</h3>
+        <p>These commands are only valid during an active migration risk report from <code>migration_safety.py</code>.</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Command</th><th>Behavior</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="cmd">!migration-approve</span></td>
+                <td>Confirm the DATA LOSS RISK report and proceed with the schema migration. Only valid when <code>migration_safety.py check</code> has returned a HIGH or DATA-LOSS risk rating and the pipeline is waiting for human confirmation.</td>
+              </tr>
+              <tr>
+                <td><span class="cmd">!migration-cancel</span></td>
+                <td>Discard the risky schema change and resume the pipeline without it. The migration SQL is discarded and the schema change task is marked BLOCKED with reason "migration cancelled by human".</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Spec Change Commands</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Command</th><th>Behavior</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="cmd">!change [description]</span></td>
+                <td>Initiate a spec change. Orchestrator produces a Blast Radius Report listing affected tasks, files, contracts, and estimated scope (Small/Medium/Large). No changes are made until approved.</td>
+              </tr>
+              <tr>
+                <td><span class="cmd">!change-approve</span></td>
+                <td>Approve the pending spec change. Affected tasks are marked STALE; <code>CHANGE_LOG.md</code> is updated; Builder resumes with STALE task re-derivation queued.</td>
+              </tr>
+              <tr>
+                <td><span class="cmd">!change-cancel</span></td>
+                <td>Discard the pending spec change. Pipeline resumes in its prior state; no tasks are modified.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Pattern Library Commands</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Command</th><th>Behavior</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="cmd">!pattern-add</span></td>
+                <td>Capture the most recently completed task's implementation as a <code>PATTERN-NNN</code> entry. Prompts for domain, stack, and reuse signal before writing to <code>PATTERN_LIBRARY.md</code> and <code>PATTERN_INDEX.md</code>.</td>
+              </tr>
+              <tr>
+                <td><span class="cmd">!pattern-list</span></td>
+                <td>Display all patterns in <code>PATTERN_LIBRARY.md</code> with domain, stack, and reuse signal keywords.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Living Documentation Commands</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Command</th><th>Output</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><span class="cmd">!docs</span></td><td><code>artifacts/docs/OVERVIEW.md</code> — project summary, tech stack, features, deployment notes</td></tr>
+              <tr><td><span class="cmd">!docs changelog</span></td><td><code>artifacts/docs/CHANGELOG.md</code> — human-readable change history from CHANGE_LOG.md and DECISIONS.md</td></tr>
+              <tr><td><span class="cmd">!docs api</span></td><td><code>artifacts/docs/API.md</code> — endpoint reference derived from openapi.yaml</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Session Management Commands</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Command</th><th>Behavior</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><span class="cmd">!help</span></td><td>Show available commands for the current pipeline stage</td></tr>
+              <tr><td><span class="cmd">!status</span></td><td>Display current pipeline stage, active agent, and task summary</td></tr>
+              <tr><td><span class="cmd">!state</span></td><td>Full pipeline state: HANDOFF version, task counts, change log, patterns applied</td></tr>
+              <tr><td><span class="cmd">!pipeline</span></td><td>Visual pipeline diagram with current stage highlighted and gate commands shown</td></tr>
+              <tr><td><span class="cmd">!budget</span></td><td>Token budget usage for the current stage</td></tr>
+              <tr><td><span class="cmd">!pause</span></td><td>Pause the current agent and save state to CHECKPOINT.md</td></tr>
+              <tr><td><span class="cmd">!reset</span></td><td>Reset pipeline to initial state. Requires typed confirmation: "yes, reset pipeline"</td></tr>
+              <tr><td><span class="cmd">!fork [name]</span></td><td>Create a named pipeline branch for parallel exploration (e.g., comparing two architectures)</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Fork &amp; Replay Commands</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Command</th><th>Behavior</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="cmd">!fork [description]</span></td>
+                <td>Fork the pipeline into two parallel branches. Branch A continues the current plan. Branch B uses the alternative described. Spawns two parallel Agent calls. Invokes <code>session_fork.py create</code>.</td>
+              </tr>
+              <tr>
+                <td><span class="cmd">!merge fork-a</span></td>
+                <td>Adopt fork-a as the winner. Copies fork-a to the project directory and removes both fork directories. Invokes <code>session_fork.py merge --branch fork-a</code>.</td>
+              </tr>
+              <tr>
+                <td><span class="cmd">!merge fork-b</span></td>
+                <td>Adopt fork-b as the winner. Copies fork-b to the project directory and removes both fork directories. Invokes <code>session_fork.py merge --branch fork-b</code>.</td>
+              </tr>
+              <tr>
+                <td><span class="cmd">!replay TASK-NNN</span></td>
+                <td>Restore the codebase to the git checkpoint created after TASK-NNN. Marks all later tasks PENDING. Requires <code>commit_by_task.py</code> to have run, so each task has a corresponding git commit. Invokes <code>pipeline_replay.py --task TASK-NNN</code>.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Pipeline Intelligence Commands</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Command</th><th>Behavior</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="cmd">!pipeline-health</span></td>
+                <td>Show <code>PROP-NNN</code> improvement proposals ranked by impact score. Runs <code>pipeline_improve.py --health</code>. Proposals are generated by post-run telemetry analysis.</td>
+              </tr>
+              <tr>
+                <td><span class="cmd">!pipeline-promote PROP-NNN</span></td>
+                <td>Apply a specific improvement proposal to the agents directory. Runs <code>pipeline_improve.py --promote PROP-NNN</code>. Human reviews the diff before promotion is confirmed.</td>
+              </tr>
+              <tr>
+                <td><span class="cmd">!budget</span></td>
+                <td>Show session token usage, context window percentage, estimated cost, and per-agent breakdown. Runs <code>token_tracker.py budget</code>. Reads pricing from <code>config/pricing.json</code>.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Maintenance Mode Commands</h2>
+        <p>
+          Available when Agent 7 (Maintenance) is active — i.e., when a registered project
+          is resumed at stage <code>built</code>, <code>critiqued</code>, <code>secured</code>,
+          <code>shipped</code>, or <code>maintenance</code>.
+        </p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Command</th><th>Behavior</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="cmd">!m-build</span></td>
+                <td>Human gate: advance from Plan → Build within the current maintenance change cycle. Equivalent to <code>!build</code> in the main pipeline but scoped to the mini-plan (1–5 tasks).</td>
+              </tr>
+              <tr>
+                <td><span class="cmd">!m-status</span></td>
+                <td>Show the current change cycle state: cycle ID, scope summary, open tasks, last commit, and registration stage.</td>
+              </tr>
+              <tr>
+                <td><span class="cmd">!m-skip</span></td>
+                <td>Discard the current change cycle and return to the ready state without committing anything.</td>
+              </tr>
+              <tr>
+                <td><span class="cmd">!m-history</span></td>
+                <td>Show all <code>MAINT-NNN</code> change cycles applied to this project, with type, surface, and commit reference.</td>
+              </tr>
+              <tr>
+                <td><span class="cmd">!observe</span></td>
+                <td>Enter read-only mode — Agent 7 loads project context but refuses all writes and plan execution. Type <code>!observe off</code> to return to normal mode.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout callout-info">
+          <span class="callout-icon">💡</span>
+          <div class="callout-content">
+            <div class="callout-title">Standard commands work inside a maintenance cycle</div>
+            <p>
+              <code>!retry</code>, <code>!skip</code>, <code>!change</code>, <code>!error-check</code>,
+              <code>!pattern-add</code>, <code>!telemetry</code>, and <code>!docs</code> are all
+              available during an active <code>MAINT-NNN</code> cycle, behaving the same as in
+              the main pipeline.
+            </p>
+          </div>
+        </div>
+
+        <h2>Discovery-Stage Commands</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Command</th><th>Behavior</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><span class="cmd">!braindump</span></td><td>Dump all known project details at once; Discovery processes and identifies gaps</td></tr>
+              <tr><td><span class="cmd">!spec</span></td><td>Preview the current spec draft without finalizing</td></tr>
+              <tr><td><span class="cmd">!compile</span></td><td>Finalize the spec; write <code>feature-spec.md</code> and <code>HANDOFF.json v1</code></td></tr>
+              <tr><td><span class="cmd">!skip [phase]</span></td><td>Skip a specific discovery phase</td></tr>
+              <tr><td><span class="cmd">!expand [topic]</span></td><td>Drill deeper into a topic with follow-up questions</td></tr>
+              <tr><td><span class="cmd">!cia</span></td><td>Run Competitive Intelligence Analysis during Phase 1</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Security-Stage Commands</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Command</th><th>Behavior</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><span class="cmd">!security</span></td><td>Activate Security Agent; begin tiered 20-domain review</td></tr>
+              <tr><td><span class="cmd">!security domain [N]</span></td><td>Run a specific domain review only (for re-review after fixes)</td></tr>
+              <tr><td><span class="cmd">!security accept [ID]</span></td><td>Formally accept a HIGH/MEDIUM finding with documented rationale</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Agent Gate Commands — All Platforms</h2>
+        <p>These commands run inside the project directory, not the agents directory.</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Command</th><th>What it runs</th><th>Stack</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>pnpm agent:check</code></td><td>lint + typecheck + test + build</td><td>Next.js / Node.js</td></tr>
+              <tr><td><code>pnpm agent:test</code></td><td>Unit + integration tests only</td><td>Next.js / Node.js</td></tr>
+              <tr><td><code>pnpm agent:e2e</code></td><td>Playwright E2E suite</td><td>Next.js / Node.js</td></tr>
+              <tr><td><code>pnpm agent:visual</code></td><td>Playwright visual regression</td><td>Next.js / Node.js</td></tr>
+              <tr><td><code>pnpm agent:doctor</code></td><td>Environment health checks</td><td>Next.js / Node.js</td></tr>
+              <tr><td><code>pnpm test:perf</code></td><td>Performance budget gate</td><td>Next.js / Node.js</td></tr>
+              <tr><td><code>cargo test</code></td><td>Rust unit + integration tests</td><td>Rust / Tauri</td></tr>
+              <tr><td><code>cargo clippy</code></td><td>Rust lint</td><td>Rust / Tauri</td></tr>
+              <tr><td><code>pytest</code></td><td>Python tests</td><td>Python</td></tr>
+              <tr><td><code>ruff check .</code></td><td>Python lint</td><td>Python</td></tr>
+              <tr><td><code>mypy .</code></td><td>Python type checking</td><td>Python</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="doc-footer">
+          <a class="doc-footer-link" href="verifier.html">
+            <span class="doc-footer-dir">← Previous</span>
+            <span class="doc-footer-title">Verifier</span>
+          </a>
+          <a class="doc-footer-link next" href="pattern-library.html">
+            <span class="doc-footer-dir">Next →</span>
+            <span class="doc-footer-title">Pattern Library</span>
+          </a>
+        </div>
+
+      </div>
+    </main>
+  </div>
+  <script src="nav.js"></script>
+</body>
+</html>

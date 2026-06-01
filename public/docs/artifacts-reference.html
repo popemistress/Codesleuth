@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Artifacts Reference — CodeSleuth AI Docs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="header" id="site-header"></header>
+  <div class="main-layout">
+    <nav class="sidebar" id="site-sidebar"></nav>
+    <main class="content">
+      <div class="content-inner">
+
+        <div class="breadcrumb">
+          <a href="index.html">Docs</a>
+          <span class="breadcrumb-sep">›</span>
+          <span>Reference</span>
+          <span class="breadcrumb-sep">›</span>
+          <span class="breadcrumb-current">Artifacts Reference</span>
+        </div>
+
+        <div class="page-tag">📁 Artifact Schemas</div>
+        <h1>Artifacts Reference</h1>
+        <p class="lead">
+          Every artifact produced by the CodeSleuth pipeline has a defined path, producer, consumer, and schema.
+          This page is the complete reference — from Discovery's first <code>feature-spec.md</code>
+          to the Verifier's final <code>VERIFICATION_REPORT.md</code>.
+        </p>
+
+        <!-- Namespace rule -->
+        <div class="callout callout-danger">
+          <span class="callout-icon">🚨</span>
+          <div class="callout-content">
+            <div class="callout-title">Two distinct artifact namespaces</div>
+            <p><strong>Pipeline artifacts</strong> (<code>artifacts/pipeline/</code>) live in the agents directory and persist across all projects. <strong>Project artifacts</strong> (<code>artifacts/discovery/</code>, <code>artifacts/build/</code>, etc.) live in the project directory. These two namespaces must never be conflated — writing pipeline artifacts to the project directory or vice versa is a hard violation.</p>
+          </div>
+        </div>
+
+        <!-- Pipeline namespace -->
+        <h2>Pipeline Artifacts (agents directory)</h2>
+        <p>Path: <code>/home/user/codesleuth/artifacts/pipeline/</code> — shared across all projects.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>File</th><th>Producer</th><th>Consumer</th><th>Contents</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>KNOWN_ERRORS.md</code></td>
+                <td>Orchestrator (<code>!error-add</code>)</td>
+                <td>All agents (repair loops)</td>
+                <td>Cross-project error registry. ERROR-NNN entries with symptom, root cause, fix, guardrail, detection, and stack.</td>
+              </tr>
+              <tr>
+                <td><code>KNOWN_ERRORS_INDEX.md</code></td>
+                <td>Orchestrator (<code>!error-add</code>)</td>
+                <td>All agents (grep lookup only)</td>
+                <td>Keyword → Error ID mapping. One row per keyword. Never read KNOWN_ERRORS.md directly — always grep this index first.</td>
+              </tr>
+              <tr>
+                <td><code>PATTERN_LIBRARY.md</code></td>
+                <td>Orchestrator (<code>!pattern-add</code>)</td>
+                <td>Planner (activation), Builder (architecture tasks)</td>
+                <td>Successful implementation patterns. PATTERN-NNN entries with domain, stack, context, pattern, pitfall avoided, reuse signal, and evidence.</td>
+              </tr>
+              <tr>
+                <td><code>PATTERN_INDEX.md</code></td>
+                <td>Orchestrator (<code>!pattern-add</code>)</td>
+                <td>Planner and Builder (grep lookup only)</td>
+                <td>Keyword → Pattern ID mapping. Never read PATTERN_LIBRARY.md in full — always grep this index first.</td>
+              </tr>
+              <tr>
+                <td><code>PIPELINE_IMPROVEMENTS.md</code></td>
+                <td><code>pipeline_improve.py</code> (post-SHIP)</td>
+                <td>Orchestrator (<code>!pipeline-health</code>)</td>
+                <td>Auto-generated improvement proposals from telemetry analysis: slowest tasks, most-repaired tasks, recurring gate failures.</td>
+              </tr>
+              <tr>
+                <td><code>MCP_CATALOG.md</code></td>
+                <td>Orchestrator (<code>!mcp-add</code>)</td>
+                <td>All agents (tool selection)</td>
+                <td>Approved MCP servers with risk tier, capabilities, auth requirements, and agent assignments.</td>
+              </tr>
+              <tr>
+                <td><code>DEAD_LETTER.md</code></td>
+                <td>Orchestrator (<code>!skip</code>)</td>
+                <td>Verifier (ship readiness check)</td>
+                <td>Skipped tasks with: task ID, reason skipped, downstream impact, recovery path, and whether it blocks SHIP.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Discovery artifacts -->
+        <h2>Discovery Artifacts (project directory)</h2>
+        <p>Path: <code>[project]/artifacts/discovery/</code> — written by Agent 1, read by Agent 2.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>File</th><th>Trigger</th><th>Contents</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>feature-spec.md</code></td>
+                <td><code>!spec</code></td>
+                <td>22-section product specification: problem, users, core features, user stories, flows, data requirements, platform scope, native capabilities, UX, API/business logic, auth/security, roles/permissions, store targets, monetization, i18n, performance, observability, scope boundaries, risks, definition of done, open questions, recommended integrations.</td>
+              </tr>
+              <tr>
+                <td><code>HANDOFF.json</code> (v1)</td>
+                <td><code>!spec</code></td>
+                <td>Structured discovery state: spec_version, pipeline_stage, project_name, platform_scope, web_stack, design_contract, complexity_tier, entity_model, api_contracts, native_capabilities, auth_model, feature_parity_matrix, store_targets, monetization, i18n_scope, performance_targets, market_validation, capability_intelligence.</td>
+              </tr>
+              <tr>
+                <td><code>PRE_SCAN.md</code></td>
+                <td>Agent 1 activation</td>
+                <td>Autonomous pre-scan output: codebase scan (greenfield/existing), Pattern Library matches, KNOWN_ERRORS warnings, dependency research findings, risk register with complexity tier estimate.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Build artifacts -->
+        <h2>Build Artifacts (project directory)</h2>
+        <p>Path: <code>[project]/artifacts/build/</code> — written by Agent 2 (Phase A+B) and updated by Agent 3.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>File</th><th>Phase</th><th>Producer</th><th>Contents</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>TDD.md</code></td>
+                <td>Phase B</td>
+                <td>Agent 2</td>
+                <td>21-section Technical Design Document: platform scope matrix, repository structure, data layer, API/interface layer, auth architecture, UI architecture per platform, web design contract (Section 5A), native capabilities, caching, i18n, error handling, feature parity, testing architecture, security requirements, CI/CD plan, code signing, store submission, performance targets, rollback strategy, known limitations, change log.</td>
+              </tr>
+              <tr>
+                <td><code>INTERFACES.md</code></td>
+                <td>Phase B</td>
+                <td>Agent 2</td>
+                <td>Module interface contracts: for every module — path, platform, owner task, exported types, exported functions with exact signatures, middleware/constants/events, cross-module dependencies, changelog.</td>
+              </tr>
+              <tr>
+                <td><code>contracts/</code></td>
+                <td>Phase B</td>
+                <td>Agent 2</td>
+                <td>Machine-readable contract layer: Zod schema files (<code>[module].contracts.ts</code>) and OpenAPI stub (<code>openapi.yaml</code>). Builder validates code against these; Verifier runs contract conformance tests against them.</td>
+              </tr>
+              <tr>
+                <td><code>SCHEMA.md</code></td>
+                <td>Phase B</td>
+                <td>Agent 2</td>
+                <td>Data model: entities, fields with types/nullability/defaults, relationships, indexes, constraints, migration strategy, seed data (if needed), sync/offline metadata for native platforms.</td>
+              </tr>
+              <tr>
+                <td><code>TASK-GRAPH.md</code></td>
+                <td>Phase B</td>
+                <td>Agent 2</td>
+                <td>Complete task dependency graph: for every task — TASK-NNN, status, task_type, platform, dependencies, can_parallel, output_files, acceptance criteria, test contract status (REQUIRED/EXEMPT), test contract table (behavior descriptions), gate commands, checkpoint hash. Includes Parallelism Map at end.</td>
+              </tr>
+              <tr>
+                <td><code>FILE_OWNERSHIP_MAP.md</code></td>
+                <td>Phase B</td>
+                <td>Agent 2</td>
+                <td>Maps every planned source file to the task(s) that own it. Used by Builder for Change Impact Tracking — after each task, cross-reference modified files against this map.</td>
+              </tr>
+              <tr>
+                <td><code>COMPONENT_MAP.md</code></td>
+                <td>Phase B</td>
+                <td>Agent 2</td>
+                <td>Component dependency map: page/feature → components used → story status → task (if story missing). Only present when <code>components/</code> folder exists.</td>
+              </tr>
+              <tr>
+                <td><code>DECISIONS.md</code></td>
+                <td>Phase A + B</td>
+                <td>Agent 2 (+ Agent 3 updates)</td>
+                <td>Architecture and implementation decision log: each decision with context, options considered, decision made, rationale, and consequences. Patterns applied are recorded here as <code>PATTERN-NNN: applied</code>.</td>
+              </tr>
+              <tr>
+                <td><code>CHECKPOINT.md</code></td>
+                <td>Phase B (+ running updates)</td>
+                <td>Agent 2 (+ Agent 3)</td>
+                <td>Builder progress state: current task, completed tasks, open blockers, test contract summary (REQUIRED/confirmed-failing/derived/exempt counts). Updated every 3–5 tasks or after a major blocker.</td>
+              </tr>
+              <tr>
+                <td><code>SYMBOL_INDEX.md</code></td>
+                <td>Phase B</td>
+                <td>Agent 2 (ctags)</td>
+                <td>Codebase symbol map: file path → exported symbols → signatures. Built by ctags at Planner activation. Tasks annotated with <code>reuse_existing</code> where applicable.</td>
+              </tr>
+              <tr>
+                <td><code>HANDOFF_v2_staged.json</code></td>
+                <td>Phase B</td>
+                <td>Agent 2</td>
+                <td>Staged v2 HANDOFF (promoted to HANDOFF.json by Builder at activation): all v1 fields plus schema_version v2, monorepo strategy, stack_versions, component_library, symbol_index_path, open blockers.</td>
+              </tr>
+              <tr>
+                <td><code>HANDOFF.json</code> (v3)</td>
+                <td>Build completion</td>
+                <td>Agent 3</td>
+                <td>v3 HANDOFF with build status, feature parity, auth model, store targets, open blockers, gate results, coverage_pct.</td>
+              </tr>
+              <tr>
+                <td><code>WRITE_LOG.jsonl</code></td>
+                <td>Per file write</td>
+                <td>Agent 3 (<code>write_log.py</code>)</td>
+                <td>Newline-delimited JSON log of every file write: task_id, file_path, timestamp. Consumed by <code>commit_by_task.py</code> post-SHIP to group git commits by task.</td>
+              </tr>
+              <tr>
+                <td><code>COVERAGE_LOG.md</code></td>
+                <td>Per task completion</td>
+                <td>Agent 3 (<code>check_coverage.py</code>)</td>
+                <td>Code coverage history: one row per task with coverage percentage. Last row shows overall baseline at build completion.</td>
+              </tr>
+              <tr>
+                <td><code>CHANGE_LOG.md</code></td>
+                <td>On <code>!change-approve</code></td>
+                <td>Orchestrator</td>
+                <td>Spec change history: CHANGE-NNN entries with description, stale tasks, invalidated contracts, schema delta, re-plan scope.</td>
+              </tr>
+              <tr>
+                <td><code>CONTEXT_ARCHIVE.md</code></td>
+                <td>On context compression</td>
+                <td>Orchestrator</td>
+                <td>Archive of full conversation exchanges for compressed tasks. Content is moved here — never deleted. Append-only.</td>
+              </tr>
+              <tr>
+                <td><code>FORK_SESSION.json</code></td>
+                <td>On <code>!fork</code></td>
+                <td>Orchestrator (<code>session_fork.py</code>)</td>
+                <td>Fork session state: branch A and B descriptions, project directory copies, SHIP/NO-SHIP verdicts after completion.</td>
+              </tr>
+              <tr>
+                <td><code>SEMANTIC_INDEX.json</code></td>
+                <td>After scaffold task</td>
+                <td>Agent 3 (<code>semantic_search.py</code>)</td>
+                <td>Semantic search index of codebase chunks. Updated after every file write. Used by Builder before architecture-class tasks to find existing implementations.</td>
+              </tr>
+              <tr>
+                <td><code>phases.md</code></td>
+                <td>Phase B</td>
+                <td>Agent 2</td>
+                <td>Phased implementation plan: tasks grouped by phase with lint/type/test/build result columns and TC status (<code>N/N</code>, <code>EXEMPT</code>, <code>DERIVED N/N</code>, <code>BLOCKED</code>).</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Security artifacts -->
+        <h2>Security Artifacts (project directory)</h2>
+        <p>Path: <code>[project]/artifacts/security/</code> — written during build (ongoing) and security review.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>File</th><th>Producer</th><th>Contents</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>SAST_FINDINGS.jsonl</code></td>
+                <td>Agent 3 (<code>sast_scan.py</code>) — after every file write</td>
+                <td>Static analysis findings: one JSON line per finding with file, line, rule, severity, message, task_id. Agent 5 reads this at activation and must confirm, expand, or dismiss every finding.</td>
+              </tr>
+              <tr>
+                <td><code>SECRET_BLOCKS.jsonl</code></td>
+                <td>Agent 3 (<code>secret_scan.py</code>) — on detection</td>
+                <td>Blocked secret writes: task_id, file_path, pattern type (e.g. "OpenAI key"), env_var used as replacement. Agent 5 verifies every entry was actually replaced.</td>
+              </tr>
+              <tr>
+                <td><code>SECURITY_REPORT.md</code></td>
+                <td>Agent 5</td>
+                <td>13-section security report: executive summary, review scope+tier, critical findings, high findings, medium/low findings, platform security matrix, dependency audit results, security test results, compliance/privacy status, release integrity status, launch gate decision, required fix list, HANDOFF v5 update summary.</td>
+              </tr>
+              <tr>
+                <td><code>HANDOFF.json</code> (v5)</td>
+                <td>Agent 5</td>
+                <td>v5 HANDOFF with security_status (APPROVE/CONDITIONAL/BLOCK), findings summary, accepted_risks list.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Verification artifacts -->
+        <h2>Verification Artifacts (project directory)</h2>
+        <p>Path: <code>[project]/artifacts/verification/</code> — written by Agent 6.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>File</th><th>Contents</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>VERIFICATION_REPORT.md</code></td>
+                <td>17-section verification report: executive summary (with repair rate and top slow tasks), platform scope, spec compliance, code quality gates, test coverage + 3A coverage verification, feature parity, 6A web design contract, 6B component catalog, 6C contract conformance (static), 6D runtime API contract testing, accessibility, performance, signing &amp; artifacts, store readiness, CI/CD, security handoff, review rubric scores (10 dimensions), overall verdict + required fixes.</td>
+              </tr>
+              <tr>
+                <td><code>screenshots/baselines/</code></td>
+                <td>Visual regression baselines — PNG files captured by Playwright at 4 breakpoints: desktop-1440, tablet-1024, mobile-768, mobile-390.</td>
+              </tr>
+              <tr>
+                <td><code>screenshots/diffs/</code></td>
+                <td>Visual regression diff images — generated when <code>pnpm test:visual</code> detects a deviation from baseline. CRITICAL failures = layout broken; MINOR = spacing drift.</td>
+              </tr>
+              <tr>
+                <td><code>contract_results.json</code></td>
+                <td>Runtime API contract test output from <code>contract_test.py</code>: endpoints tested, violations (method, path, expected status, actual status, missing fields).</td>
+              </tr>
+              <tr>
+                <td><code>PERF_REPORT.md</code></td>
+                <td>Performance budget test results: bundle size vs budget, API p95 response times vs budget, Lighthouse LCP/CLS scores.</td>
+              </tr>
+              <tr>
+                <td><code>PR_BODY.md</code></td>
+                <td>Auto-generated pull request body from <code>commit_by_task.py</code>: structured changelog grouped by task type (feat/fix/chore), with commit hashes per task.</td>
+              </tr>
+              <tr>
+                <td><code>HANDOFF.json</code> (v6)</td>
+                <td>v6 HANDOFF: all previous fields plus coverage_pct, coverage_verdict, visual_regression_status, storybook_build, catalog_coverage, contract_conformance, runtime_contract_testing, perf_bundle, perf_api, perf_lcp, perf_cls, container_verification, final_verdict.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Critique artifacts -->
+        <h2>Critique Artifacts (project directory)</h2>
+        <p>Path: <code>[project]/artifacts/critique/</code> — written by Agent 4.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>File</th><th>Contents</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>CRITICISM.md</code></td>
+                <td>22-section critique report: executive summary (scorecard verdict + mean score), 12-Dimension Product Scorecard (D1–D12), platform assessments, critical flaws, risks, top 10 fix-first list, stop-doing list, keep-doing list, product &amp; growth gaps, platform-specific critique, cross-platform consistency, monetization architecture assessment, UI/UX design contract assessment, what you're avoiding, improvement examples, stress question, assumption stress test, review categories A–L, per-platform verdict, overall verdict, one next action, audit checklist.</td>
+              </tr>
+              <tr>
+                <td><code>HANDOFF.json</code> (v4)</td>
+                <td>v4 HANDOFF with critic_verdict (SHIP_READY/CONDITIONAL/HOLD/RESTYLE/REDESIGN/KILL/PAUSE), scorecard_mean, dimensions_at_risk list, market_context findings.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Telemetry artifacts -->
+        <h2>Telemetry Artifacts (project directory)</h2>
+        <p>Path: <code>[project]/artifacts/telemetry/</code> — accumulated throughout the build.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>File</th><th>Contents</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>tasks.jsonl</code></td>
+                <td>One JSON line per completed task: agent, task_id, task_name, status, task_type, platform, started_at, completed_at, duration_seconds, files_touched, tests_added, tc_required, tc_passed, repair_attempts, failure_mode, strategy, coverage_pct, secret_blocks, gates_run, gates_failed, visual_baselines, cross_task_regression, final_status, blockers. Also includes context compression events.</td>
+              </tr>
+              <tr>
+                <td><code>session_tokens.jsonl</code></td>
+                <td>One JSON line per agent turn: timestamp, agent, task, model, input_tokens, output_tokens, cache_read_tokens, cache_write_tokens, turn_cost_usd. Consumed by <code>token_tracker.py budget</code> for the <code>!budget</code> display.</td>
+              </tr>
+              <tr>
+                <td><code>batch_results.json</code></td>
+                <td>Output from <code>parallel_runner.go</code>: per-task status, exit code, stdout, stderr, duration_seconds for parallel batch execution.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- .agent artifacts -->
+        <h2>.agent/ Directory (project directory)</h2>
+        <p>Path: <code>[project]/.agent/</code> — created during scaffold task from templates in <code>/home/user/codesleuth/templates/.agent/</code>.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>File</th><th>Contents</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>DONE_CRITERIA.md</code></td>
+                <td>Project-specific definition of done checklist. Builder reads at activation. Verifier checks every [REQUIRED] and [IF_APPLICABLE] criterion before SHIP verdict.</td>
+              </tr>
+              <tr>
+                <td><code>REVIEW_RUBRIC.md</code></td>
+                <td>10-dimension scoring rubric (R1–R10, scored 1–5). Verifier completes before final verdict. Any dimension &lt; 3 = HOLD.</td>
+              </tr>
+              <tr>
+                <td><code>COMMANDS.md</code></td>
+                <td>Project-specific command reference — which scripts exist and how to run them. Builder reads this at activation; overrides defaults from agent file for this project.</td>
+              </tr>
+              <tr>
+                <td><code>ASSUMPTIONS.md</code></td>
+                <td>Assumption ledger: A-NNN entries with statement, risk, owner (Planning/Builder), and status (Unconfirmed/Confirmed). Every inference not in the spec is recorded here.</td>
+              </tr>
+              <tr>
+                <td><code>SCOPE.md</code></td>
+                <td>In-scope / out-of-scope / V2 feature list derived from feature-spec.md. Builder checks before implementing any feature.</td>
+              </tr>
+              <tr>
+                <td><code>FAILURE_REPORT_TEMPLATE.md</code></td>
+                <td>Template for structured failure reports during repair mode: Task, Expected, Actual, Command Output, Failure Mode, Repair Hypothesis.</td>
+              </tr>
+              <tr>
+                <td><code>KNOWN_ERRORS.md</code></td>
+                <td>Project-local error registry (supplements the pipeline-level KNOWN_ERRORS.md in the agents directory). Accumulates errors specific to this project's stack during the build phase.</td>
+              </tr>
+              <tr>
+                <td><code>PERF_BUDGET.json</code></td>
+                <td>Performance budget configuration: total JS bundle size limit, largest chunk limit, API p95 response time targets per endpoint, Lighthouse LCP and CLS targets.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </main>
+  </div>
+  <script src="nav.js"></script>
+</body>
+</html>

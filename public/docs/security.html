@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Security — CodeSleuth AI Docs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="header" id="site-header"></header>
+  <div class="main-layout">
+    <nav class="sidebar" id="site-sidebar"></nav>
+    <main class="content">
+      <div class="content-inner">
+
+        <div class="breadcrumb">
+          <a href="index.html">Docs</a>
+          <span class="breadcrumb-sep">›</span>
+          <span>Agents</span>
+          <span class="breadcrumb-sep">›</span>
+          <span class="breadcrumb-current">Security</span>
+        </div>
+
+        <div class="page-tag">🔒 Agent 5</div>
+        <h1>Security Agent</h1>
+        <p class="lead">
+          The Security Agent performs a tiered, 20-domain security review of the built codebase.
+          It activates after the Critic gate (<code>!security</code>) — no project advances to Verifier
+          without a completed security review. Critical and high-severity findings block the pipeline until resolved.
+        </p>
+
+        <div class="callout callout-danger">
+          <span class="callout-icon">🚨</span>
+          <div class="callout-content">
+            <div class="callout-title">Security review is non-optional</div>
+            <p>The Security Agent cannot be skipped, bypassed, or fast-tracked. Any attempt to jump directly from Builder to Verifier without <code>!security</code> is refused by the Orchestrator.</p>
+          </div>
+        </div>
+
+        <h2>Pre-Populated Build Phase Findings</h2>
+        <p>At activation, the Security Agent immediately reads two artifact files produced during the build phase before performing its own domain review:</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>File</th><th>Produced by</th><th>Contents</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>SAST_FINDINGS.jsonl</code></td>
+                <td><code>sast_scan.py</code> (runs after every write)</td>
+                <td>Static analysis findings: rule ID, severity, file, line, message</td>
+              </tr>
+              <tr>
+                <td><code>SECRET_BLOCKS.jsonl</code></td>
+                <td><code>secret_scan.py</code> (runs pre-write)</td>
+                <td>Detected hardcoded secrets that were blocked during build — file, pattern type, line</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>SAST Findings Handling</h3>
+        <p>Every pre-identified finding in <code>SAST_FINDINGS.jsonl</code> must be explicitly addressed in <code>SECURITY_REPORT.md</code>. The Security Agent may not silently skip any finding:</p>
+        <ul>
+          <li><strong>Confirmed</strong> — finding is valid; remediation is required before <code>!verify</code></li>
+          <li><strong>Expanded</strong> — finding is valid and the agent identifies additional related issues</li>
+          <li><strong>Dismissed</strong> — finding is a false positive; documented rationale required (e.g., "test file, not production code")</li>
+        </ul>
+
+        <h3>Secret Blocks Handling</h3>
+        <p>For each entry in <code>SECRET_BLOCKS.jsonl</code>, the Security Agent verifies:</p>
+        <ol>
+          <li>The hardcoded value was actually replaced with an environment variable reference</li>
+          <li>The environment variable is documented in <code>.env.example</code></li>
+        </ol>
+
+        <div class="callout callout-error">
+          <span class="callout-icon">🚨</span>
+          <div class="callout-content">
+            <div class="callout-title">Remaining hardcoded secrets = automatic BLOCK (Critical)</div>
+            <p>Any secret listed in <code>SECRET_BLOCKS.jsonl</code> that is still hardcoded in the codebase at Security review time is classified as CRITICAL and blocks the pipeline unconditionally. This finding cannot be dismissed or accepted — it must be fixed.</p>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <span class="callout-icon">ℹ️</span>
+          <div class="callout-content">
+            <div class="callout-title">Model-adaptive behavior</div>
+            <p>The Security Agent adjusts its report format and tooling assumptions based on the active model family. Claude models produce full SECURITY_REPORT.md with all sections. Kimi and GPT-family models use a condensed format. Ollama local models skip dependency intelligence scans that require network access.</p>
+          </div>
+        </div>
+
+        <h2>Complexity-Tiered Review</h2>
+        <p>The number of domains reviewed depends on the project's complexity tier from Discovery:</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Tier</th><th>Domains reviewed</th><th>Typical scope</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="badge badge-green">Simple</span></td>
+                <td>5 (LOW severity domains)</td>
+                <td>Static sites, single-user tools, no auth, no external data</td>
+              </tr>
+              <tr>
+                <td><span class="badge badge-yellow">Standard</span></td>
+                <td>HIGH and CRITICAL domains</td>
+                <td>Auth, database, API integrations, multi-user apps</td>
+              </tr>
+              <tr>
+                <td><span class="badge badge-red">Complex</span></td>
+                <td>All 20 domains</td>
+                <td>Payments, multi-tenant, ML/AI, compliance requirements</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>20 Security Domains</h2>
+        <div class="domain-list">
+          <div class="domain-item"><span class="domain-num">D1</span> Authentication &amp; Session Management</div>
+          <div class="domain-item"><span class="domain-num">D2</span> Authorization &amp; Access Control</div>
+          <div class="domain-item"><span class="domain-num">D3</span> Input Validation &amp; Sanitization</div>
+          <div class="domain-item"><span class="domain-num">D4</span> SQL &amp; NoSQL Injection</div>
+          <div class="domain-item"><span class="domain-num">D5</span> Cross-Site Scripting (XSS)</div>
+          <div class="domain-item"><span class="domain-num">D6</span> Cross-Site Request Forgery (CSRF)</div>
+          <div class="domain-item"><span class="domain-num">D7</span> Secrets &amp; Key Management</div>
+          <div class="domain-item"><span class="domain-num">D8</span> Dependency &amp; Supply Chain</div>
+          <div class="domain-item"><span class="domain-num">D9</span> API Security &amp; Rate Limiting</div>
+          <div class="domain-item"><span class="domain-num">D10</span> Data Encryption (at rest + in transit)</div>
+          <div class="domain-item"><span class="domain-num">D11</span> File Upload &amp; Storage Security</div>
+          <div class="domain-item"><span class="domain-num">D12</span> Error Handling &amp; Information Leakage</div>
+          <div class="domain-item"><span class="domain-num">D13</span> Logging &amp; Audit Trail</div>
+          <div class="domain-item"><span class="domain-num">D14</span> Payment &amp; Financial Security</div>
+          <div class="domain-item"><span class="domain-num">D15</span> Mobile-Specific Threats</div>
+          <div class="domain-item"><span class="domain-num">D16</span> AI/LLM Prompt Injection</div>
+          <div class="domain-item"><span class="domain-num">D17</span> Infrastructure &amp; Deployment Security</div>
+          <div class="domain-item"><span class="domain-num">D18</span> Privacy &amp; Data Residency (GDPR/CCPA)</div>
+          <div class="domain-item"><span class="domain-num">D19</span> Multi-Tenancy Isolation</div>
+          <div class="domain-item"><span class="domain-num">D20</span> Business Logic &amp; Abuse Prevention</div>
+        </div>
+
+        <h2>Finding Severity Levels</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Severity</th><th>Description</th><th>Pipeline impact</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="badge badge-red">CRITICAL</span></td>
+                <td>Exploitable vulnerability that could result in data breach, account takeover, or system compromise</td>
+                <td>Hard block — pipeline cannot advance until resolved</td>
+              </tr>
+              <tr>
+                <td><span class="badge badge-yellow">HIGH</span></td>
+                <td>Significant risk that requires a fix before production deployment</td>
+                <td>Soft block — must be resolved or formally accepted before <code>!verify</code></td>
+              </tr>
+              <tr>
+                <td><span class="badge badge-blue">MEDIUM</span></td>
+                <td>Risk that should be addressed but doesn't block shipping an MVP</td>
+                <td>Logged in report; tracked in HANDOFF.json v5</td>
+              </tr>
+              <tr>
+                <td><span class="badge badge-gray">LOW</span></td>
+                <td>Hardening opportunity — defense in depth improvement</td>
+                <td>Logged for awareness; no pipeline impact</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Report Format</h2>
+        <p>The Security Agent writes <code>artifacts/security/SECURITY_REPORT.md</code> with:</p>
+        <ul>
+          <li>Executive Summary with overall risk rating</li>
+          <li>Per-domain findings (domain, severity, finding, evidence, remediation)</li>
+          <li>Critical findings list (pipeline blockers)</li>
+          <li>Dependency vulnerability scan results</li>
+          <li>Secrets audit (hardcoded values, missing env vars)</li>
+          <li>Platform-specific threat model notes</li>
+          <li>Recommended remediations ordered by severity</li>
+          <li>HANDOFF.json v5 update</li>
+        </ul>
+
+        <h2>Security Commands</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Command</th><th>Behavior</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><span class="cmd">!security</span></td><td>Activate the Security Agent; begin tiered 20-domain review</td></tr>
+              <tr><td><span class="cmd">!security domain [N]</span></td><td>Run a specific domain review only (useful for re-review after fixes)</td></tr>
+              <tr><td><span class="cmd">!security accept [ID]</span></td><td>Formally accept a HIGH or MEDIUM finding with documented rationale (adds to HANDOFF.json v5 as accepted_risk)</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="doc-footer">
+          <a class="doc-footer-link" href="critic.html">
+            <span class="doc-footer-dir">← Previous</span>
+            <span class="doc-footer-title">Critic</span>
+          </a>
+          <a class="doc-footer-link next" href="verifier.html">
+            <span class="doc-footer-dir">Next →</span>
+            <span class="doc-footer-title">Verifier</span>
+          </a>
+        </div>
+
+      </div>
+    </main>
+  </div>
+  <script src="nav.js"></script>
+</body>
+</html>

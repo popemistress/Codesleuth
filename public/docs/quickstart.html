@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quickstart — CodeSleuth AI Docs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="header" id="site-header"></header>
+  <div class="main-layout">
+    <nav class="sidebar" id="site-sidebar"></nav>
+    <main class="content">
+      <div class="content-inner">
+
+        <div class="breadcrumb">
+          <a href="index.html">Docs</a>
+          <span class="breadcrumb-sep">›</span>
+          <span>Getting Started</span>
+          <span class="breadcrumb-sep">›</span>
+          <span class="breadcrumb-current">Quickstart</span>
+        </div>
+
+        <div class="page-tag">⚡ Getting Started</div>
+        <h1>Quickstart Guide</h1>
+        <p class="lead">
+          This guide walks you through a complete CodeSleuth AI session from activating the Orchestrator
+          to receiving a final product critique. The pipeline is driven by human gate commands —
+          you stay in control at every critical transition.
+        </p>
+
+        <div class="callout callout-warning">
+          <span class="callout-icon">⚠️</span>
+          <div class="callout-content">
+            <div class="callout-title">Human Gates Are Non-Negotiable</div>
+            <p>The pipeline <strong>never auto-advances</strong> between stages. You must issue the appropriate gate command to move forward. This is by design — you retain full control over when each stage runs.</p>
+          </div>
+        </div>
+
+        <h2>Activating the Pipeline</h2>
+        <p>The pipeline works in any AI CLI or IDE that supports system-prompt loading. The universal activation phrase is:</p>
+
+        <pre><code>Start agent 0</code></pre>
+
+        <p>This phrase is mapped in <code>CLAUDE.md</code> (and synced to all other AI tools) to load <code>0__Orchestrator_Agent.md</code>. You can activate any agent directly:</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Phrase</th><th>Activates</th><th>File</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>Start agent 0</code></td><td>Orchestrator</td><td><code>0__Orchestrator_Agent.md</code></td></tr>
+              <tr><td><code>Start agent 1</code></td><td>Discovery</td><td><code>1__Product_Discovery_Agent.md</code></td></tr>
+              <tr><td><code>Start agent 2</code></td><td>Planning</td><td><code>2__Technical_Planning_Agent.md</code></td></tr>
+              <tr><td><code>Start agent 3</code></td><td>Builder</td><td><code>3__Application_Builder_Agent.md</code></td></tr>
+              <tr><td><code>Start agent 4</code></td><td>Critic</td><td><code>4__Codebase_Product_Critic_Agent.md</code></td></tr>
+              <tr><td><code>Start agent 5</code></td><td>Security</td><td><code>5__Application_Security_Agent.md</code></td></tr>
+              <tr><td><code>Start agent 6</code></td><td>Verifier</td><td><code>6__Codebase_Verifier_Agent.md</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Multi-Tool Compatibility</h3>
+        <p>The agent activation rules are stored in <code>CLAUDE.md</code> and propagated to all AI tools by running:</p>
+        <pre><code>node .cli/sync/sync-cli-instructions.mjs</code></pre>
+        <p>This stamps rules to: <code>.clinerules/</code> (Cline), <code>.continue/rules/</code> (Continue), <code>.cursor/rules/</code> (Cursor), <code>.github/copilot-instructions.md</code> (GitHub Copilot), <code>.kiro/steering/</code> (Kiro), <code>.agents/</code> (Antigravity), and <code>AGENTS.md</code> (Codex, OpenCode, Devin, Amp, Factory.ai, Zed).</p>
+        <p>Each tool's rule file includes the full <strong>Agent 0 Startup Protocol</strong> — the verbatim banner, build targets table, and welcome message — so all models produce consistent output on <code>Start agent 0</code>.</p>
+
+        <h2>Step-by-Step Session</h2>
+
+        <ol class="steps">
+          <li class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <div class="step-title">Activate the Orchestrator</div>
+              <div class="step-desc">
+                Type <strong>"Start agent 0"</strong> in your AI CLI or IDE (case-insensitive). The Orchestrator reads <code>config/context.json</code>, checks for registered projects, then outputs the startup banner:
+              </div>
+              <pre><code>✅ Setup verified — no registered projects found. Starting new project kickoff.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ██████╗ ██████╗ ██████╗ ███████╗███████╗██╗     ██╗   ██╗████████╗██╗  ██╗
+ ...
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  CodeSleuth AI — Autonomous Software Engineering Pipeline
+  ┌─────────────────────┬──────────────────────────────────────────────┐
+  │ Pipeline            │ Discovery → Planning → Builder → ...         │
+  │ Context Backends    │ Coordination: sqlite · ...                   │
+  │ Commands            │ !help · !plan · !build · !verify · ...       │
+  └─────────────────────┴──────────────────────────────────────────────┘
+
+Agent 0 — Orchestrator is active.
+To begin, tell me about the project you'd like to build...</code></pre>
+            </div>
+          </li>
+
+          <li class="step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <div class="step-title">Send Your Project Brief</div>
+              <div class="step-desc">
+                Describe your project. You can be brief or detailed. For briefs over 500 words, Discovery activates fast-track mode and skips some structured questions.
+              </div>
+              <pre><code>I want to build a SaaS invoicing tool for freelancers.
+It should support recurring invoices, Stripe payments,
+PDF export, and a client portal.</code></pre>
+            </div>
+          </li>
+
+          <li class="step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <div class="step-title">Complete the Discovery Phase</div>
+              <div class="step-desc">
+                Discovery Agent (Agent 1) asks one question per message across up to 15 phases — clarifying platform, users, features, monetization, and data model.
+              </div>
+              <div class="callout callout-info" style="margin-top:12px;">
+                <span class="callout-icon">ℹ️</span>
+                <div class="callout-content">
+                  <p>Use <span class="cmd">!braindump</span> to dump all thoughts at once. Use <span class="cmd">!spec</span> to preview the spec draft. Use <span class="cmd">!compile</span> when satisfied.</p>
+                </div>
+              </div>
+              <p style="margin-top:12px;"><strong>Discovery outputs:</strong></p>
+              <ul>
+                <li><code>artifacts/discovery/feature-spec.md</code> — full implementation spec</li>
+                <li><code>artifacts/pipeline/HANDOFF.json</code> (v1) — machine-readable summary</li>
+              </ul>
+            </div>
+          </li>
+
+          <li class="step">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <div class="step-title">Open the Planning Gate: <span class="cmd">!plan</span></div>
+              <div class="step-desc">
+                Issue <code>!plan</code> to transfer control to the Technical Planning Agent. The Planner produces all artifacts in a single pass:
+              </div>
+              <ul style="margin-top:12px;">
+                <li><code>TDD.md</code> — Technical Design Document with test contracts</li>
+                <li><code>INTERFACES.md</code> — API and component contracts</li>
+                <li><code>SCHEMA.md</code> — Database schema</li>
+                <li><code>TASK-GRAPH.md</code> — Ordered implementation task graph with Parallelism Map</li>
+                <li><code>artifacts/build/contracts/</code> — Zod schemas + OpenAPI stubs</li>
+                <li><code>artifacts/build/FILE_OWNERSHIP_MAP.md</code> — file → task ownership</li>
+              </ul>
+            </div>
+          </li>
+
+          <li class="step">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <div class="step-title">Open the Build Gate: <span class="cmd">!build</span></div>
+              <div class="step-desc">
+                Review the planning documents, then issue <code>!build</code>. The Builder runs continuously — implementing tasks, checkpointing every 3–5 tasks, and validating against contracts.
+              </div>
+              <pre><code>!build</code></pre>
+              <div class="callout callout-info" style="margin-top:12px;">
+                <span class="callout-icon">ℹ️</span>
+                <div class="callout-content">
+                  <p>Need to change scope mid-build? Use <span class="cmd">!change [description]</span>. The Orchestrator produces a blast radius report before any implementation changes.</p>
+                </div>
+              </div>
+            </div>
+          </li>
+
+          <li class="step">
+            <div class="step-num">6</div>
+            <div class="step-body">
+              <div class="step-title">Open the Critic Gate: <span class="cmd">!critic</span></div>
+              <div class="step-desc">
+                Critic Agent (Agent 4) completes the 12-Dimension Product Scorecard and performs a full
+                accountability-driven product survival review — while the codebase is fresh and before
+                security hardening locks in the architecture.
+              </div>
+              <pre><code>!critic</code></pre>
+              <p style="margin-top:12px;">Output: <code>artifacts/critique/CRITICISM.md</code> with scorecard, ranked priorities, and product verdict.</p>
+            </div>
+          </li>
+
+          <li class="step">
+            <div class="step-num">7</div>
+            <div class="step-body">
+              <div class="step-title">Open the Security Gate: <span class="cmd">!security</span></div>
+              <div class="step-desc">
+                Security Agent (Agent 5) runs a tiered 20-domain security review. Complexity tier determines scope.
+              </div>
+              <pre><code>!security</code></pre>
+              <p style="margin-top:12px;">
+                <span class="badge badge-blue">Simple</span>&nbsp;5 domains &nbsp;
+                <span class="badge badge-yellow">Standard</span>&nbsp;HIGH+ domains &nbsp;
+                <span class="badge badge-red">Complex</span>&nbsp;all 20 domains
+              </p>
+            </div>
+          </li>
+
+          <li class="step">
+            <div class="step-num">8</div>
+            <div class="step-body">
+              <div class="step-title">Open the Verification Gate: <span class="cmd">!verify</span></div>
+              <div class="step-desc">
+                Verifier Agent (Agent 6) performs QA, checks spec compliance, validates contracts, runs the Performance Budget Gate, and issues a final <strong>SHIP</strong> or <strong>NO-SHIP</strong> verdict.
+              </div>
+              <pre><code>!verify</code></pre>
+              <p style="margin-top:12px;">Output: <code>artifacts/verification/VERIFICATION_REPORT.md</code> with SHIP/NO-SHIP verdict.</p>
+            </div>
+          </li>
+        </ol>
+
+        <h2>Key Commands at a Glance</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Command</th><th>What It Does</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><span class="cmd">!help</span></td><td>Show available commands for the current stage</td></tr>
+              <tr><td><span class="cmd">!status</span></td><td>Display current pipeline stage and agent status</td></tr>
+              <tr><td><span class="cmd">!plan</span></td><td>Open Discovery → Planning gate and begin full contract planning</td></tr>
+              <tr><td><span class="cmd">!change [desc]</span></td><td>Initiate a spec change — triggers blast radius report</td></tr>
+              <tr><td><span class="cmd">!pattern-add</span></td><td>Capture current implementation as a reusable pattern</td></tr>
+              <tr><td><span class="cmd">!docs</span></td><td>Generate living documentation from current artifacts</td></tr>
+              <tr><td><span class="cmd">!reset</span></td><td>Reset pipeline to initial state (requires confirmation)</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout callout-success">
+          <span class="callout-icon">✅</span>
+          <div class="callout-content">
+            <div class="callout-title">You're ready!</div>
+            <p>For a deeper understanding of how the pipeline works, read the <a href="architecture.html">Architecture Overview</a>. For all available commands, see the <a href="commands.html">Command Reference</a>.</p>
+          </div>
+        </div>
+
+        <div class="doc-footer">
+          <a class="doc-footer-link" href="index.html">
+            <span class="doc-footer-dir">← Previous</span>
+            <span class="doc-footer-title">Introduction</span>
+          </a>
+          <a class="doc-footer-link next" href="architecture.html">
+            <span class="doc-footer-dir">Next →</span>
+            <span class="doc-footer-title">Architecture</span>
+          </a>
+        </div>
+
+      </div>
+    </main>
+  </div>
+  <script src="nav.js"></script>
+</body>
+</html>

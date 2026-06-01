@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CIA System — CodeSleuth AI Docs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="header" id="site-header"></header>
+  <div class="main-layout">
+    <nav class="sidebar" id="site-sidebar"></nav>
+    <main class="content">
+      <div class="content-inner">
+
+        <div class="breadcrumb">
+          <a href="index.html">Docs</a>
+          <span class="breadcrumb-sep">›</span>
+          <a href="discovery.html">Discovery</a>
+          <span class="breadcrumb-sep">›</span>
+          <span class="breadcrumb-current">CIA System</span>
+        </div>
+
+        <div class="page-tag">🔍 Discovery — Agent 1</div>
+        <h1>Capability Intelligence Analysis (CIA)</h1>
+        <p class="lead">
+          CIA is the mechanism that transforms user Q&amp;A into a product specification that reflects the
+          full capability landscape. It fires at four defined trigger points — and inline whenever a user
+          statement implies a specific integration need. CIA ensures the spec includes everything available,
+          not just what the user thought to ask for.
+        </p>
+
+        <!-- Reference catalogs -->
+        <h2>Reference Catalogs</h2>
+        <p>At activation, the Discovery agent loads three catalogs as internal working memory. They are never shown to the user in full — only matched findings are surfaced:</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Catalog</th><th>Path</th><th>Contents</th><th>Used For</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>available_apis.md</code></td>
+                <td><code>catalogs/available_apis.md</code></td>
+                <td>47 categories of public APIs — auth, payments, data, maps, ML, security, social, and more</td>
+                <td>Identifying external data sources and service integrations the product can use</td>
+              </tr>
+              <tr>
+                <td><code>ai_skills_repositories.md</code></td>
+                <td><code>catalogs/ai_skills_repositories.md</code></td>
+                <td>Curated skill packages for PM, engineering, security, design, research, and domain-specific workflows</td>
+                <td>Identifying reusable instruction-level capabilities that accelerate specific features</td>
+              </tr>
+              <tr>
+                <td><code>mcp_server-repos.md</code></td>
+                <td><code>catalogs/mcp_server-repos.md</code></td>
+                <td>MCP server directories and high-signal servers for databases, GitHub, browser automation, docs, cloud, memory</td>
+                <td>Identifying live tool connections the product's development pipeline and runtime can leverage</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Four trigger points -->
+        <h2>CIA Trigger Points</h2>
+        <p>CIA fires automatically at four defined moments during discovery:</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Trigger</th><th>When It Fires</th><th>Focus</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>CIA-1: Domain Scan</strong></td>
+                <td>After Phase 2 exit (problem + outcome confirmed) — or immediately after a Phase 0 braindump</td>
+                <td>Broad catalog scan based on problem domain and user type</td>
+              </tr>
+              <tr>
+                <td><strong>CIA-2: Flow Scan</strong></td>
+                <td>After Phase 3 exit (core user flow documented)</td>
+                <td>APIs and MCPs that enable specific flow steps (maps, payments, auth, messaging, etc.)</td>
+              </tr>
+              <tr>
+                <td><strong>CIA-3: Integration Scan</strong></td>
+                <td>After Phase 9 exit (API/business logic captured)</td>
+                <td>Deep API and MCP match against stated external integrations and endpoints — highest-signal trigger</td>
+              </tr>
+              <tr>
+                <td><strong>CIA-4: Pre-Spec Final Scan</strong></td>
+                <td>Immediately before <code>!spec</code> compilation</td>
+                <td>Catch-all: any resource not yet surfaced that has clear relevance</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- CIA process -->
+        <h2>CIA Process (at each trigger point)</h2>
+        <ol>
+          <li>Collect all Spec State accumulated so far (problem domain, user type, features, flows, data, integrations, monetization, platform)</li>
+          <li>Scan <code>catalogs/available_apis.md</code> — identify APIs whose categories match the product context</li>
+          <li>Scan <code>catalogs/ai_skills_repositories.md</code> — identify skill packages whose domain matches the product type or technical stack</li>
+          <li>Scan <code>catalogs/mcp_server-repos.md</code> — identify MCP servers that connect to data sources or systems the product needs</li>
+          <li>Filter results: keep only matches with clear, specific relevance. Discard weak or speculative matches.</li>
+          <li>Present findings using the CIA Finding Format (maximum 8 findings per block)</li>
+          <li>Ask one decision question: "Which of these would you like to include in the spec?"</li>
+        </ol>
+
+        <!-- CIA Finding Format -->
+        <h2>CIA Finding Format</h2>
+        <p>Every finding in a CIA block uses this exact structure:</p>
+        <pre><code>**[RESOURCE TYPE: API / Skill / MCP] — [Resource Name]**
+
+| Field | Detail |
+|---|---|
+| What it is | One sentence describing the resource |
+| Why it's relevant | Specific connection to this product's stated problem, feature, flow, or user type |
+| How it improves the product | Concrete capability or quality improvement it enables |
+| Recommendation | INCLUDE / CONSIDER / OPTIONAL — with one-line rationale |
+| Risks &amp; Requirements | Auth method, API key cost, rate limits, setup complexity, legal/compliance |</code></pre>
+
+        <h3>Recommendation definitions</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Label</th><th>Meaning</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="badge badge-danger">INCLUDE</span></td>
+                <td>High relevance. Not including it would create obvious gaps or require building something that already exists.</td>
+              </tr>
+              <tr>
+                <td><span class="badge badge-warning">CONSIDER</span></td>
+                <td>Solid relevance. Adds real value but is not a gap risk if skipped.</td>
+              </tr>
+              <tr>
+                <td><span class="badge badge-success">OPTIONAL</span></td>
+                <td>Low relevance. Worth noting but genuinely optional.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- CIA block format -->
+        <h3>CIA block output format</h3>
+        <pre><code>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔍 CIA-2: Flow Scan — 4 capabilities found
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+**API — Stripe**
+| Field | Detail |
+|---|---|
+| What it is | Full-stack payment processing platform with subscriptions, invoicing, and webhooks |
+| Why it's relevant | Your booking flow includes a payment step for service reservations |
+| How it improves the product | Eliminates building payment infrastructure from scratch; PCI compliance out of the box |
+| Recommendation | INCLUDE — payment is a core flow step |
+| Risks &amp; Requirements | API key required; 2.9% + $0.30 per transaction; PCI compliance scope reduced but not eliminated |
+
+...
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Which of these would you like to include in the product plan?
+(Reply with numbers, names, "all," "none," or specific notes.)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</code></pre>
+
+        <!-- CIA hard rules -->
+        <h2>CIA Hard Rules</h2>
+        <ol>
+          <li>Maximum 8 findings per CIA block. Priority order: INCLUDE, then CONSIDER, then OPTIONAL. When more exist, note how many were filtered.</li>
+          <li>Never repeat a finding across CIA blocks. Once surfaced, tracked in Spec State — if the user already decided, do not re-surface it.</li>
+          <li>Never invent resources. Every finding must come from one of the three reference catalog files.</li>
+          <li>If zero relevant resources are found: output <code>CIA-N complete — no additional capability matches found for the current product context.</code> Do not pad with irrelevant results.</li>
+          <li>Do not surface security scanning tools (GitGuardian, VirusTotal) as product features — those are pipeline tools for Agent 5, not product capabilities.</li>
+        </ol>
+
+        <!-- Capability Intercepts -->
+        <h2>Capability Intercepts — Inline CIA</h2>
+        <p>An intercept fires <em>immediately</em> when user input contains an explicit or strongly implied need for a specific resource — regardless of which CIA trigger point is next scheduled. This is the mechanism that ensures no explicit integration signal is ever deferred or missed.</p>
+
+        <h3>Intercept triggers</h3>
+        <ul>
+          <li>User explicitly names a third-party service: "we need Stripe," "use Twilio for SMS," "hook into Salesforce"</li>
+          <li>User describes a single-match need: "send emails," "show a map," "OCR documents," "smart recommendations"</li>
+          <li>Braindump content contains integration keywords, named services, or data-source references</li>
+          <li>Any user answer mentions an external system, platform API, or workflow that maps to a catalog entry</li>
+        </ul>
+
+        <h3>Intercept format</h3>
+        <pre><code>⚡ Capability Intercept — Stripe (API)
+Full-stack payment processing — matches your stated need for accepting payments in the booking flow.
+Recommendation: INCLUDE
+Risks: API key required; 2.9% + $0.30 per transaction; PCI compliance scope reduced but present
+
+Include this in the spec? (yes / no / tell me more)</code></pre>
+
+        <h3>Intercept rules</h3>
+        <ul>
+          <li><strong>One intercept per response maximum.</strong> If multiple matches fire simultaneously, bundle only those directly related (e.g., Stripe API + Stripe MCP). Unrelated matches queue for the next CIA block.</li>
+          <li>After the user answers, record the decision in <code>capability_intelligence</code> Spec State and continue discovery normally.</li>
+          <li>An intercepted resource is never re-surfaced at a later CIA block.</li>
+          <li>Intercepts do not replace scheduled CIA-1 through CIA-4 blocks — they supplement the scheduled scans by catching signals between trigger points.</li>
+          <li>If the user ignores an intercept, re-surface it at the next CIA block under "unresolved intercepts."</li>
+          <li>Intercepts are non-blocking — present the finding, ask the single approval question, wait for the user's answer before continuing.</li>
+        </ul>
+
+        <!-- CIA state tracking -->
+        <h2>CIA State Tracking</h2>
+        <p>The Discovery agent maintains <code>capability_intelligence</code> in its internal Spec State, and carries all <code>"included"</code> entries into HANDOFF.json v1:</p>
+
+        <pre><code>{
+  "capability_intelligence": {
+    "apis": [
+      {
+        "name": "Stripe",
+        "category": "Payments",
+        "recommendation": "INCLUDE",
+        "status": "included"
+      }
+    ],
+    "skills": [
+      {
+        "name": "PM Discovery Skills",
+        "source": "phuryn/pm-skills",
+        "recommendation": "CONSIDER",
+        "status": "skipped"
+      }
+    ],
+    "mcp_servers": [
+      {
+        "name": "Neon MCP",
+        "source_url": "mcp.neon.tech",
+        "recommendation": "INCLUDE",
+        "status": "included"
+      }
+    ]
+  }
+}</code></pre>
+
+        <p>Status values: <code>pending</code> (surfaced, awaiting decision), <code>included</code> (user approved), <code>skipped</code> (user declined), <code>consider</code> (user deferred).</p>
+
+        <!-- Fast-track CIA -->
+        <h2>Fast-Track CIA</h2>
+        <p>When the initial kickoff or braindump is already detailed enough to skip most discovery phases, Fast-Track CIA compresses the schedule:</p>
+        <ul>
+          <li>CIA-1 and CIA-2 run together as a single "Fast-Track CIA" block (covering resources not already handled by intercepts during braindump parsing)</li>
+          <li>CIA-3 runs after any API/integration clarifying questions</li>
+          <li>CIA-4 still runs before <code>!spec</code> — never skipped</li>
+        </ul>
+
+        <!-- Market Validation -->
+        <h2>Market Validation Layer</h2>
+        <p>After Phase 2 exit (problem + outcome confirmed), the Discovery agent runs an automated market validation check before advancing to CIA-1:</p>
+
+        <ol>
+          <li><strong>Brave Search MCP</strong>: search the stated problem. Find 2–3 evidence sources showing real demand.</li>
+          <li><strong>Firecrawl MCP</strong>: identify named competitors and scrape their pricing/feature pages.</li>
+          <li><strong>Reddit API</strong>: search relevant subreddits for pain-point threads matching the stated problem.</li>
+          <li><strong>Hacker News API</strong>: search "Ask HN" for comparable products or problems.</li>
+          <li><strong>World Bank / Data USA</strong>: pull public market sizing data for regulated or global products.</li>
+        </ol>
+
+        <p>Results are recorded in Spec State under <code>market_validation</code> and surface as: named competitors found, evidence the problem is real, and any signals that contradict the stated differentiation.</p>
+
+      </div>
+    </main>
+  </div>
+  <script src="nav.js"></script>
+</body>
+</html>

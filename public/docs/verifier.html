@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verifier — CodeSleuth AI Docs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="header" id="site-header"></header>
+  <div class="main-layout">
+    <nav class="sidebar" id="site-sidebar"></nav>
+    <main class="content">
+      <div class="content-inner">
+
+        <div class="breadcrumb">
+          <a href="index.html">Docs</a>
+          <span class="breadcrumb-sep">›</span>
+          <span>Agents</span>
+          <span class="breadcrumb-sep">›</span>
+          <span class="breadcrumb-current">Verifier</span>
+        </div>
+
+        <div class="page-tag">✅ Agent 6</div>
+        <h1>Verifier Agent</h1>
+        <p class="lead">
+          The Verifier is the release gate. It performs a systematic, multi-phase QA review across
+          spec compliance, code quality, contract conformance, visual regression, accessibility,
+          performance budget, and platform readiness — then issues a final <strong>SHIP</strong>
+          or <strong>NO-SHIP</strong> verdict.
+        </p>
+
+        <h2>Verification Phases</h2>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Phase</th><th>Name</th><th>Gate impact</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>1</strong></td><td>Spec Compliance — every feature-spec.md feature mapped to DONE tasks</td><td>NO-SHIP if &gt;5% features missing</td></tr>
+              <tr><td><strong>2</strong></td><td>Code Quality — lint, typecheck, dead code, complexity</td><td>NO-SHIP if lint errors or type errors</td></tr>
+              <tr><td><strong>3</strong></td><td>Test Coverage — unit, integration, E2E pass rates</td><td>NO-SHIP if any TC test fails</td></tr>
+              <tr><td><strong>3A</strong></td><td>Code Coverage Verification — <code>check_coverage.py</code> measures line coverage %</td><td>NO-SHIP if &lt;60%; CONDITIONAL if 60–69%; PASS if ≥70%</td></tr>
+              <tr><td><strong>4</strong></td><td>Build Integrity — production build succeeds, no bundle warnings</td><td>NO-SHIP if build fails</td></tr>
+              <tr><td><strong>5</strong></td><td>Environment Gate — all required env vars documented, secrets not hardcoded</td><td>NO-SHIP if secrets found in code</td></tr>
+              <tr><td><strong>6A</strong></td><td>Visual Regression — Playwright screenshots vs. baselines at 4 viewports</td><td>NO-SHIP if diff &gt; threshold</td></tr>
+              <tr><td><strong>6C</strong></td><td>Contract Conformance — Zod schemas validate all API responses; OpenAPI stubs match implementation</td><td>NO-SHIP if contract violations found</td></tr>
+              <tr><td><strong>6D</strong></td><td>Runtime API Contract Testing — live endpoint validation via <code>contract_test.py</code></td><td>NO-SHIP if any endpoint fails status code or required field check</td></tr>
+              <tr><td><strong>7</strong></td><td>Design Contract Conformance — brand colors, fonts, spacing, component usage</td><td>CONDITIONAL if deviations found</td></tr>
+              <tr><td><strong>8</strong></td><td>Performance Budget Gate — bundle KB and API p50/p95 vs. PERF_BUDGET.json</td><td>NO-SHIP if budget exceeded</td></tr>
+              <tr><td><strong>9</strong></td><td>Accessibility — WCAG 2.1 AA automated checks</td><td>CONDITIONAL if violations found</td></tr>
+              <tr><td><strong>10</strong></td><td>Platform Readiness — store assets, signing, metadata (mobile/desktop)</td><td>NO-SHIP if platform requirements unmet</td></tr>
+              <tr><td><strong>11</strong></td><td>Security Integration — CRITICAL findings from SECURITY_REPORT.md unresolved</td><td>NO-SHIP if CRITICAL findings remain</td></tr>
+              <tr><td><strong>12B</strong></td><td>Container Verification — Docker image build + test suite run inside container via <code>container_verify.py</code></td><td>NO-SHIP if CONTAINER_FAIL; SKIP if Docker unavailable</td></tr>
+              <tr><td><strong>12</strong></td><td>Review Rubric + DONE_CRITERIA check + HANDOFF v6 Update</td><td>NO-SHIP if rubric mean &lt;3.0; required to complete the pipeline</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Phase 3A — Code Coverage Verification</h2>
+        <p>After all test contracts pass in Phase 3, <code>check_coverage.py</code> runs independently to measure overall line coverage across the project.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Result</th><th>Verdict</th><th>Pipeline impact</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Coverage ≥ 70%</td>
+                <td><span class="badge badge-green">COVERAGE_PASS</span></td>
+                <td>Continue to Phase 4</td>
+              </tr>
+              <tr>
+                <td>Coverage 60–69%</td>
+                <td><span class="badge badge-yellow">COVERAGE_LOW</span></td>
+                <td>SHIP with qualifier — documented in VERIFICATION_REPORT.md</td>
+              </tr>
+              <tr>
+                <td>Coverage &lt; 60%</td>
+                <td><span class="badge badge-red">COVERAGE_FAIL</span></td>
+                <td>NO-SHIP — Builder must add missing tests before re-verify</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Phase 6C — Contract Conformance Testing</h2>
+        <p>The Verifier independently re-validates the contract layer created by the Planner in Phase B. This catches drift between planned contracts and actual implementation.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Contract type</th><th>Validation method</th><th>Failure impact</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Zod schemas</td>
+                <td>Run all schemas against actual API response fixtures collected during E2E tests</td>
+                <td>NO-SHIP — contract violation</td>
+              </tr>
+              <tr>
+                <td>OpenAPI stubs</td>
+                <td>Compare openapi.yaml endpoint signatures against actual route handlers; check request/response shapes</td>
+                <td>NO-SHIP — contract violation</td>
+              </tr>
+              <tr>
+                <td>Type safety</td>
+                <td><code>tsc --noEmit</code> must pass with zero errors</td>
+                <td>NO-SHIP — type error</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Phase 6D — Runtime API Contract Testing</h2>
+        <p>Phase 6D starts the application and calls every endpoint declared in <code>INTERFACES.md</code> with minimal valid requests. This validates that the running application behaves as specified — not just that the code compiles.</p>
+
+        <p>Powered by <code>contract_test.py</code>, which:</p>
+        <ol>
+          <li>Reads all endpoints from <code>INTERFACES.md</code> and <code>openapi.yaml</code></li>
+          <li>Sends a minimal valid request to each endpoint (using example payloads from the OpenAPI spec)</li>
+          <li>Validates the response status code against the declared success code</li>
+          <li>Checks required response fields are present and correctly typed</li>
+        </ol>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Result</th><th>Verdict</th><th>Pipeline impact</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>All endpoints pass</td>
+                <td><span class="badge badge-green">RUNTIME_CONTRACT_PASS</span></td>
+                <td>Continue to Phase 7</td>
+              </tr>
+              <tr>
+                <td>Any endpoint fails status or field check</td>
+                <td><span class="badge badge-red">RUNTIME_CONTRACT_FAIL</span></td>
+                <td>NO-SHIP — every failing endpoint listed with actual vs. expected</td>
+              </tr>
+              <tr>
+                <td>Application fails to start</td>
+                <td><span class="badge badge-red">RUNTIME_CONTRACT_FAIL</span></td>
+                <td>NO-SHIP — startup error treated as contract failure</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Phase 8 — Performance Budget Gate</h2>
+        <p>The Verifier runs <code>scripts/perf.mjs</code> and compares results against <code>.agent/PERF_BUDGET.json</code>.</p>
+
+        <pre><code>pnpm test:perf</code></pre>
+
+        <h3>Metrics measured</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Metric</th><th>Default budget</th><th>Source</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Total bundle size</td><td>500 KB</td><td><code>.next/build-manifest.json</code></td></tr>
+              <tr><td>Initial chunk size</td><td>200 KB</td><td><code>.next/build-manifest.json</code></td></tr>
+              <tr><td>API response p50</td><td>200ms</td><td>5 samples per endpoint in openapi.yaml</td></tr>
+              <tr><td>API response p95</td><td>800ms</td><td>5 samples per endpoint in openapi.yaml</td></tr>
+              <tr><td>Build warnings</td><td>0</td><td><code>pnpm build</code> stderr</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Performance verdicts</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Result</th><th>Verdict</th><th>Action</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>All metrics within budget</td><td><span class="badge badge-green">PERF_PASS</span></td><td>Continue to Phase 9</td></tr>
+              <tr><td>Any metric exceeds budget</td><td><span class="badge badge-red">PERF_FAIL</span></td><td>NO-SHIP — fix before re-verify</td></tr>
+              <tr><td>Budget file missing</td><td><span class="badge badge-yellow">PERF_SKIP</span></td><td>Log warning; continue (non-blocking)</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>To rebaseline after a deliberate change (e.g., adding a large dependency intentionally), run:</p>
+        <pre><code>pnpm test:perf --update</code></pre>
+
+        <h2>Phase 12B — Container Verification</h2>
+        <p>Phase 12B runs immediately before the final verdict. <code>container_verify.py</code> builds a Docker image from the project's Dockerfile and runs the full test suite inside the container — catching environment mismatch bugs that only surface at deploy time.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Result</th><th>Verdict</th><th>Pipeline impact</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Image builds, all tests pass inside container</td>
+                <td><span class="badge badge-green">CONTAINER_PASS</span></td>
+                <td>Proceed to Phase 12 verdict</td>
+              </tr>
+              <tr>
+                <td>Image builds, but tests fail inside container</td>
+                <td><span class="badge badge-red">CONTAINER_FAIL</span></td>
+                <td>NO-SHIP — environment mismatch; container error log included in report</td>
+              </tr>
+              <tr>
+                <td>Docker not available on the system</td>
+                <td><span class="badge badge-yellow">CONTAINER_SKIP</span></td>
+                <td>Non-blocking — log warning and continue to verdict</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Phase 12 — Verdict</h2>
+        <p>The final phase consolidates all phase results, runs the Review Rubric, checks DONE_CRITERIA.md, updates HANDOFF.json v6, and issues the SHIP or NO-SHIP verdict.</p>
+
+        <h3>Review Rubric (REVIEW_RUBRIC.md)</h3>
+        <p>The Verifier scores the project on 10 dimensions (R1–R10) on a 1–5 scale. A mean score of ≥ 3.0 is required for SHIP.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Dimension</th><th>What is evaluated</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>R1 — Spec Compliance</td><td>All features from feature-spec.md implemented and verifiable</td></tr>
+              <tr><td>R2 — Code Quality</td><td>Lint, type safety, complexity, dead code</td></tr>
+              <tr><td>R3 — Test Coverage</td><td>Coverage % and test contract completeness</td></tr>
+              <tr><td>R4 — Contract Conformance</td><td>Zod + OpenAPI + runtime contract results</td></tr>
+              <tr><td>R5 — Security Posture</td><td>Finding counts, resolved blockers, secret hygiene</td></tr>
+              <tr><td>R6 — Performance</td><td>Bundle size, API latency vs. budget</td></tr>
+              <tr><td>R7 — Accessibility</td><td>WCAG 2.1 AA pass rate</td></tr>
+              <tr><td>R8 — Platform Readiness</td><td>Signing, store assets, deploy config</td></tr>
+              <tr><td>R9 — Observability</td><td>Logging, metrics, health endpoints present</td></tr>
+              <tr><td>R10 — Documentation</td><td>README, API docs, env vars documented</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout callout-info">
+          <span class="callout-icon">ℹ️</span>
+          <div class="callout-content">
+            <div class="callout-title">REVIEW_RUBRIC.md and DONE_CRITERIA.md are template-sourced</div>
+            <p>Both files are copied from <code>templates/.agent/</code> to the project's <code>.agent/</code> directory by the Planner during the scaffold task. The Verifier reads them from <code>.agent/</code> in the project directory.</p>
+          </div>
+        </div>
+
+        <h2>SHIP vs NO-SHIP Verdict</h2>
+
+        <div class="callout callout-success">
+          <span class="callout-icon">✅</span>
+          <div class="callout-content">
+            <div class="callout-title">SHIP</div>
+            <p>All phases pass. No unresolved CRITICAL security findings. Performance budget met. Contract conformance confirmed. Platform requirements satisfied. The pipeline is complete — the product is ready for production.</p>
+          </div>
+        </div>
+
+        <div class="callout callout-danger">
+          <span class="callout-icon">🚫</span>
+          <div class="callout-content">
+            <div class="callout-title">NO-SHIP</div>
+            <p>One or more hard-block conditions exist. The Verifier lists every blocker with the specific fix required. The pipeline does not advance until all NO-SHIP conditions are resolved and <code>!verify</code> is re-run.</p>
+          </div>
+        </div>
+
+        <div class="callout callout-warning">
+          <span class="callout-icon">⚠️</span>
+          <div class="callout-content">
+            <div class="callout-title">CONDITIONAL</div>
+            <p>No hard blockers, but notable issues exist (design deviations, accessibility warnings, accepted security risks). The pipeline completes with documented conditions that must be resolved before production launch.</p>
+          </div>
+        </div>
+
+        <h2>Post-SHIP: Auto-Commit and PR</h2>
+        <p>After a SHIP verdict, the Verifier runs <code>commit_by_task.py</code> to create a clean git history and prepare the pull request body.</p>
+
+        <p><code>commit_by_task.py</code>:</p>
+        <ol>
+          <li>Reads every task from TASK-GRAPH.md in order</li>
+          <li>Creates one git commit per task using the task title and ID as the commit message</li>
+          <li>Writes <code>artifacts/verification/PR_BODY.md</code> — a structured PR description with task summary, test results, and verification verdict</li>
+          <li>Prints the push and PR creation commands for the human to run</li>
+        </ol>
+
+        <pre><code># Commands printed by commit_by_task.py after SHIP:
+git push origin main
+gh pr create --title "..." --body-file artifacts/verification/PR_BODY.md</code></pre>
+
+        <div class="callout callout-info">
+          <span class="callout-icon">ℹ️</span>
+          <div class="callout-content">
+            <div class="callout-title">The Verifier prints, not pushes</div>
+            <p>The Verifier never pushes to remote or creates PRs automatically. It prints the exact commands for the human to review and execute. This preserves the human gate at the final deployment step.</p>
+          </div>
+        </div>
+
+        <h2>Outputs</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Artifact</th><th>Path</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>VERIFICATION_REPORT.md</code></td><td><code>artifacts/verification/</code></td></tr>
+              <tr><td><code>PERF_REPORT.md</code></td><td><code>artifacts/verification/</code></td></tr>
+              <tr><td><code>PR_BODY.md</code></td><td><code>artifacts/verification/</code></td></tr>
+              <tr><td>Visual regression baselines</td><td><code>artifacts/verification/screenshots/baselines/</code></td></tr>
+              <tr><td><code>HANDOFF.json v6</code></td><td><code>artifacts/pipeline/</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="doc-footer">
+          <a class="doc-footer-link" href="security.html">
+            <span class="doc-footer-dir">← Previous</span>
+            <span class="doc-footer-title">Security</span>
+          </a>
+          <a class="doc-footer-link next" href="commands.html">
+            <span class="doc-footer-dir">Next →</span>
+            <span class="doc-footer-title">Command Reference</span>
+          </a>
+        </div>
+
+      </div>
+    </main>
+  </div>
+  <script src="nav.js"></script>
+</body>
+</html>

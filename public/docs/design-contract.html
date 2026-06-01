@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Design Contract — CodeSleuth AI Docs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="header" id="site-header"></header>
+  <div class="main-layout">
+    <nav class="sidebar" id="site-sidebar"></nav>
+    <main class="content">
+      <div class="content-inner">
+
+        <div class="breadcrumb">
+          <a href="index.html">Docs</a>
+          <span class="breadcrumb-sep">›</span>
+          <span>Reference</span>
+          <span class="breadcrumb-sep">›</span>
+          <span class="breadcrumb-current">Design Contract</span>
+        </div>
+
+        <div class="page-tag">🎨 Reference</div>
+        <h1>Design Contract</h1>
+        <p class="lead">
+          The design contract is automatically activated for any project with a web platform.
+          It specifies the design system, typography, color architecture, component library,
+          spacing rules, and animation standards. The Discovery Agent writes
+          <code>artifacts/discovery/design-contract.md</code>. The Verifier measures conformance in Phase 7.
+        </p>
+
+        <div class="callout callout-info">
+          <span class="callout-icon">ℹ️</span>
+          <div class="callout-content">
+            <div class="callout-title">Auto-activated for web projects</div>
+            <p>The Discovery Agent produces <code>design-contract.md</code> automatically for any project with a Next.js or web platform. The Builder loads it at the start of every UI task. The Verifier scores conformance in Phase 7.</p>
+          </div>
+        </div>
+
+        <h2>Default Design System</h2>
+        <p>Unless the project brief specifies otherwise, web projects use this default stack:</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Element</th><th>Default</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Primary font</td><td>Inter (variable, 400–800 weight)</td></tr>
+              <tr><td>Mono font</td><td>JetBrains Mono</td></tr>
+              <tr><td>CSS framework</td><td>Tailwind CSS v4</td></tr>
+              <tr><td>Component library</td><td>shadcn/ui (Radix UI primitives)</td></tr>
+              <tr><td>Animation</td><td>Framer Motion ^11</td></tr>
+              <tr><td>Icons</td><td>Lucide React</td></tr>
+              <tr><td>Color system</td><td>CSS custom properties with HSL values</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Color Architecture</h2>
+        <p>All colors are defined as CSS custom properties. The Builder never hardcodes hex values in components — always uses semantic tokens:</p>
+
+        <pre><code>/* globals.css */
+:root {
+  --background: 0 0% 100%;
+  --foreground: 222.2 84% 4.9%;
+  --primary: 221.2 83.2% 53.3%;
+  --primary-foreground: 210 40% 98%;
+  --secondary: 210 40% 96.1%;
+  --secondary-foreground: 222.2 47.4% 11.2%;
+  --muted: 210 40% 96.1%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+  --accent: 210 40% 96.1%;
+  --accent-foreground: 222.2 47.4% 11.2%;
+  --destructive: 0 84.2% 60.2%;
+  --border: 214.3 31.8% 91.4%;
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: 222.2 84% 4.9%;
+  --foreground: 210 40% 98%;
+  /* ... dark mode tokens */
+}</code></pre>
+
+        <h2>Typography Scale</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Role</th><th>Size</th><th>Weight</th><th>Usage</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Display</td><td>3rem / 48px</td><td>800</td><td>Hero headings only</td></tr>
+              <tr><td>H1</td><td>2.25rem / 36px</td><td>700</td><td>Page titles</td></tr>
+              <tr><td>H2</td><td>1.875rem / 30px</td><td>600</td><td>Section headings</td></tr>
+              <tr><td>H3</td><td>1.5rem / 24px</td><td>600</td><td>Subsection headings</td></tr>
+              <tr><td>Body</td><td>1rem / 16px</td><td>400</td><td>Body text, line-height 1.75</td></tr>
+              <tr><td>Small</td><td>0.875rem / 14px</td><td>400</td><td>Captions, labels</td></tr>
+              <tr><td>Mono</td><td>0.875rem / 14px</td><td>400–500</td><td>Code, technical values</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Spacing System</h2>
+        <p>All spacing uses the Tailwind 4-unit (16px base) scale. The Builder never uses arbitrary pixel values in layout components:</p>
+        <ul>
+          <li><strong>Section padding:</strong> <code>py-16 px-6</code> (mobile) → <code>py-24 px-8</code> (desktop)</li>
+          <li><strong>Card padding:</strong> <code>p-4</code> (compact) | <code>p-6</code> (standard) | <code>p-8</code> (spacious)</li>
+          <li><strong>Stack gap:</strong> <code>gap-2</code> (tight) | <code>gap-4</code> (standard) | <code>gap-8</code> (loose)</li>
+          <li><strong>Max content width:</strong> <code>max-w-6xl mx-auto</code></li>
+        </ul>
+
+        <h2>shadcn/ui Component Usage Rules</h2>
+        <p>The Builder uses shadcn/ui primitives before building custom components. New custom components must not duplicate shadcn functionality.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Need</th><th>Use</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Modal / dialog</td><td><code>&lt;Dialog&gt;</code></td></tr>
+              <tr><td>Dropdown</td><td><code>&lt;DropdownMenu&gt;</code></td></tr>
+              <tr><td>Select input</td><td><code>&lt;Select&gt;</code></td></tr>
+              <tr><td>Date picker</td><td><code>&lt;Calendar&gt;</code> + <code>&lt;Popover&gt;</code></td></tr>
+              <tr><td>Toast / notification</td><td><code>&lt;Sonner&gt;</code> (via sonner library)</td></tr>
+              <tr><td>Form</td><td><code>&lt;Form&gt;</code> (React Hook Form + Zod)</td></tr>
+              <tr><td>Table</td><td><code>&lt;Table&gt;</code> (or @tanstack/react-table for complex grids)</td></tr>
+              <tr><td>Navigation tabs</td><td><code>&lt;Tabs&gt;</code></td></tr>
+              <tr><td>Contextual menu</td><td><code>&lt;ContextMenu&gt;</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Animation Rules</h2>
+        <ul>
+          <li><strong>Micro-interactions:</strong> 150–200ms, ease-out. Used for hover states, focus rings, button presses.</li>
+          <li><strong>Page transitions:</strong> 300–400ms, spring physics. Used for route changes and modal opens.</li>
+          <li><strong>Content reveals:</strong> 500–600ms, staggered when multiple elements. Used for list items, cards appearing on scroll.</li>
+          <li><strong>Loading states:</strong> Skeleton placeholders (not spinners) for content loading &gt;300ms.</li>
+          <li><strong>Reduced motion:</strong> All animations must respect <code>prefers-reduced-motion</code>. Use Framer Motion's <code>useReducedMotion()</code> hook.</li>
+        </ul>
+
+        <h2>Responsive Breakpoints</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Breakpoint</th><th>Width</th><th>Target devices</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>sm:</code></td><td>640px+</td><td>Large phones, small tablets</td></tr>
+              <tr><td><code>md:</code></td><td>768px+</td><td>Tablets</td></tr>
+              <tr><td><code>lg:</code></td><td>1024px+</td><td>Laptops</td></tr>
+              <tr><td><code>xl:</code></td><td>1280px+</td><td>Desktops</td></tr>
+              <tr><td><code>2xl:</code></td><td>1536px+</td><td>Wide desktops</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>Visual regression baselines are captured at: 390px (mobile), 768px (tablet), 1024px (laptop), 1440px (desktop).</p>
+
+        <h2>Verifier Design Contract Score</h2>
+        <p>Phase 7 of the Verifier measures design contract conformance. Score is 0–100. Below 80 is a CONDITIONAL flag; below 60 is a RESTYLE recommendation to the Critic.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Check</th><th>Weight</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Font stack correct (Inter primary, JetBrains Mono)</td><td>10%</td></tr>
+              <tr><td>Color tokens used (no hardcoded hex in components)</td><td>20%</td></tr>
+              <tr><td>shadcn/ui components used for standard UI patterns</td><td>20%</td></tr>
+              <tr><td>Spacing follows 4-unit scale (no arbitrary px values)</td><td>15%</td></tr>
+              <tr><td>All interactive elements have focus-visible states</td><td>15%</td></tr>
+              <tr><td>Dark mode tokens implemented and functional</td><td>10%</td></tr>
+              <tr><td>Reduced motion respected</td><td>10%</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="doc-footer">
+          <a class="doc-footer-link" href="platform-gates.html">
+            <span class="doc-footer-dir">← Previous</span>
+            <span class="doc-footer-title">Platform Gates</span>
+          </a>
+          <a class="doc-footer-link next" href="index.html">
+            <span class="doc-footer-dir">↑ Back to</span>
+            <span class="doc-footer-title">Introduction</span>
+          </a>
+        </div>
+
+      </div>
+    </main>
+  </div>
+  <script src="nav.js"></script>
+</body>
+</html>

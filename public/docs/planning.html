@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Technical Planning — CodeSleuth AI Docs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="header" id="site-header"></header>
+  <div class="main-layout">
+    <nav class="sidebar" id="site-sidebar"></nav>
+    <main class="content">
+      <div class="content-inner">
+
+        <div class="breadcrumb">
+          <a href="index.html">Docs</a>
+          <span class="breadcrumb-sep">›</span>
+          <span>Agents</span>
+          <span class="breadcrumb-sep">›</span>
+          <span class="breadcrumb-current">Technical Planning</span>
+        </div>
+
+        <div class="page-tag">📐 Agent 2</div>
+        <h1>Technical Planning Agent</h1>
+        <p class="lead">
+          The Technical Planning Agent transforms the Discovery spec into a complete implementation blueprint —
+          TDD, interface contracts, data schema, task graph, machine-readable Zod schemas, and a full parallelism
+          map — all produced in a single pass triggered by <code>!plan</code>.
+        </p>
+
+        <h2>Planning Output Artifacts</h2>
+        <p>Triggered by <span class="cmd">!plan</span>. The Planner produces the complete artifact set directly:</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Artifact</th><th>Path</th><th>Contents</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>TDD.md</code></td><td><code>artifacts/build/</code></td><td>Technical Design Document: architecture decisions, data flow, API design, error handling strategy, test contract requirements</td></tr>
+              <tr><td><code>INTERFACES.md</code></td><td><code>artifacts/build/</code></td><td>API endpoint signatures, component prop interfaces, event schemas</td></tr>
+              <tr><td><code>SCHEMA.md</code></td><td><code>artifacts/build/</code></td><td>Database schema with relationships, indexes, and migration strategy</td></tr>
+              <tr><td><code>TASK-GRAPH.md</code></td><td><code>artifacts/build/</code></td><td>Ordered task list with dependencies, test contracts, acceptance criteria, and Parallelism Map</td></tr>
+              <tr><td><code>[module].contracts.ts</code></td><td><code>artifacts/build/contracts/</code></td><td>Zod schemas for every major data model and API response shape</td></tr>
+              <tr><td><code>openapi.yaml</code></td><td><code>artifacts/build/contracts/</code></td><td>OpenAPI 3.1 stubs for all declared endpoints</td></tr>
+              <tr><td><code>FILE_OWNERSHIP_MAP.md</code></td><td><code>artifacts/build/</code></td><td>Every project file mapped to the task(s) that own it — used for Change Impact Tracking</td></tr>
+              <tr><td><code>DECISIONS.md</code></td><td><code>artifacts/build/</code></td><td>Architecture decisions log including Pattern Library matches applied</td></tr>
+              <tr><td><code>HANDOFF.json v2</code></td><td><code>artifacts/build/</code></td><td>Updated with task_count, contracts_path, schema_hash, stack_versions, component_library</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Machine-Readable Contract Layer</h2>
+        <p>The Planner emits two contract types that create a ground truth for Builder and Verifier:</p>
+
+        <h3>Zod Schemas</h3>
+        <pre><code>// artifacts/build/contracts/user.contracts.ts
+import { z } from 'zod';
+
+export const UserSchema = z.object({
+  id: z.string().cuid(),
+  email: z.string().email(),
+  role: z.enum(['ADMIN', 'USER']),
+  createdAt: z.coerce.date(),
+});
+
+export const CreateUserSchema = UserSchema.omit({ id: true, createdAt: true });
+export type User = z.infer&lt;typeof UserSchema&gt;;
+</code></pre>
+
+        <h3>OpenAPI Stubs</h3>
+        <pre><code># artifacts/build/contracts/openapi.yaml
+openapi: "3.1.0"
+info:
+  title: "Project API"
+  version: "1.0.0"
+paths:
+  /api/users:
+    post:
+      operationId: createUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateUser' }
+      responses:
+        "201":
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/User' }
+</code></pre>
+
+        <h2>Task Schema</h2>
+        <p>Every task in <code>TASK-GRAPH.md</code> follows this schema, including the v3.0 parallelism and checkpoint fields:</p>
+
+        <pre><code>### TASK-001: Set up authentication with NextAuth v5
+**Status:** PENDING
+**Task type:** auth
+**Platform:** web
+**Dependencies:** none
+**depends_on:** none
+**can_parallel:** false
+**output_files:**
+- src/lib/auth.ts
+- src/app/api/auth/[...nextauth]/route.ts
+
+**Acceptance criteria:**
+- Users can sign in with Google OAuth
+- Session is stored in database (not JWT)
+- Unauthenticated requests to /api/protected return 401
+
+**Test contract status:** REQUIRED
+
+**Test contract:**
+| # | Behavior description | Test type | Test file |
+|---|---|---|---|
+| TC-1 | Sign-in with valid credentials creates session | integration | tests/auth.test.ts |
+| TC-2 | Unauthenticated request to /api/protected returns 401 | integration | tests/auth.test.ts |
+
+**Gate commands:**
+pnpm agent:check
+
+**Checkpoint:** (written by Builder after commit_by_task.py — git SHA + timestamp)
+</code></pre>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Field</th><th>Values</th><th>Purpose</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>task_type</code></td><td>api | auth | data | infra | ui | config | feature | cicd | obs</td><td>Determines which scripts run and which Pattern Library queries apply</td></tr>
+              <tr><td><code>depends_on</code></td><td>[TASK-NNN] or "none"</td><td>Explicit dependency edges for batch ordering</td></tr>
+              <tr><td><code>can_parallel</code></td><td>true | false</td><td>Whether this task may execute concurrently with siblings in the same batch</td></tr>
+              <tr><td><code>output_files</code></td><td>[list of files]</td><td>Used by <code>parallel_runner.go</code> for write-conflict detection</td></tr>
+              <tr><td><code>Checkpoint</code></td><td>git SHA + timestamp</td><td>Written by Builder after <code>commit_by_task.py</code> — enables <code>!replay TASK-NNN</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Standard Infrastructure Tasks</h2>
+        <p>The Planner automatically injects standard infrastructure tasks into every TASK-GRAPH based on project type. These tasks are never omitted — they are appended after the human-authored feature tasks.</p>
+
+        <h3>CI/CD Tasks (all project types)</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Task ID</th><th>Name</th><th>Output</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>TASK-CICD-1</code></td><td>CI workflow</td><td><code>.github/workflows/ci.yml</code></td></tr>
+              <tr><td><code>TASK-CICD-2</code></td><td>Deploy workflow</td><td><code>.github/workflows/deploy.yml</code></td></tr>
+              <tr><td><code>TASK-CICD-3</code></td><td>Security scan workflow</td><td><code>.github/workflows/security.yml</code></td></tr>
+              <tr><td><code>TASK-CICD-4</code></td><td>GoReleaser config</td><td><code>.goreleaser.yaml</code> — Linux CLI projects only</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Observability Tasks — HTTP API projects</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Task ID</th><th>Name</th><th>Output</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>TASK-OBS-1</code></td><td>Structured logger</td><td>JSON logging middleware on all routes</td></tr>
+              <tr><td><code>TASK-OBS-2</code></td><td>Metrics endpoint</td><td><code>GET /metrics</code> (Prometheus format)</td></tr>
+              <tr><td><code>TASK-OBS-3</code></td><td>Health &amp; readiness probes</td><td><code>GET /health</code>, <code>GET /ready</code></td></tr>
+              <tr><td><code>TASK-OBS-4</code></td><td>OpenTelemetry tracing</td><td>OTLP exporter configured</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Observability Tasks — CLI projects</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Task ID</th><th>Name</th><th>Output</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>TASK-OBS-1</code></td><td>Verbose / debug flags</td><td><code>--verbose</code> and <code>--debug</code> global flags with leveled output</td></tr>
+              <tr><td><code>TASK-OBS-2</code></td><td>Log file output</td><td><code>--log-file &lt;path&gt;</code> flag writing structured JSON log</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Spec Validation Gate</h2>
+        <p>After Phase B completes, <code>spec_validate.py</code> runs automatically. It must exit 0 before <code>!build</code> is unlocked. The script performs seven checks:</p>
+
+        <div class="domain-list">
+          <div class="domain-item"><span class="domain-num">1</span> Every feature in <code>feature-spec.md</code> has at least one owning task in TASK-GRAPH.md</div>
+          <div class="domain-item"><span class="domain-num">2</span> No task has a circular dependency (DAG validation)</div>
+          <div class="domain-item"><span class="domain-num">3</span> All API endpoints in INTERFACES.md appear in <code>openapi.yaml</code></div>
+          <div class="domain-item"><span class="domain-num">4</span> All database tables in SCHEMA.md have a corresponding Zod schema in <code>contracts/</code></div>
+          <div class="domain-item"><span class="domain-num">5</span> Every task has at least one test contract (TC row) for Standard and Complex tier projects</div>
+          <div class="domain-item"><span class="domain-num">6</span> <code>FILE_OWNERSHIP_MAP.md</code> covers all files listed in task <code>output_files</code> fields</div>
+          <div class="domain-item"><span class="domain-num">7</span> HANDOFF.json v2 is present and valid JSON with required fields</div>
+        </div>
+
+        <div class="callout callout-error">
+          <span class="callout-icon">🚨</span>
+          <div class="callout-content">
+            <div class="callout-title">Spec validation failure blocks !build</div>
+            <p>If <code>spec_validate.py</code> exits non-zero, the Orchestrator refuses to unlock <code>!build</code> and displays the failing checks. The Planner must fix the artifacts before the gate can open.</p>
+          </div>
+        </div>
+
+        <h2>Schema Change Safety</h2>
+        <p>Whenever SCHEMA.md is modified during Planning or mid-build, <code>migration_safety.py generate</code> runs automatically. It produces a Migration Risk Report with:</p>
+
+        <ul>
+          <li>Delta between old and new schema (added/removed/modified columns and tables)</li>
+          <li>Risk severity per change: LOW | MEDIUM | HIGH</li>
+          <li>Bidirectional SQL: forward migration and rollback SQL</li>
+          <li>Data loss assessment for each destructive change</li>
+        </ul>
+
+        <div class="callout callout-warn">
+          <span class="callout-icon">⚠️</span>
+          <div class="callout-content">
+            <div class="callout-title">HIGH severity risks block the pipeline</div>
+            <p>Any schema change classified HIGH (e.g., dropping a column with existing data, changing a column type non-losslessly) blocks the pipeline until the human issues <span class="cmd">!migration-approve</span> or <span class="cmd">!migration-cancel</span>. See <a href="orchestrator.html">Orchestrator — Migration Sub-Commands</a>.</p>
+          </div>
+        </div>
+
+        <h2>FILE_OWNERSHIP_MAP</h2>
+        <p>The <code>FILE_OWNERSHIP_MAP.md</code> maps every project file to the task(s) responsible for it. This powers Change Impact Tracking in Agent 3 — when a file is modified, the Builder looks up which other tasks own files in the same module and re-runs their tests.</p>
+
+        <pre><code>| File | Owning Task(s) |
+|---|---|
+| src/lib/auth.ts | TASK-001 |
+| src/app/api/auth/[...nextauth]/route.ts | TASK-001 |
+| src/components/LoginForm.tsx | TASK-003 |
+| src/lib/db.ts | TASK-002, TASK-001 |
+</code></pre>
+
+        <h2>Pattern Library Integration</h2>
+        <p>At activation, the Planner queries <code>PATTERN_INDEX.md</code> with the project's stack keywords. Matched patterns are recorded in <code>DECISIONS.md</code> and applied directly in planning without re-solving known problems.</p>
+
+        <p>Example: a project with <code>nextjs + prisma + nextauth</code> will automatically apply:</p>
+        <ul>
+          <li>PATTERN-001 — NextAuth v5 + Prisma database sessions</li>
+          <li>PATTERN-002 — Zod env validation at module load time</li>
+          <li>PATTERN-003 — Prisma singleton with globalThis hot-reload guard</li>
+        </ul>
+
+        <h2>Planning Validation Checklist</h2>
+        <p>Before emitting Phase B artifacts, the Planner self-validates:</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Check</th><th>Pass condition</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Every task has acceptance criteria</td><td>No task row is missing the "Acceptance criteria" field</td></tr>
+              <tr><td>Every Complex-tier task has test contracts</td><td>Test contract status is REQUIRED and at least one TC row exists</td></tr>
+              <tr><td>No circular task dependencies</td><td>TASK-GRAPH has no cycles</td></tr>
+              <tr><td>All spec features mapped to tasks</td><td>Every feature-spec.md feature has at least one owning task</td></tr>
+              <tr><td>Contracts cover all API endpoints</td><td>Every endpoint in INTERFACES.md appears in openapi.yaml</td></tr>
+              <tr><td>FILE_OWNERSHIP_MAP is complete</td><td>Every planned file has at least one owning task</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="doc-footer">
+          <a class="doc-footer-link" href="discovery.html">
+            <span class="doc-footer-dir">← Previous</span>
+            <span class="doc-footer-title">Discovery</span>
+          </a>
+          <a class="doc-footer-link next" href="builder.html">
+            <span class="doc-footer-dir">Next →</span>
+            <span class="doc-footer-title">Application Builder</span>
+          </a>
+        </div>
+
+      </div>
+    </main>
+  </div>
+  <script src="nav.js"></script>
+</body>
+</html>

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Global Contract — CodeSleuth AI Docs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="header" id="site-header"></header>
+  <div class="main-layout">
+    <nav class="sidebar" id="site-sidebar"></nav>
+    <main class="content">
+      <div class="content-inner">
+
+        <div class="breadcrumb">
+          <a href="index.html">Docs</a>
+          <span class="breadcrumb-sep">›</span>
+          <span>Reference</span>
+          <span class="breadcrumb-sep">›</span>
+          <span class="breadcrumb-current">Global Contract</span>
+        </div>
+
+        <div class="page-tag">📜 Reference</div>
+        <h1>Global Contract</h1>
+        <p class="lead">
+          The Global Contract defines the rules that every agent in the pipeline inherits unconditionally.
+          No agent may override these rules. They exist to ensure consistency, safety, and predictability
+          across all pipeline stages.
+        </p>
+
+        <div class="callout callout-danger">
+          <span class="callout-icon">🚨</span>
+          <div class="callout-content">
+            <div class="callout-title">These rules cannot be overridden</div>
+            <p>Each agent file begins with <code>&lt;!-- GLOBAL CONTRACT REFERENCE --&gt;</code> indicating it inherits this contract. Agent-specific rules may extend, but never replace, global rules.</p>
+          </div>
+        </div>
+
+        <h2>Core Behavioral Rules</h2>
+
+        <h3>RARV Cycle (non-negotiable)</h3>
+        <p>Every agent follows Reason → Act → Reflect → Verify before producing any output. No agent skips the Reflect or Verify step, even under time or token pressure.</p>
+
+        <h3>Human Gate Supremacy</h3>
+        <p>No pipeline stage advances without an explicit human gate command. An agent that believes the next stage is ready must wait for the command — it may not auto-advance, even if the human seems to intend it.</p>
+
+        <h3>No Silent Failures</h3>
+        <p>When something fails, agents must state the failure explicitly, describe the impact, and propose a fix. Continuing past a known failure without documentation is prohibited.</p>
+
+        <h3>Artifact Ownership</h3>
+        <p>Each agent writes only to its designated artifact paths. No agent modifies another agent's primary outputs. Discovery does not modify TDD.md. Builder does not modify feature-spec.md.</p>
+
+        <h3>Truth Over Comfort</h3>
+        <p>Agents do not provide false reassurance. If the product has fundamental problems, the agent says so. Positive assessments require evidence.</p>
+
+        <h2>Token Budget Rules</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Stage</th><th>Budget</th><th>On breach</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Discovery</td><td>80K tokens</td><td>Summarize remaining phases; emit partial spec with open questions marked</td></tr>
+              <tr><td>Planning</td><td>140K tokens</td><td>Emit partial artifacts; mark incomplete tasks as PENDING with NOTE</td></tr>
+              <tr><td>Builder (per task)</td><td>40K tokens</td><td>Mark task BLOCKED; document what remains; advance to next task</td></tr>
+              <tr><td>Security</td><td>100K tokens</td><td>Complete reviewed domains; mark remaining as SKIPPED with reason</td></tr>
+              <tr><td>Verifier</td><td>80K tokens</td><td>Complete phases through current; emit partial VERIFICATION_REPORT</td></tr>
+              <tr><td>Critic</td><td>120K tokens</td><td>Complete phases 0–3; emit partial CRITICISM.md; note incomplete sections</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Security Rules (All Agents)</h2>
+        <ul>
+          <li>Never output hardcoded secrets, API keys, or credentials in any artifact or code sample</li>
+          <li>Never write SQL queries using string concatenation — always use parameterized queries or ORM</li>
+          <li>Never recommend disabling security features (CSRF protection, CSP headers, TLS verification) without documented justification</li>
+          <li>Always use environment variables for configuration that differs between environments</li>
+          <li>Never store sensitive data in localStorage or sessionStorage without explicit product decision and documentation</li>
+        </ul>
+
+        <h2>Output Quality Rules</h2>
+        <ul>
+          <li>Every output file must be complete and self-contained — no placeholder text like "TODO: implement this"</li>
+          <li>Every code sample in planning artifacts must be syntactically correct for the declared language/version</li>
+          <li>Every task in TASK-GRAPH.md must have: status, dependencies, acceptance criteria, and at least one test contract (Complex tier)</li>
+          <li>No agent may emit a DONE status for a task whose tests have not passed</li>
+          <li>No agent may claim a feature is implemented without code evidence</li>
+        </ul>
+
+        <h2>Complexity Tier Rules</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Tier</th><th>Security domains</th><th>TC requirement</th><th>Performance budget</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="badge badge-green">Simple</span></td>
+                <td>5 LOW domains</td>
+                <td>1 TC minimum per task</td>
+                <td>Standard budgets apply</td>
+              </tr>
+              <tr>
+                <td><span class="badge badge-yellow">Standard</span></td>
+                <td>HIGH + CRITICAL domains</td>
+                <td>2 TC minimum per task; E2E for user flows</td>
+                <td>Standard budgets apply</td>
+              </tr>
+              <tr>
+                <td><span class="badge badge-red">Complex</span></td>
+                <td>All 20 domains</td>
+                <td>Full TC suite; integration tests required</td>
+                <td>Tightened budgets for multi-platform</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Prohibited Actions (All Agents)</h2>
+        <ul>
+          <li>Auto-advancing the pipeline without a gate command</li>
+          <li>Modifying another agent's designated output files</li>
+          <li>Marking a task DONE without passing tests</li>
+          <li>Skipping the security review (<code>!security</code>) before verification</li>
+          <li>Executing irreversible operations (database drops, file deletions, production deployments) without explicit human confirmation</li>
+          <li>Using <code>--force</code>, <code>--no-verify</code>, or equivalent bypass flags in gate commands</li>
+          <li>Generating HANDOFF.json with a lower version number than the current file</li>
+        </ul>
+
+        <div class="doc-footer">
+          <a class="doc-footer-link" href="pattern-library.html">
+            <span class="doc-footer-dir">← Previous</span>
+            <span class="doc-footer-title">Pattern Library</span>
+          </a>
+          <a class="doc-footer-link next" href="handoff-schema.html">
+            <span class="doc-footer-dir">Next →</span>
+            <span class="doc-footer-title">HANDOFF.json Schema</span>
+          </a>
+        </div>
+
+      </div>
+    </main>
+  </div>
+  <script src="nav.js"></script>
+</body>
+</html>

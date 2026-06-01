@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Maintenance Mode — CodeSleuth AI Docs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="header" id="site-header"></header>
+  <div class="main-layout">
+    <nav class="sidebar" id="site-sidebar"></nav>
+    <main class="content">
+      <div class="content-inner">
+
+        <div class="breadcrumb">
+          <a href="index.html">Docs</a>
+          <span class="breadcrumb-sep">›</span>
+          <span>Agents</span>
+          <span class="breadcrumb-sep">›</span>
+          <span class="breadcrumb-current">Maintenance Mode</span>
+        </div>
+
+        <div class="page-tag">🔧 Agent 7</div>
+        <h1>Maintenance Mode</h1>
+        <p class="lead">
+          Agent 7 is the always-resident pipeline for projects that have completed a build.
+          Every feature addition, bug fix, and change — however small — passes through a
+          lightweight mini-pipeline rather than being applied ad hoc. The pipeline never
+          goes dark for a registered project.
+        </p>
+
+        <div class="callout callout-danger">
+          <span class="callout-icon">🚨</span>
+          <div class="callout-content">
+            <div class="callout-title">Ad-hoc edits are refused</div>
+            <p>
+              Once a project is registered, direct edits outside the pipeline are blocked.
+              Every change — one line or one thousand — must enter the mini-pipeline via Agent 7.
+              This is intentional: it keeps the HANDOFF, TASK-GRAPH, test contracts, and
+              CHANGE_LOG in sync with the actual codebase at all times.
+            </p>
+          </div>
+        </div>
+
+        <!-- How a project gets registered -->
+        <h2>How Projects Become Registered</h2>
+        <p>
+          Registration is automatic — you do not trigger it manually. Agent 3 (Builder) calls
+          <code>register_project.py</code> at the moment all tasks are marked DONE, before
+          activating the Critic. This means a project is registered even if the user stops
+          at the completed build and never proceeds to Critic, Security, or Verifier.
+        </p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Agent</th><th>Stage set</th><th>When</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Agent 3 — Builder</td><td><code>built</code></td><td>All tasks DONE, before Critic activates</td></tr>
+              <tr><td>Agent 4 — Critic</td><td><code>critiqued</code></td><td>CRITICISM.md written, HANDOFF v4 updated</td></tr>
+              <tr><td>Agent 5 — Security</td><td><code>secured</code></td><td>Security report complete, before waiting for <code>!verify</code></td></tr>
+              <tr><td>Agent 6 — Verifier</td><td><code>shipped</code></td><td>SHIP verdict issued</td></tr>
+              <tr><td>Agent 7 — Maintenance</td><td><code>maintenance</code></td><td>After every completed change cycle</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Resume flow -->
+        <h2>Session Resume</h2>
+        <p>
+          On every <code>Start agent 0</code>, the Orchestrator checks
+          <code>config/context.json → registered_projects</code>. If any projects are found,
+          a numbered menu is displayed:
+        </p>
+
+        <pre><code>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔁 REGISTERED PROJECTS — Pipeline Always Resident
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  [1]  MyApp        Stage: built       Last: Agent 3
+  [2]  AdminDash    Stage: shipped     Last: Agent 6
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Type a project number to resume · Type N for a new project</code></pre>
+
+        <p>
+          Selecting a number loads the project's HANDOFF.json and resumes from
+          <code>last_active_agent</code>. Projects at stage <code>shipped</code> or
+          <code>maintenance</code> route directly to Agent 7. Projects at earlier stages
+          (e.g. <code>built</code>, awaiting <code>!security</code>) resume from their last gate.
+        </p>
+
+        <!-- Mini-pipeline -->
+        <h2>The Mini-Pipeline</h2>
+        <p>
+          Every change request runs through a six-stage cycle. The cycle is lighter than the
+          full pipeline — no TDD rewrite, no full planning ceremony — but all safety gates are
+          preserved.
+        </p>
+
+        <ol class="steps">
+          <li class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <div class="step-title">Scope (Mini-Discovery)</div>
+              <div class="step-desc">
+                Agent 7 produces a scope block: type, surface, risk level, likely files touched,
+                and whether an automatic security check will run. A <code>MAINT-NNN</code> entry
+                is appended to <code>CHANGE_LOG.md</code>.
+              </div>
+            </div>
+          </li>
+          <li class="step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <div class="step-title">Plan (1–5 tasks)</div>
+              <div class="step-desc">
+                A compact task table is produced — no full TDD, no INTERFACES rewrite.
+                Each task has a test contract (REQUIRED or EXEMPT), gate commands, and owner files.
+                Agent 7 waits for <span class="cmd">!m-build</span> before proceeding.
+              </div>
+            </div>
+          </li>
+          <li class="step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <div class="step-title">Build</div>
+              <div class="step-desc">
+                Same per-task rules as Agent 3: failing tests first, minimum implementation,
+                platform gates, SAST scan, secret scan before every write.
+                Up to 5 self-repair attempts per task before surfacing a blocker.
+              </div>
+            </div>
+          </li>
+          <li class="step">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <div class="step-title">Critic check (automatic, targeted)</div>
+              <div class="step-desc">
+                Three focused questions scoped to the changed surface only: Does this degrade
+                an existing user flow? Does it introduce UX inconsistency? Does it miss an
+                obvious edge case? Concerns are surfaced before commit; all-clear proceeds automatically.
+              </div>
+            </div>
+          </li>
+          <li class="step">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <div class="step-title">Security (automatic, surface-gated)</div>
+              <div class="step-desc">
+                Runs automatically only when the change surface is <code>auth</code>,
+                <code>data</code>, or <code>infra</code>. Scoped to the diff —
+                not the full codebase. HIGH findings block commit. All other surfaces skip
+                this stage and proceed directly to Stage 6.
+              </div>
+            </div>
+          </li>
+          <li class="step">
+            <div class="step-num">6</div>
+            <div class="step-body">
+              <div class="step-title">Commit &amp; registration update</div>
+              <div class="step-desc">
+                <code>commit_by_task.py</code> groups writes by task ID and creates conventional
+                commits. <code>register_project.py</code> advances the stage to
+                <code>maintenance</code>. The cycle-complete banner is displayed and Agent 7
+                returns to ready state — no re-activation needed for the next request.
+              </div>
+            </div>
+          </li>
+        </ol>
+
+        <!-- Commands -->
+        <h2>Maintenance Commands</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Command</th><th>Behavior</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="cmd">!m-build</span></td>
+                <td>Human gate — advances from Plan to Build within the current change cycle.</td>
+              </tr>
+              <tr>
+                <td><span class="cmd">!m-status</span></td>
+                <td>Shows current cycle ID, scope, open tasks, last commit, and registration stage.</td>
+              </tr>
+              <tr>
+                <td><span class="cmd">!m-skip</span></td>
+                <td>Discard the current change cycle without committing. Returns to ready state.</td>
+              </tr>
+              <tr>
+                <td><span class="cmd">!m-history</span></td>
+                <td>List all <code>MAINT-NNN</code> cycles applied to this project with type, surface, and commit reference.</td>
+              </tr>
+              <tr>
+                <td><span class="cmd">!observe</span></td>
+                <td>Read-only mode — loads project context but refuses all writes. Use when inspecting the codebase without intending to change it. Type <span class="cmd">!observe off</span> to exit.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout callout-info">
+          <span class="callout-icon">💡</span>
+          <div class="callout-content">
+            <div class="callout-title">Standard pipeline commands still work</div>
+            <p>
+              <code>!retry</code>, <code>!skip</code>, <code>!change</code>,
+              <code>!error-check</code>, <code>!pattern-add</code>, <code>!telemetry</code>,
+              and <code>!docs</code> are all available during an active maintenance cycle.
+            </p>
+          </div>
+        </div>
+
+        <!-- Observe mode -->
+        <h2>Observe Mode</h2>
+        <p>
+          Sometimes you want to inspect a registered project — read code, check the HANDOFF,
+          review the TASK-GRAPH — without triggering a change cycle. <code>!observe</code>
+          activates a read-only session:
+        </p>
+
+        <pre><code>👁 Observe mode active — reads only, no writes. Type !observe off to resume.</code></pre>
+
+        <p>
+          Agent 7 will load files, answer questions, and summarize the codebase, but refuses
+          all tool writes, plan execution, and gate commands until <code>!observe off</code>
+          is issued.
+        </p>
+
+        <!-- Registration script -->
+        <h2>Under the Hood — register_project.py</h2>
+        <p>
+          The always-resident behavior is backed by <code>scripts/register_project.py</code>,
+          which writes to the <code>registered_projects</code> object in
+          <code>config/context.json</code>. Each entry records:
+        </p>
+
+        <pre><code>{
+  "/home/user/myapp": {
+    "name":              "MyApp",
+    "status":            "maintenance",
+    "pipeline_stage":    "maintenance",
+    "last_active_agent": 7,
+    "handoff":           "/home/user/myapp/artifacts/build/HANDOFF.json",
+    "registered_at":     "2026-05-31T21:00:00Z",
+    "last_updated":      "2026-06-01T09:14:00Z"
+  }
+}</code></pre>
+
+        <p>
+          Stage progression is one-way — the script refuses to regress a stage.
+          Calling it with an earlier stage than the current value produces a warning
+          and leaves the entry unchanged.
+        </p>
+
+        <div class="doc-footer">
+          <a class="doc-footer-link" href="verifier.html">
+            <span class="doc-footer-dir">← Previous</span>
+            <span class="doc-footer-title">Verifier</span>
+          </a>
+          <a class="doc-footer-link next" href="commands.html">
+            <span class="doc-footer-dir">Next →</span>
+            <span class="doc-footer-title">Command Reference</span>
+          </a>
+        </div>
+
+      </div>
+    </main>
+  </div>
+  <script src="nav.js"></script>
+</body>
+</html>

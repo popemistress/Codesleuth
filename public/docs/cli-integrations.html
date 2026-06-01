@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CLI Integrations — CodeSleuth AI Docs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="header" id="site-header"></header>
+  <div class="main-layout">
+    <nav class="sidebar" id="site-sidebar"></nav>
+    <main class="content">
+      <div class="content-inner">
+
+        <div class="breadcrumb">
+          <a href="index.html">Docs</a>
+          <span class="breadcrumb-sep">›</span>
+          <span>Reference</span>
+          <span class="breadcrumb-sep">›</span>
+          <span class="breadcrumb-current">CLI Integrations</span>
+        </div>
+
+        <div class="page-tag">🔧 Multi-Tool Support</div>
+        <h1>CLI Integrations</h1>
+        <p class="lead">
+          CodeSleuth works natively with 13 AI coding tools. The pipeline rules are maintained in a
+          <code>.cli/</code> directory and synced to each tool's expected instruction format automatically.
+          The same pipeline logic runs whether you're using Claude Code, Cursor, GitHub Copilot, Cline, Continue, or any other supported tool.
+        </p>
+
+        <!-- Auto-sync -->
+        <h2>Auto-Detection &amp; Install</h2>
+        <p>The <code>detect-and-install.mjs</code> script detects the active AI tool and installs only that tool's instruction files:</p>
+        <pre><code># Auto-detect the active tool and install its rules
+node .cli/sync/detect-and-install.mjs
+
+# Force install for a specific tool
+node .cli/sync/detect-and-install.mjs --tool cursor
+
+# Dry run (show what would be installed without writing files)
+node .cli/sync/detect-and-install.mjs --dry-run
+
+# Install all tools at once (full sync)
+bash scripts/sync-agent-rules.sh</code></pre>
+
+        <h3>Detection order (first match wins)</h3>
+        <ol>
+          <li><code>--tool &lt;name&gt;</code> flag (explicit override)</li>
+          <li>Environment variables (e.g. <code>CLAUDE_CODE</code>, <code>ANTHROPIC_MODEL</code>, <code>CURSOR_SESSION_ID</code>)</li>
+          <li>Config/marker files present in repo (e.g. <code>.claude/settings.json</code>, <code>.cursor/</code>)</li>
+          <li>Process name in parent process chain</li>
+          <li>Default: install all tools (full sync)</li>
+        </ol>
+
+        <!-- Supported tools table -->
+        <h2>Supported Tools</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Tool</th><th>Display Name</th><th>Instruction Format</th><th>Source Path</th><th>Target Path(s)</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>claude-code</code></td>
+                <td>Claude Code</td>
+                <td><code>CLAUDE.md</code></td>
+                <td>Source of truth — never overwritten</td>
+                <td><code>CLAUDE.md</code></td>
+              </tr>
+              <tr>
+                <td><code>openai-codex</code></td>
+                <td>OpenAI Codex CLI</td>
+                <td><code>AGENTS.md</code></td>
+                <td><code>.cli/codex/AGENTS.md</code></td>
+                <td><code>AGENTS.md</code></td>
+              </tr>
+              <tr>
+                <td><code>google-antigravity</code></td>
+                <td>Google Antigravity CLI</td>
+                <td><code>.agents/</code></td>
+                <td><code>.cli/antigravity/</code></td>
+                <td><code>.agents/</code></td>
+              </tr>
+              <tr>
+                <td><code>cursor</code></td>
+                <td>Cursor CLI / Cursor Agent</td>
+                <td><code>.cursor/rules/*.mdc</code></td>
+                <td><code>.cli/cursor/rules/</code></td>
+                <td><code>.cursor/rules/</code></td>
+              </tr>
+              <tr>
+                <td><code>github-copilot</code></td>
+                <td>GitHub Copilot</td>
+                <td><code>.github/copilot-instructions.md</code></td>
+                <td><code>.cli/copilot/</code></td>
+                <td><code>.github/copilot-instructions.md</code>, <code>.github/instructions/</code></td>
+              </tr>
+              <tr>
+                <td><code>opencode</code></td>
+                <td>OpenCode</td>
+                <td><code>AGENTS.md</code></td>
+                <td><code>.cli/opencode/AGENTS.md</code></td>
+                <td><code>AGENTS.md</code>, <code>opencode.json</code></td>
+              </tr>
+              <tr>
+                <td><code>kiro</code></td>
+                <td>Kiro CLI</td>
+                <td><code>.kiro/steering/*.md</code></td>
+                <td><code>.cli/kiro/</code></td>
+                <td><code>.kiro/steering/</code></td>
+              </tr>
+              <tr>
+                <td><code>devin</code></td>
+                <td>Devin CLI</td>
+                <td><code>AGENTS.md</code></td>
+                <td><code>.cli/devin/AGENTS.md</code></td>
+                <td><code>AGENTS.md</code></td>
+              </tr>
+              <tr>
+                <td><code>cline</code></td>
+                <td>Cline CLI</td>
+                <td><code>.clinerules/*.md</code></td>
+                <td><code>.cli/cline/.clinerules/</code></td>
+                <td><code>.clinerules/</code></td>
+              </tr>
+              <tr>
+                <td><code>amp-code</code></td>
+                <td>Amp Code CLI</td>
+                <td><code>AGENTS.md</code></td>
+                <td><code>.cli/amp/AGENTS.md</code></td>
+                <td><code>AGENTS.md</code></td>
+              </tr>
+              <tr>
+                <td><code>factory-droid</code></td>
+                <td>Factory.ai Droid</td>
+                <td><code>AGENTS.md</code></td>
+                <td><code>.cli/factory-droid/AGENTS.md</code></td>
+                <td><code>AGENTS.md</code></td>
+              </tr>
+              <tr>
+                <td><code>zed</code></td>
+                <td>Zed</td>
+                <td><code>.rules</code></td>
+                <td><code>.cli/zed/AGENTS.md</code> + <code>.rules</code></td>
+                <td><code>.rules</code>, <code>AGENTS.md</code></td>
+              </tr>
+              <tr>
+                <td><code>continue</code></td>
+                <td>Continue</td>
+                <td><code>.continue/rules/*.md</code></td>
+                <td><code>.cli/continue/rules/</code></td>
+                <td><code>.continue/rules/</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Shared rules -->
+        <h2>Shared Rule Files</h2>
+        <p>The <code>.cli/shared/</code> directory contains the canonical rule content that tool-specific files are compiled from. These are the authoritative definitions — edit them, then run the sync script to propagate changes:</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>File</th><th>Contents</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>codesleuth-core.md</code></td><td>Zero Bypass Rule, Agent 0 Startup Protocol (verbatim banner), agent activation table, gate command definitions</td></tr>
+              <tr><td><code>pipeline-gates.md</code></td><td>Human gate protocol, gate command syntax, auto-transition rules</td></tr>
+              <tr><td><code>agent-roles.md</code></td><td>Per-agent roles, inputs, outputs, and activation conditions</td></tr>
+              <tr><td><code>commands.md</code></td><td>Complete command reference (activation, gates, state, fork, replay, etc.)</td></tr>
+              <tr><td><code>state-files.md</code></td><td>HANDOFF.json, TASK-GRAPH.md, CHECKPOINT.md — what they contain and when to read them</td></tr>
+              <tr><td><code>build-verification.md</code></td><td>Per-task cycle (RARV), test contracts, coverage enforcement, staged write</td></tr>
+              <tr><td><code>security-rules.md</code></td><td>Secret scanning patterns, security non-negotiables, pre-write block rules</td></tr>
+              <tr><td><code>design-contract.md</code></td><td>Web design contract rules, Section 5A, visual regression coverage</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Cursor -->
+        <h2>Tool-Specific Notes</h2>
+
+        <h3>Cursor</h3>
+        <p>Cursor uses MDC (Markdown with Cursor metadata) rule files. CodeSleuth installs four rules into <code>.cursor/rules/</code>:</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>File</th><th>Content</th><th>Apply Mode</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>00-codesleuth-core.mdc</code></td><td>Core identity, Zero Bypass Rule, gate enforcement</td><td><code>alwaysApply: true</code></td></tr>
+              <tr><td><code>01-pipeline-gates.mdc</code></td><td>Gate protocol, activation phrases, standalone requirement</td><td><code>alwaysApply: true</code></td></tr>
+              <tr><td><code>02-builder-rules.mdc</code></td><td>RARV cycle, staged write, secret scanning, test contract enforcement</td><td>Auto on Builder activation</td></tr>
+              <tr><td><code>03-security-verification.mdc</code></td><td>20-domain security review, SHIP/NO-SHIP criteria</td><td>Auto on Security activation</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>GitHub Copilot</h3>
+        <p>Copilot receives three instruction files in <code>.github/instructions/</code>:</p>
+        <ul>
+          <li><code>codesleuth.instructions.md</code> — core pipeline rules and gate protocol</li>
+          <li><code>security.instructions.md</code> — security review rules and domain checklist</li>
+          <li><code>testing.instructions.md</code> — test contract enforcement, coverage requirements, RARV cycle</li>
+        </ul>
+
+        <h3>Cline</h3>
+        <p>Cline uses numbered rule files in <code>.clinerules/</code> — loaded in order:</p>
+        <ul>
+          <li><code>01-codesleuth-core.md</code> — Zero Bypass Rule and agent table</li>
+          <li><code>02-pipeline-gates.md</code> — gate commands and standalone requirement</li>
+          <li><code>03-builder.md</code> — implementation rules</li>
+          <li><code>04-security.md</code> — security review rules</li>
+        </ul>
+
+        <h3>Kiro</h3>
+        <p>Kiro uses "steering" files in <code>.kiro/steering/</code> — topically organized:</p>
+        <ul>
+          <li><code>product.md</code> — what CodeSleuth builds, platform scope, agent roles</li>
+          <li><code>pipeline-gates.md</code> — gate command protocol</li>
+          <li><code>tech.md</code> — technical standards (TDD, testing, contracts)</li>
+          <li><code>security.md</code> — security review and secret scanning</li>
+          <li><code>structure.md</code> — project isolation rule, artifact namespaces</li>
+        </ul>
+
+        <h3>Continue</h3>
+        <p>Continue reads all <code>.md</code> files in <code>.continue/rules/</code> as always-active context rules — no special frontmatter or metadata required. CodeSleuth installs four numbered rule files:</p>
+        <ul>
+          <li><code>01-codesleuth-core.md</code> — Zero Bypass Rule, two-path activation (registered project resume + explicit <code>Start agent N</code>), agent table (0–7), project isolation</li>
+          <li><code>02-pipeline-gates.md</code> — Human gate commands, maintenance gate commands (<code>!m-build</code>, <code>!m-status</code>, etc.), sub-commands, standalone requirement</li>
+          <li><code>03-builder.md</code> — Per-task write pipeline, DONE criteria, TDD flow, build completion registration call</li>
+          <li><code>04-security.md</code> — Secret scanning patterns, SAST, absolute security rules</li>
+        </ul>
+        <p>
+          Detection: <code>.continue/</code> directory presence, <code>CONTINUE_SESSION_ID</code> env var,
+          or <code>continue</code> process name.
+        </p>
+
+        <h3>OpenCode</h3>
+        <p>OpenCode receives <code>AGENTS.md</code> for rules and <code>opencode.json</code> for tool configuration. The JSON file configures the model, context settings, and tool permissions.</p>
+
+        <!-- Sync script -->
+        <h2>Syncing Rules Across All Tools</h2>
+        <pre><code># Full sync — updates all tool-specific files from .cli/shared/ sources
+bash scripts/sync-agent-rules.sh
+
+# Verify all tool files match their source
+node .cli/sync/verify-cli-instructions.mjs
+
+# Auto-detect and install for the current environment
+node .cli/sync/detect-and-install.mjs</code></pre>
+
+        <div class="callout callout-warning">
+          <span class="callout-icon">⚠️</span>
+          <div class="callout-content">
+            <div class="callout-title">Edit the source, not the target</div>
+            <p>Always edit files in <code>.cli/shared/</code> (or for Claude Code, <code>CLAUDE.md</code>), then run the sync script. Editing tool-specific files directly (e.g. <code>.cursor/rules/</code>) will be overwritten on the next sync.</p>
+          </div>
+        </div>
+
+        <!-- Manifest -->
+        <h2>MANIFEST.json</h2>
+        <p>The <code>.cli/MANIFEST.json</code> is the authoritative source of truth for all tool configurations. It defines:</p>
+        <ul>
+          <li>Tool identifiers and display names</li>
+          <li>The official instruction format for each tool</li>
+          <li>Source and target paths for sync</li>
+          <li>Detection signals (env vars, config files, process names)</li>
+          <li>Sync strategy: <code>preserve</code> (never overwrite — Claude Code's CLAUDE.md) or <code>merge</code> or <code>overwrite</code></li>
+        </ul>
+        <pre><code>{
+  "version": "3.0.0",
+  "tools": [
+    {
+      "tool": "cursor",
+      "displayName": "Cursor CLI / Cursor Agent",
+      "officialInstructionFormat": ".cursor/rules/*.mdc",
+      "sourcePath": ".cli/cursor/rules/",
+      "targetPaths": [".cursor/rules/"],
+      "syncStrategy": "overwrite",
+      "detectionSignals": {
+        "env": ["CURSOR_SESSION_ID", "CURSOR_TRACE_ID"],
+        "files": [".cursor/"],
+        "process": ["cursor"]
+      }
+    }
+    ...
+  ]
+}</code></pre>
+
+      </div>
+    </main>
+  </div>
+  <script src="nav.js"></script>
+</body>
+</html>

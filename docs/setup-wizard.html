@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Setup Wizard — CodeSleuth AI Docs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="header" id="site-header"></header>
+  <div class="main-layout">
+    <nav class="sidebar" id="site-sidebar"></nav>
+    <main class="content">
+      <div class="content-inner">
+
+        <div class="breadcrumb">
+          <a href="index.html">Docs</a>
+          <span class="breadcrumb-sep">›</span>
+          <span>Getting Started</span>
+          <span class="breadcrumb-sep">›</span>
+          <span class="breadcrumb-current">Setup Wizard</span>
+        </div>
+
+        <div class="page-tag">⚙️ First-Time Setup</div>
+        <h1>Setup Wizard</h1>
+        <p class="lead">
+          Before typing <code>Start agent 0</code> for the first time, run the setup script.
+          It walks you through two tiers of context management configuration and takes 2–3 minutes.
+          Re-run it at any time to change your settings.
+        </p>
+
+        <!-- Required -->
+        <div class="callout callout-danger">
+          <span class="callout-icon">🚨</span>
+          <div class="callout-content">
+            <div class="callout-title">Required before pipeline activation</div>
+            <p>
+              The Orchestrator reads <code>config/context.json</code> at activation. If setup has not been
+              completed, it refuses to start and displays instructions to run the script.
+            </p>
+          </div>
+        </div>
+
+        <!-- Run the script -->
+        <h2>Running the Setup Script</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>OS</th><th>Command</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>🐧 Linux / 🍎 macOS</td>
+                <td><code>bash SETUP.sh</code></td>
+              </tr>
+              <tr>
+                <td>🪟 Windows</td>
+                <td><code>Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass</code><br><code>.\SETUP.ps1</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Flags</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Flag</th><th>Effect</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>bash SETUP.sh</code> (no flags)</td><td>Full wizard — path personalisation then context configuration</td></tr>
+              <tr><td><code>bash SETUP.sh --check</code></td><td>Show current configuration and exit without making changes</td></tr>
+              <tr><td><code>bash SETUP.sh --reset</code></td><td>Clear all settings and re-run the full wizard from defaults</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- What setup does -->
+        <h2>What Setup Does</h2>
+        <ol class="steps">
+          <li class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <div class="step-title">Path personalisation</div>
+              <div class="step-desc">Replaces the default install path (<code>/home/user/codesleuth/</code>) with your actual install location throughout all pipeline files. Skipped automatically if paths already match. The resolved path is saved as <code>install_path</code> in <code>config/context.json</code> so agents have a single source of truth for the agents directory location.</div>
+            </div>
+          </li>
+          <li class="step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <div class="step-title">Tier 1 — local backend selection</div>
+              <div class="step-desc">Three questions about coordination, semantic search, and agent memory. All Tier 1 options run locally with no accounts required. Current config is shown as the default — press ENTER to keep it.</div>
+            </div>
+          </li>
+          <li class="step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <div class="step-title">Tier 2 — cloud services (optional)</div>
+              <div class="step-desc">Five optional cloud service prompts. Press ENTER to skip any you don't want. All Tier 2 services are additive — Tier 1 handles everything on its own.</div>
+            </div>
+          </li>
+          <li class="step">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <div class="step-title">Package installation</div>
+              <div class="step-desc">
+                Installs any Python packages required by your Tier 1 selections (e.g. <code>chromadb</code>, <code>mem0ai</code>).
+                Nothing is installed for Tier 1 options A (file-based defaults).
+                Each package shows an animated progress bar so you can see install progress in real time.
+                On systems where the system Python is externally managed (Debian, Ubuntu, and similar),
+                setup automatically creates a <code>.venv</code> virtual environment in the agents directory
+                and installs packages there — no manual intervention required.
+              </div>
+            </div>
+          </li>
+          <li class="step">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <div class="step-title">Connection tests</div>
+              <div class="step-desc">Tests each configured backend. Reports ✅ or ❌ with a specific reason. Failures are reported but do not block saving — you can fix credentials and re-run.</div>
+            </div>
+          </li>
+          <li class="step">
+            <div class="step-num">6</div>
+            <div class="step-body">
+              <div class="step-title">Config saved</div>
+              <div class="step-desc">Writes <code>config/context.json</code> with all selected backends and a resolved <code>active</code> object. The Orchestrator reads this on every activation.</div>
+            </div>
+          </li>
+        </ol>
+
+        <!-- Tier 1 -->
+        <h2>Tier 1 — Local Backends</h2>
+        <p>No accounts. No internet. All options run on your machine.</p>
+
+        <h3>Question 1 of 3 — Agent Coordination</h3>
+        <p>Controls how parallel agents coordinate task status during builds.</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Option</th><th>Backend</th><th>Best for</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>A — File-based</strong></td>
+                <td>Plain files (default)</td>
+                <td>Single-agent builds, simple projects</td>
+              </tr>
+              <tr>
+                <td><strong>B — SQLite WAL ✨ recommended</strong></td>
+                <td>SQLite write-ahead log</td>
+                <td>Parallel builds, larger projects — safer concurrent writes, no install required</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Question 2 of 3 — Semantic Search</h3>
+        <p>Controls how agents find relevant information inside large project files.</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Option</th><th>Backend</th><th>Best for</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>A — JSON index</strong></td>
+                <td>Keyword grep (default)</td>
+                <td>Simple projects, low memory environments</td>
+              </tr>
+              <tr>
+                <td><strong>B — Chroma local ✨ recommended</strong></td>
+                <td>Local vector database</td>
+                <td>Large codebases — finds relevant context by meaning, not just keywords. Setup installs <code>chromadb</code> automatically.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Question 3 of 3 — Agent Memory</h3>
+        <p>Controls how agents retain context between tasks and across sessions.</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Option</th><th>Backend</th><th>Best for</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>A — File-based</strong></td>
+                <td>HANDOFF.json (default)</td>
+                <td>One-off projects, users who don't need cross-session memory</td>
+              </tr>
+              <tr>
+                <td><strong>B — mem0 local ✨ recommended</strong></td>
+                <td>Local persistent memory store</td>
+                <td>Ongoing projects — agents remember decisions, errors, and context across sessions. Setup installs <code>mem0ai</code> automatically.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Tier 2 -->
+        <h2>Tier 2 — Cloud Services</h2>
+        <p>All optional. Press ENTER at any prompt to skip. Tier 1 handles everything — Tier 2 adds visibility, scale, and team features.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Service</th><th>What it adds</th><th>Requires</th><th>Sign up</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Redis</strong></td>
+                <td>Real-time coordination for parallel agents — eliminates file-write race conditions entirely</td>
+                <td>Redis URL</td>
+                <td><a href="https://redis.com/try-free">redis.com/try-free</a></td>
+              </tr>
+              <tr>
+                <td><strong>Notion</strong></td>
+                <td>Cross-session project registry — every project, decision, error, and pattern stored in a searchable Notion database</td>
+                <td>API key + database IDs</td>
+                <td><a href="https://notion.so/my-integrations">notion.so/my-integrations</a></td>
+              </tr>
+              <tr>
+                <td><strong>GitHub Issues</strong></td>
+                <td>Task graph mirror — each task becomes a GitHub Issue. Live project board for team visibility</td>
+                <td>Personal Access Token + repo</td>
+                <td><a href="https://github.com/settings/tokens">github.com/settings/tokens</a></td>
+              </tr>
+              <tr>
+                <td><strong>mem0 Cloud</strong></td>
+                <td>Enhanced persistent memory — overrides local mem0. Synced across machines</td>
+                <td>API key</td>
+                <td><a href="https://app.mem0.ai">app.mem0.ai</a></td>
+              </tr>
+              <tr>
+                <td><strong>Chroma Cloud</strong></td>
+                <td>Cloud-hosted semantic search — overrides local Chroma. Synced across machines</td>
+                <td>API key</td>
+                <td><a href="https://trychroma.com">trychroma.com</a></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Config file -->
+        <h2>Configuration File</h2>
+        <p>
+          Setup writes all choices to <code>config/context.json</code> in the agents directory.
+          The <code>active</code> object at the bottom is the resolved backend map the Orchestrator
+          reads — Tier 2 services automatically override Tier 1 when configured.
+        </p>
+        <pre><code>{
+  "_setup_complete": true,
+  "_last_configured": "2026-05-31T10:00:00Z",
+  "install_path": "/home/user/agents.v7",
+
+  "tier1": {
+    "coordination":    { "backend": "sqlite" },
+    "semantic_search": { "backend": "chroma_local" },
+    "agent_memory":    { "backend": "mem0_local" }
+  },
+
+  "tier2": {
+    "redis":       { "enabled": false, "url": "" },
+    "notion":      { "enabled": false, "api_key": "" },
+    "github":      { "enabled": false, "token": "", "repository": "" },
+    "mem0_cloud":  { "enabled": false, "api_key": "" },
+    "chroma_cloud":{ "enabled": false, "api_key": "" }
+  },
+
+  "active": {
+    "coordination":      "sqlite",
+    "semantic_search":   "chroma_local",
+    "agent_memory":      "mem0_local",
+    "external_registry": "none",
+    "venv":              "/home/user/agents.v7/.venv"
+  },
+
+  "registered_projects": {
+    "/home/user/myapp": {
+      "name":              "MyApp",
+      "status":            "built",
+      "pipeline_stage":    "built",
+      "last_active_agent": 3,
+      "handoff":           "/home/user/myapp/artifacts/build/HANDOFF.json",
+      "registered_at":     "2026-05-31T21:00:00Z",
+      "last_updated":      "2026-05-31T21:00:00Z"
+    }
+  }
+}</code></pre>
+
+        <div class="callout callout-info">
+          <span class="callout-icon">💡</span>
+          <div class="callout-content">
+            <div class="callout-title">Automatic virtual environment</div>
+            <p>
+              On Debian, Ubuntu, and similar systems the system Python is <em>externally managed</em>
+              (PEP 668) and blocks <code>pip install</code> by default.
+              Setup detects this automatically and creates a <code>.venv</code> virtual environment
+              in the agents directory, then installs packages there.
+              The resolved path is recorded in <code>active.venv</code> so agents know where to find
+              the packages — no manual <code>source .venv/bin/activate</code> step is required.
+              If <code>active.venv</code> is <code>null</code>, packages are installed into the system Python directly.
+            </p>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <span class="callout-icon">💡</span>
+          <div class="callout-content">
+            <div class="callout-title">registered_projects — always-resident pipeline</div>
+            <p>
+              The <code>registered_projects</code> map is written automatically by Agent 3 when a
+              build completes, and updated by Agents 4–6 as the pipeline advances.
+              On every subsequent <code>Start agent 0</code>, the Orchestrator reads this map and
+              displays a resume menu — so the pipeline is always resident for any registered project,
+              even across sessions. You never need to re-activate the pipeline for a project you have
+              already built. See <a href="maintenance.html">Maintenance Mode</a> for the always-resident
+              mini-pipeline that handles post-build features and fixes.
+            </p>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <span class="callout-icon">💡</span>
+          <div class="callout-content">
+            <div class="callout-title">Override resolution</div>
+            <p>
+              When a Tier 2 service is enabled it automatically overrides the corresponding Tier 1 backend
+              in the <code>active</code> object — no manual editing required. For example: enabling
+              mem0 Cloud sets <code>active.agent_memory = "mem0_cloud"</code> regardless of the Tier 1
+              memory choice.
+            </p>
+          </div>
+        </div>
+
+        <!-- What to choose -->
+        <h2>What Should I Choose?</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>You are…</th><th>Recommended config</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>New to CodeSleuth, not technical</td>
+                <td>Tier 1 all <strong>B</strong> (SQLite + Chroma local + mem0 local). Skip all Tier 2. Best balance of capability and zero friction.</td>
+              </tr>
+              <tr>
+                <td>Developer, single machine</td>
+                <td>Tier 1 all <strong>B</strong>. Add mem0 Cloud and Chroma Cloud from Tier 2 when you want cross-machine sync.</td>
+              </tr>
+              <tr>
+                <td>Developer, working in a team</td>
+                <td>Tier 1 all <strong>B</strong>. Add Redis + GitHub Issues from Tier 2 for real-time coordination and shared project visibility.</td>
+              </tr>
+              <tr>
+                <td>Power user / enterprise</td>
+                <td>Tier 1 all <strong>B</strong>. Enable all Tier 2 services for maximum persistence, visibility, and scale.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </main>
+  </div>
+  <script src="nav.js"></script>
+</body>
+</html>

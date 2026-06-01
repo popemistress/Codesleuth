@@ -9,18 +9,33 @@ import {
     Eye,
     MessageSquareWarning,
     ArrowRight,
+    GitBranch,
+    Wrench,
 } from "lucide-react";
 
 const agents = [
     {
+        id: 0,
+        name: "Orchestrator",
+        icon: GitBranch,
+        color: "primary",
+        description:
+            "Pipeline director and state manager. Never writes code — enforces human gates, routes stage transitions, and owns the Spec Change Protocol.",
+        features: [
+            "Human gate enforcement (!plan, !build, !security, !verify)",
+            "Spec Change blast radius analysis",
+            "Registered project resume on startup",
+        ],
+    },
+    {
         id: 1,
         name: "Product Discovery",
         icon: Brain,
-        color: "primary",
+        color: "secondary",
         description:
-            "13-phase structured discovery. One question at a time. The word 'also' is forbidden to prevent compound logic.",
+            "16-phase structured discovery (Phase 0–15). One question at a time. Capability Intelligence Analysis at 4 trigger points.",
         features: [
-            "Extreme granularity over speed",
+            "CIA cross-references APIs, skills, and MCP servers",
             "Stack Probes for technical extraction",
             "Zero clarifying questions for builder",
         ],
@@ -29,7 +44,7 @@ const agents = [
         id: 2,
         name: "Technical Designer",
         icon: FileSearch,
-        color: "secondary",
+        color: "accent",
         description:
             "Translates product requirements into executable blueprints with cross-platform parity.",
         features: [
@@ -42,30 +57,43 @@ const agents = [
         id: 3,
         name: "Application Builder",
         icon: Code2,
-        color: "accent",
+        color: "success",
         description:
-            "'Red = Stop, Green = Ship.' Three-strike error fingerprinting prevents infinite repair loops.",
+            "'Red = Stop, Green = Ship.' 5-stage repair system classifies every failure by mode and applies a prescribed recovery strategy.",
         features: [
-            "80%+ error match detection",
+            "Failure modes: compiler, test, dependency, interface, timeout",
             "Quality gates: Lint, Type, Test, Build",
             "phases.md progress contract",
         ],
     },
     {
         id: 4,
-        name: "Security Agent",
-        icon: Shield,
-        color: "error",
+        name: "Product Critic",
+        icon: MessageSquareWarning,
+        color: "warning",
         description:
-            "Assume Breach philosophy. 17 security domains with absolute BLOCK/APPROVE authority.",
+            "Truth-Over-Comfort mandate. 12-Dimension Product Scorecard — any dimension scoring 1 is an automatic HOLD.",
         features: [
-            "Domain 12: Release Integrity",
-            "Domain 13: Client-Side Secrets",
-            "Platform-specific annexes",
+            "CRITICISM.md deliverable",
+            "SHIP_READY / CONDITIONAL / HOLD / KILL verdicts",
+            "Go/No-Go launch gate",
         ],
     },
     {
         id: 5,
+        name: "Security Agent",
+        icon: Shield,
+        color: "error",
+        description:
+            "Assume Breach philosophy. 20 security domains with absolute BLOCK/APPROVE authority.",
+        features: [
+            "Release Integrity & Client-Side Secrets domains",
+            "OWASP Top 10 compliance",
+            "Platform-specific annexes",
+        ],
+    },
+    {
+        id: 6,
         name: "Codebase Verifier",
         icon: Eye,
         color: "info",
@@ -78,16 +106,16 @@ const agents = [
         ],
     },
     {
-        id: 6,
-        name: "Product Critic",
-        icon: MessageSquareWarning,
-        color: "warning",
+        id: 7,
+        name: "Maintenance Agent",
+        icon: Wrench,
+        color: "primary",
         description:
-            "Truth-Over-Comfort mandate. Red Team Mode with power to KILL or PAUSE before code is written.",
+            "Always-resident after ship. Handles every post-launch feature request and fix through the same quality gates as the original build.",
         features: [
-            "CRITICISM.md deliverable",
-            "Top 10 Fix-First prioritization",
-            "Go/No-Go launch gate",
+            "Registered project mini-pipeline",
+            "Feature, fix, and refactor routing",
+            "Full gate enforcement on every change",
         ],
     },
 ];
@@ -96,6 +124,7 @@ const colorMap: Record<string, string> = {
     primary: "from-primary to-primary-hover",
     secondary: "from-secondary to-secondary-hover",
     accent: "from-accent to-pink-600",
+    success: "from-success to-emerald-600",
     error: "from-error to-red-600",
     info: "from-info to-blue-600",
     warning: "from-warning to-amber-600",
@@ -105,6 +134,7 @@ const glowMap: Record<string, string> = {
     primary: "shadow-primary/30",
     secondary: "shadow-secondary/30",
     accent: "shadow-accent/30",
+    success: "shadow-success/30",
     error: "shadow-error/30",
     info: "shadow-info/30",
     warning: "shadow-warning/30",
@@ -121,7 +151,7 @@ export function AgentsSection() {
                     viewport={{ once: true }}
                     className="text-center max-w-3xl mx-auto mb-16"
                 >
-                    <span className="badge badge-primary mb-4">6 Specialized Agents</span>
+                    <span className="badge badge-primary mb-4">8 Specialized Agents</span>
                     <h2 className="mb-4">
                         The <span className="gradient-text">Agent Orchestra</span>
                     </h2>
@@ -151,7 +181,7 @@ export function AgentsSection() {
 
                             {/* Agent Number */}
                             <div className="absolute top-6 right-6 text-foreground-subtle/20 text-4xl font-bold">
-                                0{agent.id}
+                                {String(agent.id).padStart(2, "0")}
                             </div>
 
                             {/* Content */}

@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Suggestion Tracker — CodeSleuth AI Docs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="header" id="site-header"></header>
+  <div class="main-layout">
+    <nav class="sidebar" id="site-sidebar"></nav>
+    <main class="content">
+      <div class="content-inner">
+
+        <div class="breadcrumb">
+          <a href="index.html">Docs</a>
+          <span class="breadcrumb-sep">›</span>
+          <span>Reference</span>
+          <span class="breadcrumb-sep">›</span>
+          <span class="breadcrumb-current">Suggestion Tracker</span>
+        </div>
+
+        <div class="page-tag">📋 Reference</div>
+        <h1>Suggestion Tracker</h1>
+        <p class="lead">
+          Implementation status for all 29 improvement suggestions collected during the CodeSleuth
+          AI pipeline design process. Each suggestion has been evaluated, implemented where
+          applicable, and tracked here for transparency.
+        </p>
+
+        <div class="callout callout-info">
+          <span class="callout-icon">ℹ️</span>
+          <div class="callout-content">
+            <div class="callout-title">27 of 29 suggestions fully implemented</div>
+            <p>27 suggestions have been fully implemented as Python scripts, Go goroutines, and agent behavioral rules. 1 suggestion is partially addressed through pre-existing content. 1 suggestion is not applicable to a text-based AI pipeline.</p>
+          </div>
+        </div>
+
+        <h2>Implementation Summary</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Status</th><th>Count</th><th>Notes</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><span class="badge badge-green">DONE</span></td><td>27</td><td>Fully implemented as scripts, behavioral rules, or templates</td></tr>
+              <tr><td><span class="badge badge-yellow">PARTIAL</span></td><td>1</td><td>Content was pre-existing but not surfaced in docs</td></tr>
+              <tr><td><span class="badge badge-gray">N/A</span></td><td>1</td><td>Not applicable to a text-based AI agent pipeline</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>All 29 Suggestions</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>ID</th><th>Suggestion</th><th>Status</th><th>Implementation</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>S1</strong></td>
+                <td>Symbol Index</td>
+                <td><span class="badge badge-yellow">PARTIAL</span></td>
+                <td>ctags integration was already present in Agent 2 pre-existing content. Not added to docs but was never missing from the pipeline.</td>
+              </tr>
+              <tr>
+                <td><strong>S2</strong></td>
+                <td>TDD Test-First Loop</td>
+                <td><span class="badge badge-yellow">PARTIAL</span></td>
+                <td>Test-first loop already existed in Agent 3 Per-Task Cycle. Content was pre-existing; not newly introduced but documented in the Per-Task Execution Cycle on <a href="builder.html">builder.html</a>.</td>
+              </tr>
+              <tr>
+                <td><strong>S3</strong></td>
+                <td>Parallel Task Execution</td>
+                <td><span class="badge badge-green">DONE</span></td>
+                <td><code>parallel_runner.go</code> (Go goroutine batch executor) + Agent 3 parallel batch protocol with write-conflict detection. See <a href="scripts.html">Pipeline Scripts</a>.</td>
+              </tr>
+              <tr>
+                <td><strong>S4</strong></td>
+                <td>Staged Write Overlay</td>
+                <td><span class="badge badge-green">DONE</span></td>
+                <td><code>staged_write.py</code> with colored terminal diff and Apply / Edit / Reject prompt. Every file write passes through this gate. See <a href="builder.html">Builder → Pipeline Script Integration</a>.</td>
+              </tr>
+              <tr>
+                <td><strong>S5</strong></td>
+                <td>Auto-Commit + PR Body</td>
+                <td><span class="badge badge-green">DONE</span></td>
+                <td><code>commit_by_task.py</code> groups <code>WRITE_LOG.jsonl</code> by task and creates one conventional git commit per task. Generates <code>PR_BODY.md</code>. Invoked by Verifier post-SHIP hook.</td>
+              </tr>
+              <tr>
+                <td><strong>S6</strong></td>
+                <td>Review Rubric</td>
+                <td><span class="badge badge-green">DONE</span></td>
+                <td><code>templates/.agent/REVIEW_RUBRIC.md</code> — 10-dimension Verifier scoring rubric. Loaded by Agent 6 at activation.</td>
+              </tr>
+              <tr>
+                <td><strong>S7</strong></td>
+                <td>Done Criteria Checklist</td>
+                <td><span class="badge badge-green">DONE</span></td>
+                <td><code>templates/.agent/DONE_CRITERIA.md</code> — Builder activation checklist. Agent 3 reads this at activation to confirm readiness before beginning task execution.</td>
+              </tr>
+              <tr>
+                <td><strong>S8</strong></td>
+                <td>Hot Compilation Check</td>
+                <td><span class="badge badge-green">DONE</span></td>
+                <td>Behavioral rule in Agent 3 step 10c: run <code>go build</code> / <code>npx tsc --noEmit</code> / <code>cargo check</code> immediately after each file write. Compilation failure re-enters implementation without proceeding to tests.</td>
+              </tr>
+              <tr>
+                <td><strong>S9</strong></td>
+                <td>Environment Bootstrap</td>
+                <td><span class="badge badge-green">DONE</span></td>
+                <td><code>bootstrap.py</code> validates toolchain, installs deps, generates <code>.env.example</code>. Invoked at Agent 3 activation step before any build tasks. See <a href="scripts.html">Pipeline Scripts</a>.</td>
+              </tr>
+              <tr>
+                <td><strong>S10</strong></td>
+                <td>Multi-Modal Discovery</td>
+                <td><span class="badge badge-green">DONE</span></td>
+                <td>Image analysis protocol in Agent 1: native Claude vision processes wireframes, mockups, and screenshots attached during Discovery. No external dependency — Claude handles natively.</td>
+              </tr>
+              <tr>
+                <td><strong>S11</strong></td>
+                <td>Spec Formal Validation</td>
+                <td><span class="badge badge-green">DONE</span></td>
+                <td><code>spec_validate.py</code> runs before the <code>!build</code> gate. Checks task_type, output_files, TC status, circular dependencies, and parallelism map coverage. Exit 1 blocks the gate with specific errors.</td>
+              </tr>
+              <tr>
+                <td><strong>S12</strong></td>
+                <td>Model-Adaptive Prompting</td>
+                <td><span class="badge badge-green">DONE</span></td>
+                <td>Behavioral adaptation tables in Agents 1–3 and 5–6. Each agent adjusts prompt structure, verbosity, and tool use for Claude, Kimi, GPT-4o, and Ollama-hosted models.</td>
+              </tr>
+              <tr>
+                <td><strong>S13</strong></td>
+                <td>Pipeline Replay</td>
+                <td><span class="badge badge-green">DONE</span></td>
+                <td><code>pipeline_replay.py</code> restores the codebase to any task checkpoint and marks later tasks PENDING. Invoked by <code>!replay TASK-NNN</code> in the Orchestrator. See <a href="commands.html">Fork &amp; Replay Commands</a>.</td>
+              </tr>
+              <tr>
+                <td><strong>S14</strong></td>
+                <td>Continuous SAST</td>
+                <td><span class="badge badge-green">DONE</span></td>
+                <td><code>sast_scan.py</code> runs non-blocking after every approved write. Supports gosec, bandit, semgrep with inline fallback. Findings in <code>SAST_FINDINGS.jsonl</code> are consumed by Agent 5 (Security). See Agent 3 step 12d.</td>
+              </tr>
+              <tr>
+                <td><strong>S15</strong></td>
+                <td>Session Forking</td>
+                <td><span class="badge badge-green">DONE</span></td>
+                <td><code>session_fork.py</code> forks the pipeline into two parallel branches. Sub-commands: create, compare, merge, status. Invoked by <code>!fork</code> and <code>!merge</code> commands in the Orchestrator.</td>
+              </tr>
+              <tr>
+                <td><strong>S16</strong></td>
+                <td>Container Verification</td>
+                <td><span class="badge badge-green">DONE</span></td>
+                <td><code>container_verify.py</code> builds the Docker image and runs the full test suite inside the container. Auto-generates <code>Dockerfile.test</code>. Invoked by Verifier Phase 12B. See <a href="verifier.html">Verifier</a>.</td>
+              </tr>
+              <tr>
+                <td><strong>S17</strong></td>
+                <td>Smart Retry Strategies</td>
+                <td><span class="badge badge-green">DONE</span></td>
+                <td>Failure classification system in Agent 3 Repair Mode with 6 failure modes: compile error, test failure, contract violation, coverage below threshold, secret found, and write rejected. Each mode has a distinct repair path.</td>
+              </tr>
+              <tr>
+                <td><strong>S18</strong></td>
+                <td>Self-Improving Pipeline</td>
+                <td><span class="badge badge-green">DONE</span></td>
+                <td><code>pipeline_improve.py</code> analyzes post-run telemetry and generates <code>PROP-NNN</code> improvement proposals. Promoted proposals modify the agents directory. Invoked by <code>!pipeline-health</code> and <code>!pipeline-promote</code>.</td>
+              </tr>
+              <tr>
+                <td><strong>S19</strong></td>
+                <td>CI/CD Generation</td>
+                <td><span class="badge badge-green">DONE</span></td>
+                <td>Agent 2 standard CICD task rules: every project plan includes tasks for <code>ci.yml</code>, <code>deploy.yml</code>, <code>security.yml</code>, and goreleaser config. Generated as part of Phase B contract output.</td>
+              </tr>
+              <tr>
+                <td><strong>S20</strong></td>
+                <td>Observability Scaffolding</td>
+                <td><span class="badge badge-green">DONE</span></td>
+                <td>Agent 2 standard OBS task rules: every project plan includes structured logger, metrics endpoint, health check, and distributed tracing scaffold tasks automatically injected into <code>TASK-GRAPH.md</code>.</td>
+              </tr>
+              <tr>
+                <td><strong>S21</strong></td>
+                <td>Natural Language Gate Hints</td>
+                <td><span class="badge badge-green">DONE</span></td>
+                <td>Behavioral rule in Orchestrator: when a human types intent phrases ("I think we're ready", "looks good", "what's next"), the Orchestrator recognizes the intent and suggests the appropriate gate command rather than silently waiting.</td>
+              </tr>
+              <tr>
+                <td><strong>S22</strong></td>
+                <td>Secret Scanning</td>
+                <td><span class="badge badge-green">DONE</span></td>
+                <td><code>secret_scan.py</code> with 14 regex patterns. Runs as a hard block before every file write in Agent 3. Write is refused and repair context returned if any secret pattern matches. See <a href="builder.html">Builder → Pipeline Script Integration</a>.</td>
+              </tr>
+              <tr>
+                <td><strong>S23</strong></td>
+                <td>Code Coverage Enforcement</td>
+                <td><span class="badge badge-green">DONE</span></td>
+                <td><code>check_coverage.py</code> enforces 70% threshold across go/node/python/rust stacks. Runs in Agent 3 step 11b after TC tests pass. Also checked in Verifier Phase 3A. Below-threshold blocks DONE marking.</td>
+              </tr>
+              <tr>
+                <td><strong>S24</strong></td>
+                <td>Semantic RAG Search</td>
+                <td><span class="badge badge-green">DONE</span></td>
+                <td><code>semantic_search.py</code> provides embedding-based codebase search. Agent 3 queries before each architecture-class task. Uses Ollama <code>nomic-embed-text</code> with TF-IDF fallback. See <a href="scripts.html">Pipeline Scripts</a>.</td>
+              </tr>
+              <tr>
+                <td><strong>S25</strong></td>
+                <td>Database Migration Safety</td>
+                <td><span class="badge badge-green">DONE</span></td>
+                <td><code>migration_safety.py</code> detects schema deltas, generates bidirectional SQL, and classifies data-loss risk. HIGH/DATA-LOSS risks block the pipeline until <code>!migration-approve</code>. See <a href="commands.html">Migration Sub-Commands</a>.</td>
+              </tr>
+              <tr>
+                <td><strong>S26</strong></td>
+                <td>Runtime API Contract Testing</td>
+                <td><span class="badge badge-green">DONE</span></td>
+                <td><code>contract_test.py</code> starts the application and calls every endpoint in <code>INTERFACES.md</code>, validating status codes and response fields. Invoked by Verifier Phase 6D for runtime conformance beyond static type checking.</td>
+              </tr>
+              <tr>
+                <td><strong>S27</strong></td>
+                <td>Harness Activation Guard</td>
+                <td><span class="badge badge-green">DONE</span></td>
+                <td>Zero-bypass rule in <code>CLAUDE.md</code>: pipeline refuses all project work until <code>Start agent N</code> is issued as a standalone message. Gate commands equally strict — no embedded commands accepted. Pre-existing from initial design.</td>
+              </tr>
+              <tr>
+                <td><strong>S28</strong></td>
+                <td>Token Counter</td>
+                <td><span class="badge badge-green">DONE</span></td>
+                <td><code>token_tracker.py</code> tracks session token usage per agent. Reads pricing from <code>config/pricing.json</code>. <code>!budget</code> shows total tokens, context window %, cost, and per-agent breakdown. See <a href="commands.html">Pipeline Intelligence Commands</a>.</td>
+              </tr>
+              <tr>
+                <td><strong>S29</strong></td>
+                <td>Thinking Indicators</td>
+                <td><span class="badge badge-green">DONE</span></td>
+                <td>⏳ status prefix rules added to all 7 agents. Each agent prefixes long-running steps with ⏳ and updates to ✅ or ❌ on completion. Native Claude Code spinner handles TUI animation — no custom implementation needed.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Implementation Artifacts by Category</h2>
+
+        <h3>Python Scripts (14)</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Script</th><th>Suggestions Addressed</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>bootstrap.py</code></td><td>S9</td></tr>
+              <tr><td><code>spec_validate.py</code></td><td>S11</td></tr>
+              <tr><td><code>staged_write.py</code></td><td>S4</td></tr>
+              <tr><td><code>secret_scan.py</code></td><td>S22</td></tr>
+              <tr><td><code>write_log.py</code></td><td>S5</td></tr>
+              <tr><td><code>sast_scan.py</code></td><td>S14</td></tr>
+              <tr><td><code>check_coverage.py</code></td><td>S23</td></tr>
+              <tr><td><code>semantic_search.py</code></td><td>S24</td></tr>
+              <tr><td><code>migration_safety.py</code></td><td>S25</td></tr>
+              <tr><td><code>pipeline_replay.py</code></td><td>S13</td></tr>
+              <tr><td><code>session_fork.py</code></td><td>S15</td></tr>
+              <tr><td><code>pipeline_improve.py</code></td><td>S18</td></tr>
+              <tr><td><code>token_tracker.py</code></td><td>S28</td></tr>
+              <tr><td><code>container_verify.py</code></td><td>S16</td></tr>
+              <tr><td><code>contract_test.py</code></td><td>S26</td></tr>
+              <tr><td><code>commit_by_task.py</code></td><td>S5</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Go Goroutine Executor (1)</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Script</th><th>Suggestions Addressed</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>parallel_runner.go</code></td><td>S3</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Agent Behavioral Rules</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Rule</th><th>Agents</th><th>Suggestions Addressed</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Hot compilation check after each write</td><td>Agent 3 step 10c</td><td>S8</td></tr>
+              <tr><td>Model-adaptive prompting tables</td><td>Agents 1–3, 5–6</td><td>S12</td></tr>
+              <tr><td>Multi-modal image analysis</td><td>Agent 1</td><td>S10</td></tr>
+              <tr><td>Natural language gate hints</td><td>Agent 0</td><td>S21</td></tr>
+              <tr><td>6-mode repair classification</td><td>Agent 3 Repair Mode</td><td>S17</td></tr>
+              <tr><td>CI/CD and OBS task injection</td><td>Agent 2</td><td>S19, S20</td></tr>
+              <tr><td>⏳ thinking status prefix</td><td>All 7 agents</td><td>S29</td></tr>
+              <tr><td>Zero-bypass activation guard</td><td>CLAUDE.md + Agent 0</td><td>S27</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Template Files</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>File</th><th>Suggestions Addressed</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>templates/.agent/REVIEW_RUBRIC.md</code></td><td>S6</td></tr>
+              <tr><td><code>templates/.agent/DONE_CRITERIA.md</code></td><td>S7</td></tr>
+              <tr><td><code>config/pricing.json</code></td><td>S28</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="doc-footer">
+          <a class="doc-footer-link" href="scripts.html">
+            <span class="doc-footer-dir">← Previous</span>
+            <span class="doc-footer-title">Pipeline Scripts</span>
+          </a>
+          <a class="doc-footer-link next" href="index.html">
+            <span class="doc-footer-dir">Next →</span>
+            <span class="doc-footer-title">Introduction</span>
+          </a>
+        </div>
+
+      </div>
+    </main>
+  </div>
+  <script src="nav.js"></script>
+</body>
+</html>

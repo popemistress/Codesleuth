@@ -15,9 +15,9 @@ const roadmapPhases = [
         image: "/images/roadmap/image1-01.webp",
         title: "Product Discovery",
         subtitle: "Phase 01 — Foundation",
-        description: "Every enterprise feature begins with exhaustive discovery. The Product Discovery Agent conducts a 13-phase structured interview to eliminate ambiguity before a single line of code is written.",
+        description: "Every enterprise feature begins with exhaustive discovery. The Product Discovery Agent conducts a 16-phase structured process (Phase 0–15) to eliminate ambiguity before a single line of code is written.",
         highlights: [
-            "13-phase structured discovery protocol",
+            "16-phase structured discovery (Phase 0–15)",
             "Concept Validation Gate (KILL/PROCEED/PAUSE)",
             "Feature specification compilation",
             "Zero-ambiguity requirement enforcement",
@@ -44,7 +44,7 @@ const roadmapPhases = [
         description: "The Application Builder Agent implements features with strict quality gate enforcement. Every change must pass lint, typecheck, test, and build verification.",
         highlights: [
             "Quality gate enforcement (4 gates)",
-            "Strike limit protocol for repair loops",
+            "5-stage repair system with failure-mode classification",
             "Progress tracking via phases.md",
             "Smallest possible diff philosophy",
         ],
@@ -56,7 +56,7 @@ const roadmapPhases = [
         subtitle: "Phase 04 — Protection",
         description: "The Security Agent operates with an 'Assume Breach' mindset, evaluating code against 17 distinct security domains. No shortcuts, no suggestions—only BLOCK or APPROVE.",
         highlights: [
-            "17 domain security assessment",
+            "20 domain security assessment",
             "OWASP Top 10 compliance",
             "Platform-specific security annexes",
             "Mandatory security test coverage",

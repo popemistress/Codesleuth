@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MCP Catalog — CodeSleuth AI Docs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="header" id="site-header"></header>
+  <div class="main-layout">
+    <nav class="sidebar" id="site-sidebar"></nav>
+    <main class="content">
+      <div class="content-inner">
+
+        <div class="breadcrumb">
+          <a href="index.html">Docs</a>
+          <span class="breadcrumb-sep">›</span>
+          <span>Reference</span>
+          <span class="breadcrumb-sep">›</span>
+          <span class="breadcrumb-current">MCP Catalog</span>
+        </div>
+
+        <div class="page-tag">🔌 MCP Servers</div>
+        <h1>MCP Server Catalog</h1>
+        <p class="lead">
+          CodeSleuth uses Model Context Protocol (MCP) servers to give agents live access to external tools —
+          databases, browsers, APIs, and more. Each agent is assigned an approved risk tier, and no agent
+          may use a server above its tier without explicit user confirmation.
+        </p>
+
+        <!-- Catalog location -->
+        <h2>Catalog Location</h2>
+        <p>The active MCP catalog is stored at <code>artifacts/pipeline/MCP_CATALOG.md</code> in the <strong>agents directory</strong> — not the project directory. This is the single source of truth for which MCP servers are approved for each agent.</p>
+
+        <!-- Risk tiers -->
+        <h2>Risk Tiers</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Tier</th><th>Description</th><th>Examples</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="badge badge-success">Low</span></td>
+                <td>Read-only access to public data; no credentials required; no write capability</td>
+                <td>Brave Search, Context7, Hacker News API, npm Registry</td>
+              </tr>
+              <tr>
+                <td><span class="badge badge-warning">Medium</span></td>
+                <td>Read-write access with limited scope; API key required; container-isolated preferred</td>
+                <td>Firecrawl (read), Redis, Neon (branch-based), Playwright</td>
+              </tr>
+              <tr>
+                <td><span class="badge badge-danger">High</span></td>
+                <td>Write access to persistent data; token required; branch restrictions enforced</td>
+                <td>GitHub (write), DBHub (schema), Supabase</td>
+              </tr>
+              <tr>
+                <td><span class="badge" style="background:#7c3aed;color:#fff;">Critical</span></td>
+                <td>Broad system access; explicit user confirmation required before every use</td>
+                <td>Shell access, file system without scope restriction</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Agent MCP assignments -->
+        <h2>Agent MCP Tier Assignments</h2>
+        <p>Each agent has a maximum approved risk tier. An agent cannot use a server above its tier without the user explicitly typing a confirmation command.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Agent</th><th>Max Tier</th><th>Approved Servers</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Discovery (Agent 1)</strong></td>
+                <td><span class="badge badge-warning">Medium</span></td>
+                <td>Brave Search, Firecrawl (public pages only), Reddit API, Hacker News API, GitHub (read-only), World Bank API, Data USA API</td>
+              </tr>
+              <tr>
+                <td><strong>Planning (Agent 2)</strong></td>
+                <td><span class="badge badge-warning">Medium</span></td>
+                <td>Context7, GitHub (read-only), Neon (read-only), npm Registry API</td>
+              </tr>
+              <tr>
+                <td><strong>Builder (Agent 3)</strong></td>
+                <td><span class="badge badge-danger">High</span></td>
+                <td>Context7, GitHub (branch-restricted write), DBHub (read-only), Supabase, Neon (branch-based), Redis, Playwright</td>
+              </tr>
+              <tr>
+                <td><strong>Critic (Agent 4)</strong></td>
+                <td><span class="badge badge-warning">Medium</span></td>
+                <td>Brave Search, Firecrawl, Playwright (read), Reddit API, Hacker News API, GitHub (read-only), SerpApi, Alpha Vantage</td>
+              </tr>
+              <tr>
+                <td><strong>Security (Agent 5)</strong></td>
+                <td><span class="badge badge-warning">Medium</span></td>
+                <td>GitHub (read-only), DBHub (read-only), GitGuardian API, OSV.dev, NIST NVD, VirusTotal, URLScan.io, AbuseIPDB</td>
+              </tr>
+              <tr>
+                <td><strong>Verifier (Agent 6)</strong></td>
+                <td><span class="badge badge-warning">Medium</span></td>
+                <td>Playwright, GitHub (read-only), GitHub Checks API, CircleCI API, Travis CI API, Fetch MCP</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Server reference by agent -->
+        <h2>MCP Server Reference</h2>
+
+        <h3>Discovery Tools</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Server</th><th>Type</th><th>Auth</th><th>Use</th><th>Risk</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Brave Search MCP</td>
+                <td>MCP</td>
+                <td>None</td>
+                <td>Market research, competitor discovery, problem validation</td>
+                <td><span class="badge badge-success">Low</span></td>
+              </tr>
+              <tr>
+                <td>Firecrawl MCP</td>
+                <td>MCP</td>
+                <td>None / API Key</td>
+                <td>Scrape competitor pricing pages and feature lists (public pages only)</td>
+                <td><span class="badge badge-warning">Medium</span></td>
+              </tr>
+              <tr>
+                <td>Reddit API</td>
+                <td>REST</td>
+                <td>None</td>
+                <td>Pull community pain-point threads for problem validation</td>
+                <td><span class="badge badge-success">Low</span></td>
+              </tr>
+              <tr>
+                <td>Hacker News API</td>
+                <td>REST</td>
+                <td>None</td>
+                <td>Search "Ask HN" threads for comparable products</td>
+                <td><span class="badge badge-success">Low</span></td>
+              </tr>
+              <tr>
+                <td>World Bank API</td>
+                <td>REST</td>
+                <td>None</td>
+                <td>Market sizing for global/regulated products</td>
+                <td><span class="badge badge-success">Low</span></td>
+              </tr>
+              <tr>
+                <td>Data USA API</td>
+                <td>REST</td>
+                <td>None</td>
+                <td>US public data for domestic market sizing</td>
+                <td><span class="badge badge-success">Low</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Planning Tools</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Server</th><th>Type</th><th>Auth</th><th>Use</th><th>Risk</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Context7 MCP</td>
+                <td>MCP</td>
+                <td>None</td>
+                <td>Live, version-specific framework docs before writing INTERFACES.md and TDD API sections</td>
+                <td><span class="badge badge-success">Low</span></td>
+              </tr>
+              <tr>
+                <td>GitHub API (read-only)</td>
+                <td>REST</td>
+                <td>Token (optional)</td>
+                <td>Explore reference repos with similar stacks; validate library combinations</td>
+                <td><span class="badge badge-success">Low</span></td>
+              </tr>
+              <tr>
+                <td>Neon MCP (read-only)</td>
+                <td>MCP</td>
+                <td>API Key</td>
+                <td>Generate accurate Postgres DDL; validate migration strategy</td>
+                <td><span class="badge badge-warning">Medium</span></td>
+              </tr>
+              <tr>
+                <td>npm Registry API</td>
+                <td>REST</td>
+                <td>None</td>
+                <td>Verify package versions and peer-dependency constraints</td>
+                <td><span class="badge badge-success">Low</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Builder Tools</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Server</th><th>Type</th><th>Auth</th><th>Use</th><th>Risk</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Context7 MCP</td>
+                <td>MCP</td>
+                <td>None</td>
+                <td>Live framework docs during task execution — correct API signatures on demand</td>
+                <td><span class="badge badge-success">Low</span></td>
+              </tr>
+              <tr>
+                <td>GitHub MCP (branch-restricted)</td>
+                <td>MCP</td>
+                <td>Token</td>
+                <td>Create feature branches, push commits, open PRs per task. <strong>Never push to main/master.</strong></td>
+                <td><span class="badge badge-danger">High</span></td>
+              </tr>
+              <tr>
+                <td>DBHub (read-only)</td>
+                <td>MCP</td>
+                <td>Connection string</td>
+                <td>Validate schema migrations apply cleanly; inspect table structure during data tasks</td>
+                <td><span class="badge badge-danger">High (read-only)</span></td>
+              </tr>
+              <tr>
+                <td>Supabase MCP</td>
+                <td>MCP</td>
+                <td>API Key</td>
+                <td>Full-stack backend scaffolding for Supabase projects</td>
+                <td><span class="badge badge-danger">High</span></td>
+              </tr>
+              <tr>
+                <td>Neon MCP</td>
+                <td>MCP</td>
+                <td>API Key</td>
+                <td>Branch-based Postgres for safe schema iteration; roll back bad migrations without touching prod</td>
+                <td><span class="badge badge-warning">Medium</span></td>
+              </tr>
+              <tr>
+                <td>Redis MCP</td>
+                <td>MCP</td>
+                <td>Connection string</td>
+                <td>Live cache configuration and key inspection during caching tasks</td>
+                <td><span class="badge badge-warning">Medium</span></td>
+              </tr>
+              <tr>
+                <td>Playwright MCP</td>
+                <td>MCP</td>
+                <td>None</td>
+                <td>Execute E2E gate checks in-flight; observe browser behavior during web platform gates</td>
+                <td><span class="badge badge-warning">Medium</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Security Tools</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Server</th><th>Domain</th><th>Auth</th><th>What It Does</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>GitGuardian API</td>
+                <td>Domain 13</td>
+                <td>API Key</td>
+                <td>Scan entire codebase and git history for committed secrets, API keys, tokens</td>
+              </tr>
+              <tr>
+                <td>OSV.dev API</td>
+                <td>Domain 8</td>
+                <td>None (free)</td>
+                <td>Query open-source vulnerability database by package name+version. Covers npm, PyPI, Maven, Go, Rust, Swift.</td>
+              </tr>
+              <tr>
+                <td>NIST NVD API</td>
+                <td>Domain 8</td>
+                <td>None (free)</td>
+                <td>Official CVE database. CVSS scores, attack vectors, fix versions.</td>
+              </tr>
+              <tr>
+                <td>VirusTotal API</td>
+                <td>Domain 8</td>
+                <td>API Key</td>
+                <td>Hash-check dependency packages against known malware. Especially useful for native binaries.</td>
+              </tr>
+              <tr>
+                <td>URLScan.io API</td>
+                <td>Domain 14</td>
+                <td>API Key</td>
+                <td>Scan external API endpoints and webhook URLs for known malicious patterns and certificate validity.</td>
+              </tr>
+              <tr>
+                <td>AbuseIPDB API</td>
+                <td>Domain 4</td>
+                <td>API Key</td>
+                <td>Flag suspicious IP ranges referenced in CORS allowlists or firewall rules.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Catalog commands -->
+        <h2>Catalog Management Commands</h2>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Command</th><th>Behavior</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>!mcp-catalog</code></td>
+                <td>Display the active catalog with risk levels, capabilities, and agent assignments</td>
+              </tr>
+              <tr>
+                <td><code>!mcp-add [server]</code></td>
+                <td>Scan the server with cisco-ai-defense/skill-scanner, classify risk, add to catalog on pass. The scan checks for malicious code, prompt injection, and supply-chain risks before any server is approved.</td>
+              </tr>
+              <tr>
+                <td><code>!mcp-disable [server]</code></td>
+                <td>Remove server from active use without deleting its catalog entry. The entry is preserved with a <code>Status: Disabled</code> marker for future reference.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Safety rules -->
+        <h2>MCP Safety Rules</h2>
+        <ol>
+          <li><strong>Skill scanner required</strong>: Before any new skill package or MCP server is used by the pipeline, <code>cisco-ai-defense/skill-scanner</code> must run against it to check for malicious code, prompt injection, and supply-chain risks.</li>
+          <li><strong>Risk tier enforcement</strong>: No agent may use a server above its approved tier without explicit user confirmation typed as a standalone command.</li>
+          <li><strong>Docker preference</strong>: Prefer Dockerized MCP servers (<code>mcp.docker.com</code> catalog) for local deployments — container isolation prevents host pollution and simplifies removal.</li>
+          <li><strong>SaaS gateway</strong>: For projects requiring many SaaS integrations (Slack, Jira, Google Drive, Notion), route through the Composio managed MCP gateway (<code>composio.dev/mcp</code>) rather than requiring per-service OAuth setup from the user.</li>
+          <li><strong>GitHub write restriction</strong>: Builder may only push to the project's feature branch. Never push directly to <code>main</code>, <code>master</code>, or release branches. Require user confirmation before any force-push or branch deletion.</li>
+        </ol>
+
+      </div>
+    </main>
+  </div>
+  <script src="nav.js"></script>
+</body>
+</html>

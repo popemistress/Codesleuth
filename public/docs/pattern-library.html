@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pattern Library — CodeSleuth AI Docs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="header" id="site-header"></header>
+  <div class="main-layout">
+    <nav class="sidebar" id="site-sidebar"></nav>
+    <main class="content">
+      <div class="content-inner">
+
+        <div class="breadcrumb">
+          <a href="index.html">Docs</a>
+          <span class="breadcrumb-sep">›</span>
+          <span>Reference</span>
+          <span class="breadcrumb-sep">›</span>
+          <span class="breadcrumb-current">Pattern Library</span>
+        </div>
+
+        <div class="page-tag">🧩 Reference</div>
+        <h1>Pattern Library</h1>
+        <p class="lead">
+          The Pattern Library is the pipeline's compounding knowledge base. Solutions to non-obvious
+          implementation problems — auth quirks, database race conditions, platform workarounds — are
+          stored as <code>PATTERN-NNN</code> entries and applied automatically on every future project
+          that matches the same stack. You never need to ask the pipeline to use a pattern — it does so on its own.
+        </p>
+
+        <div class="callout callout-success">
+          <span class="callout-icon">✅</span>
+          <div class="callout-content">
+            <div class="callout-title">Lookup and reuse are fully automatic</div>
+            <p>Agent 2 (Planner) queries <code>PATTERN_INDEX.md</code> at activation and records matched patterns in <code>DECISIONS.md</code>, applying them directly in planning. Agent 3 (Builder) queries before every architecture-class task and applies the match as implementation hypothesis 1. No command, no prompt — it just happens.</p>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <span class="callout-icon">ℹ️</span>
+          <div class="callout-content">
+            <div class="callout-title">Capture is human-triggered — intentionally</div>
+            <p>Adding a new pattern to the library requires <span class="cmd">!pattern-add</span>. This is by design: the human decides what is worth preserving as institutional knowledge. Not every solved problem needs to become a pattern — only the ones with non-obvious pitfalls worth carrying forward.</p>
+          </div>
+        </div>
+
+        <h2>How It Works</h2>
+        <ol class="steps">
+          <li class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <div class="step-title">Pattern is captured — <em>human triggers once</em></div>
+              <div class="step-desc">After completing a task with a non-obvious solution, issue <span class="cmd">!pattern-add</span>. The Orchestrator prompts for domain, stack, and reuse signal keywords, then writes the full entry to <code>PATTERN_LIBRARY.md</code> and a one-line lookup to <code>PATTERN_INDEX.md</code>. This is the only step that requires a human action.</div>
+            </div>
+          </li>
+          <li class="step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <div class="step-title">Pattern is queried automatically — forever after</div>
+              <div class="step-desc">On every subsequent project, Agent 2 (Planner) scans <code>PATTERN_INDEX.md</code> at activation against the project's stack keywords. Matched patterns are recorded in <code>DECISIONS.md</code> and incorporated into planning — no command required.</div>
+            </div>
+          </li>
+          <li class="step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <div class="step-title">Pattern is applied automatically — at the task level</div>
+              <div class="step-desc">Agent 3 (Builder) queries <code>PATTERN_INDEX.md</code> before every architecture-class task (<code>api</code>, <code>auth</code>, <code>data</code>, <code>infra</code>). A matching pattern becomes implementation hypothesis 1 — the validated approach from a prior project, applied before any new code is written. No user command needed.</div>
+            </div>
+          </li>
+        </ol>
+
+        <h2>Pattern Entry Format</h2>
+        <pre><code>## PATTERN-001: NextAuth v5 + Prisma Database Sessions
+
+**domain:** authentication
+**stack:** next.js, next-auth v5, prisma, typescript
+**context:** Any Next.js application that uses NextAuth v5 for authentication and stores sessions in a relational database.
+
+**pattern:**
+Use the Prisma adapter with database sessions (not JWT). JWT sessions break on server-side role checks because the JWT is only refreshed on sign-in. Database sessions allow real-time role lookups.
+
+```typescript
+// src/lib/auth.ts
+import NextAuth from 'next-auth';
+import { PrismaAdapter } from '@auth/prisma-adapter';
+import { db } from './db';
+
+export const { handlers, signIn, signOut, auth } = NextAuth({
+  adapter: PrismaAdapter(db),
+  session: { strategy: 'database' },
+  // ...
+});
+```
+
+**pitfall_avoided:** JWT strategy caches the user role at sign-in. If an admin downgrades a user's role, the user retains elevated permissions until their JWT expires (default 30 days).
+
+**reuse_signal:** nextauth, next-auth, auth, authentication, prisma, session, role
+
+**evidence:** nextjs-wellness-booking (TASK-001, 2025-05-15)
+</code></pre>
+
+        <h2>Pattern Index Format</h2>
+        <p><code>PATTERN_INDEX.md</code> is a compact keyword → PATTERN-NNN lookup table used by agents at startup:</p>
+
+        <pre><code>| Keywords | Pattern |
+|---|---|
+| nextauth, next-auth, prisma, session, database-sessions | PATTERN-001 |
+| env, environment, zod, validation, startup | PATTERN-002 |
+| prisma, singleton, globalThis, hot-reload, dev-server | PATTERN-003 |
+| sqlite, better-sqlite3, wal, tauri, desktop, local-db | PATTERN-004 |
+| demucs, vram, oom, cuda, audio, ml, torch | PATTERN-005 |
+| zustand, persist, localstorage, json-storage | PATTERN-006 |
+</code></pre>
+
+        <div class="callout callout-info">
+          <span class="callout-icon">ℹ️</span>
+          <div class="callout-content">
+            <div class="callout-title">Pattern files persist across all projects</div>
+            <p>Both files live in the agents directory at <code>artifacts/pipeline/PATTERN_LIBRARY.md</code> and <code>artifacts/pipeline/PATTERN_INDEX.md</code> — not inside any individual project directory. Every project the pipeline touches contributes to and benefits from the same library.</p>
+          </div>
+        </div>
+
+        <h2>Seed Patterns</h2>
+        <p>The pipeline ships with 6 seed patterns pre-populated. These cover the most common cross-project problems.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>ID</th><th>Domain</th><th>Stack</th><th>Problem solved</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="badge badge-blue">PATTERN-001</span></td>
+                <td>Authentication</td>
+                <td>NextAuth v5 + Prisma</td>
+                <td>JWT vs. database sessions: role changes don't propagate with JWT</td>
+              </tr>
+              <tr>
+                <td><span class="badge badge-blue">PATTERN-002</span></td>
+                <td>Configuration</td>
+                <td>Next.js + Zod</td>
+                <td>Env validation at module load time — fail fast on missing secrets</td>
+              </tr>
+              <tr>
+                <td><span class="badge badge-blue">PATTERN-003</span></td>
+                <td>Database</td>
+                <td>Prisma + Next.js</td>
+                <td>Prisma singleton via <code>globalThis</code> — prevents dev-server connection exhaustion</td>
+              </tr>
+              <tr>
+                <td><span class="badge badge-blue">PATTERN-004</span></td>
+                <td>Database</td>
+                <td>better-sqlite3 + Tauri</td>
+                <td>WAL mode + user config dir placement for Tauri desktop apps</td>
+              </tr>
+              <tr>
+                <td><span class="badge badge-blue">PATTERN-005</span></td>
+                <td>ML / Audio</td>
+                <td>Demucs + PyTorch</td>
+                <td>VRAM OOM fallback — segment halving then CPU fallback for audio separation</td>
+              </tr>
+              <tr>
+                <td><span class="badge badge-blue">PATTERN-006</span></td>
+                <td>State Management</td>
+                <td>Zustand</td>
+                <td>Persist middleware with <code>createJSONStorage(() =&gt; localStorage)</code> for SSR safety</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>When to Capture a Pattern</h2>
+        <p>A pattern is worth capturing when:</p>
+        <ul>
+          <li>The solution is not obvious from the library documentation</li>
+          <li>The wrong approach causes a specific, non-obvious failure</li>
+          <li>The same problem is likely to appear in future projects on the same stack</li>
+          <li>The implementation involves a known gotcha (race condition, hot-reload issue, platform-specific quirk)</li>
+        </ul>
+
+        <p>A pattern is <em>not</em> needed when:</p>
+        <ul>
+          <li>The implementation follows standard library documentation exactly</li>
+          <li>The code is self-explanatory and there is no pitfall to avoid</li>
+          <li>The problem is project-specific and unlikely to recur</li>
+        </ul>
+
+        <div class="doc-footer">
+          <a class="doc-footer-link" href="commands.html">
+            <span class="doc-footer-dir">← Previous</span>
+            <span class="doc-footer-title">Command Reference</span>
+          </a>
+          <a class="doc-footer-link next" href="global-contract.html">
+            <span class="doc-footer-dir">Next →</span>
+            <span class="doc-footer-title">Global Contract</span>
+          </a>
+        </div>
+
+      </div>
+    </main>
+  </div>
+  <script src="nav.js"></script>
+</body>
+</html>

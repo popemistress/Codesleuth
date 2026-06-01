@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OS Setup — CodeSleuth AI Docs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="header" id="site-header"></header>
+  <div class="main-layout">
+    <nav class="sidebar" id="site-sidebar"></nav>
+    <main class="content">
+      <div class="content-inner">
+
+        <div class="breadcrumb">
+          <a href="index.html">Docs</a>
+          <span class="breadcrumb-sep">›</span>
+          <span>Getting Started</span>
+          <span class="breadcrumb-sep">›</span>
+          <span class="breadcrumb-current">OS Setup</span>
+        </div>
+
+        <div class="page-tag">🖥️ Cross-Platform</div>
+        <h1>OS Setup — Linux, macOS &amp; Windows</h1>
+        <p class="lead">
+          CodeSleuth lives in a single directory on any OS. There are no separate distributions.
+          The pipeline logic, agents, scripts, and documentation are identical across Linux, macOS, and Windows.
+          Only a small set of OS-specific helper files differ — and they all ship in the same
+          <code>scripts/</code> folder.
+        </p>
+
+        <!-- What ships for each OS -->
+        <h2>OS-Specific Files (all in <code>scripts/</code>)</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>File</th><th>Linux</th><th>macOS</th><th>Windows</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>scripts/build.sh</code></td>
+                <td>✅ Primary</td>
+                <td>✅ Primary</td>
+                <td>Optional (WSL2 / Git Bash)</td>
+              </tr>
+              <tr>
+                <td><code>scripts/build.ps1</code></td>
+                <td>—</td>
+                <td>—</td>
+                <td>✅ Primary</td>
+              </tr>
+              <tr>
+                <td><code>scripts/sync-agent-rules.sh</code></td>
+                <td>✅ Primary</td>
+                <td>✅ Primary</td>
+                <td>Optional (WSL2 / Git Bash)</td>
+              </tr>
+              <tr>
+                <td><code>scripts/sync-agent-rules.ps1</code></td>
+                <td>—</td>
+                <td>—</td>
+                <td>✅ Primary</td>
+              </tr>
+              <tr>
+                <td><code>SETUP.sh</code></td>
+                <td>Run if path differs</td>
+                <td>Run if path differs</td>
+                <td>—</td>
+              </tr>
+              <tr>
+                <td><code>SETUP.ps1</code></td>
+                <td>—</td>
+                <td>—</td>
+                <td>Run if path differs</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout callout-info">
+          <span class="callout-icon">💡</span>
+          <div class="callout-content">
+            <div class="callout-title">Everything else is identical</div>
+            <p>All Python scripts (<code>scripts/*.py</code>) use <code>Path(__file__).resolve().parent.parent</code> to locate themselves — they are fully OS-agnostic. The Go script (<code>parallel_runner.go</code>) compiles natively on all platforms. All agent rules, catalogs, templates, and documentation are the same file on every OS.</p>
+          </div>
+        </div>
+
+        <!-- Path personalisation -->
+        <h2>Path Personalisation (first-time setup)</h2>
+        <p>
+          The pipeline ships with hardcoded paths pointing to <code>/home/user/codesleuth/</code>.
+          If you install it at a different location or under a different username, run the setup script once
+          to replace all path references throughout the pipeline files automatically.
+        </p>
+
+        <h3>Linux &amp; macOS</h3>
+        <pre><code>bash SETUP.sh</code></pre>
+        <p>Detects your actual install directory and replaces <code>/home/user/codesleuth/</code> with it. Works on both Linux (<code>sed -i</code>) and macOS (<code>sed -i ''</code>) automatically.</p>
+
+        <h3>Windows</h3>
+        <pre><code>Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.\SETUP.ps1</code></pre>
+        <p>Replaces <code>/home/user/codesleuth</code> with the actual install path using forward slashes (<code>C:/Users/yourname/codesleuth</code>), which Python, PowerShell, and Go all accept on Windows. If <code>python3</code> is not found on PATH, the script also updates script invocations to use <code>python</code>.</p>
+
+        <!-- Build commands -->
+        <h2>Build Commands by OS</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Operation</th><th>Linux / macOS</th><th>Windows (PowerShell)</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Build binary</td>
+                <td><code>bash scripts/build.sh</code></td>
+                <td><code>.\scripts\build.ps1</code></td>
+              </tr>
+              <tr>
+                <td>Compile check only</td>
+                <td><code>bash scripts/build.sh --check</code></td>
+                <td><code>.\scripts\build.ps1 -Check</code></td>
+              </tr>
+              <tr>
+                <td>Release build</td>
+                <td><code>bash scripts/build.sh --release</code></td>
+                <td><code>.\scripts\build.ps1 -Release</code></td>
+              </tr>
+              <tr>
+                <td>Sync CLI rules</td>
+                <td><code>bash scripts/sync-agent-rules.sh</code></td>
+                <td><code>.\scripts\sync-agent-rules.ps1</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Python -->
+        <h2>Python Command</h2>
+        <p>On Linux and macOS the pipeline calls <code>python3</code>. On Windows, if only <code>python</code> (not <code>python3</code>) is on your PATH, run <code>SETUP.ps1</code> — it detects this and updates all invocations in the agent files automatically.</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>OS</th><th>Command expected</th><th>How to check</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Linux</td><td><code>python3</code></td><td><code>python3 --version</code></td></tr>
+              <tr><td>macOS</td><td><code>python3</code></td><td><code>python3 --version</code></td></tr>
+              <tr><td>Windows</td><td><code>python</code> or <code>python3</code></td><td><code>python --version</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Requirements -->
+        <h2>Requirements by OS</h2>
+
+        <h3>Linux</h3>
+        <pre><code>sudo apt install python3 golang-go nodejs git
+npm install -g @anthropic-ai/claude-code</code></pre>
+
+        <h3>macOS</h3>
+        <pre><code>brew install python go node git
+npm install -g @anthropic-ai/claude-code</code></pre>
+
+        <h3>Windows</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Tool</th><th>Install</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Python 3.10+</td><td><a href="https://python.org/downloads/windows/">python.org</a> — check "Add to PATH"</td></tr>
+              <tr><td>Go 1.22+</td><td><a href="https://go.dev/dl/">go.dev/dl</a></td></tr>
+              <tr><td>Node.js 20+</td><td><a href="https://nodejs.org/">nodejs.org</a></td></tr>
+              <tr><td>Git</td><td><a href="https://git-scm.com/download/win">git-scm.com</a></td></tr>
+              <tr><td>PowerShell 7+</td><td><a href="https://github.com/PowerShell/PowerShell/releases">github.com/PowerShell</a></td></tr>
+              <tr><td>Claude Code CLI</td><td><code>npm install -g @anthropic-ai/claude-code</code></td></tr>
+              <tr><td>WSL2 (optional)</td><td><code>wsl --install</code> — enables running <code>.sh</code> scripts natively</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Portability notes -->
+        <h2>What "Same Files" Means in Practice</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Component</th><th>Portable?</th><th>Notes</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>scripts/*.py</code></td>
+                <td>✅ Fully portable</td>
+                <td>Use <code>Path(__file__).resolve()</code> — no hardcoded paths</td>
+              </tr>
+              <tr>
+                <td><code>scripts/parallel_runner.go</code></td>
+                <td>✅ Fully portable</td>
+                <td>Compiles natively with <code>go run</code> on any OS</td>
+              </tr>
+              <tr>
+                <td><code>scripts/build.sh</code></td>
+                <td>Linux / macOS only</td>
+                <td>Use <code>build.ps1</code> on Windows, or WSL2</td>
+              </tr>
+              <tr>
+                <td><code>scripts/build.ps1</code></td>
+                <td>Windows (+ PowerShell Core)</td>
+                <td>Works on Linux/macOS if PowerShell Core 7+ is installed</td>
+              </tr>
+              <tr>
+                <td><code>agents/*.md</code></td>
+                <td>Portable after <code>SETUP</code></td>
+                <td>Contain hardcoded paths — <code>SETUP.sh</code> / <code>SETUP.ps1</code> fix these</td>
+              </tr>
+              <tr>
+                <td>Documentation (<code>documentation/*.html</code>)</td>
+                <td>✅ Fully portable</td>
+                <td>Static HTML — no OS dependency</td>
+              </tr>
+              <tr>
+                <td>Templates, catalogs, configs</td>
+                <td>✅ Fully portable</td>
+                <td>Plain text / JSON — no OS dependency</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </main>
+  </div>
+  <script src="nav.js"></script>
+</body>
+</html>

@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Orchestrator — CodeSleuth AI Docs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="header" id="site-header"></header>
+  <div class="main-layout">
+    <nav class="sidebar" id="site-sidebar"></nav>
+    <main class="content">
+      <div class="content-inner">
+
+        <div class="breadcrumb">
+          <a href="index.html">Docs</a>
+          <span class="breadcrumb-sep">›</span>
+          <span>Agents</span>
+          <span class="breadcrumb-sep">›</span>
+          <span class="breadcrumb-current">Orchestrator</span>
+        </div>
+
+        <div class="page-tag">🎯 Agent 0</div>
+        <h1>Orchestrator Agent</h1>
+        <p class="lead">
+          The Orchestrator is the director of the pipeline. It never builds — it enforces gates,
+          manages state, routes to the correct template, coordinates spec changes, and captures
+          patterns. Every session starts and ends with the Orchestrator.
+        </p>
+
+        <div class="callout callout-warning">
+          <span class="callout-icon">⚠️</span>
+          <div class="callout-content">
+            <div class="callout-title">The Orchestrator does not build code</div>
+            <p>If a user asks the Orchestrator to write code, it refuses and redirects to Agent 3 (Builder). Its role is coordination and gate enforcement only.</p>
+          </div>
+        </div>
+
+        <h2>Activation</h2>
+        <pre><code>Start agent 0</code></pre>
+        <p>On activation, the Orchestrator runs a two-path startup check before anything else.</p>
+
+        <h2>Startup Protocol</h2>
+        <p>
+          On <code>Start agent 0</code> (case-insensitive, whitespace-forgiving), the Orchestrator
+          executes a fixed startup sequence — no HANDOFF.json or TASK-GRAPH.md is read first because
+          they don't exist on a cold start. The protocol runs identically in every supported CLI and IDE.
+        </p>
+
+        <ol class="steps">
+          <li class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <div class="step-title">Read <code>config/context.json</code></div>
+              <div class="step-desc">
+                Checks <code>_setup_complete</code>. If <code>false</code> or file is absent,
+                outputs the setup block and stops:
+                <pre><code>⛔ Setup required before starting the pipeline.
+Run:  bash SETUP.sh       (Linux / macOS)
+      .\SETUP.ps1          (Windows)</code></pre>
+              </div>
+            </div>
+          </li>
+          <li class="step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <div class="step-title">Check registered projects</div>
+              <div class="step-desc">
+                If <code>registered_projects</code> has entries, displays a numbered resume menu
+                and waits. The user picks a number to resume from <code>last_active_agent</code>,
+                or types <strong>N</strong> for a new project. If empty, continues immediately.
+              </div>
+            </div>
+          </li>
+          <li class="step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <div class="step-title">Output status line</div>
+              <div class="step-desc"><code>✅ Setup verified — no registered projects found. Starting new project kickoff.</code></div>
+            </div>
+          </li>
+          <li class="step">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <div class="step-title">Output ASCII banner + info table</div>
+              <div class="step-desc">
+                Displays the CodeSleuth ASCII art banner followed by the info table with live values
+                from <code>config/context.json</code>: Pipeline stages, Context Backends
+                (coordination, semantic search, agent memory, external registry), Design Contract
+                status, and the full command reference.
+              </div>
+            </div>
+          </li>
+          <li class="step">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <div class="step-title">Output build targets + welcome</div>
+              <div class="step-desc">
+                Displays the CodeSleuth Build Targets table (Web, Linux, Windows, macOS, Android, iOS)
+                then the welcome message asking for: what the project does, the target platform,
+                and the project directory (must be outside the agents directory).
+              </div>
+            </div>
+          </li>
+        </ol>
+
+        <div class="callout callout-info">
+          <span class="callout-icon">💡</span>
+          <div class="callout-content">
+            <div class="callout-title">No step narration</div>
+            <p>The protocol outputs blocks verbatim without narrating each step. Models that output "Step 1 complete ✅, now checking..." are not following the protocol correctly — the rule file explicitly forbids this.</p>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <span class="callout-icon">💡</span>
+          <div class="callout-content">
+            <div class="callout-title">When does a project get registered?</div>
+            <p>
+              Agent 3 (Builder) calls <code>register_project.py</code> at build completion —
+              even if the user stops there and never proceeds to Critic or Verifier.
+              Agents 4, 5, and 6 advance the stage from <code>built</code> → <code>critiqued</code>
+              → <code>secured</code> → <code>shipped</code> as the pipeline progresses.
+              Once registered, the project is always resident in the pipeline for every future session.
+            </p>
+          </div>
+        </div>
+
+        <h2>Human Gate Protocol</h2>
+        <p>The Orchestrator enforces all human gates. No agent advances automatically — every transition requires an explicit command from the human.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Gate Command</th><th>Transition</th><th>What happens</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><span class="cmd">!plan</span></td><td>Discovery → Planning</td><td>Loads Agent 2; full contract planning begins immediately (TDD, INTERFACES, SCHEMA, TASK-GRAPH)</td></tr>
+              <tr><td><span class="cmd">!build</span></td><td>Planning → Builder</td><td>Loads Agent 3; continuous execution begins</td></tr>
+              <tr><td><span class="cmd">!critic</span></td><td>Builder → Critic</td><td>Loads Agent 4; 12-Dimension Product Scorecard and critique begins</td></tr>
+              <tr><td><span class="cmd">!security</span></td><td>Critic → Security</td><td>Loads Agent 5; 20-domain security review begins</td></tr>
+              <tr><td><span class="cmd">!verify</span></td><td>Security → Verifier</td><td>Loads Agent 6; QA and release gate begins</td></tr>
+              <tr><td><em>(resume selection)</em></td><td>Any stage → Maintenance</td><td>Registered projects at stage <code>shipped</code> or <code>maintenance</code> route to Agent 7 automatically</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Spec Change Protocol</h2>
+        <p>The <code>!change</code> command initiates a formal spec change review. No implementation changes happen until the human approves the blast radius report.</p>
+
+        <ol class="steps">
+          <li class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <div class="step-title">Human issues <span class="cmd">!change [description]</span></div>
+              <div class="step-desc">Example: <code>!change add a dark mode toggle to the settings page</code></div>
+            </div>
+          </li>
+          <li class="step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <div class="step-title">Orchestrator emits Blast Radius Report</div>
+              <div class="step-desc">Lists affected tasks (PENDING/IN-PROGRESS/DONE), files, contracts, and tests. Classifies scope as Small / Medium / Large. Warns about any DONE tasks that will become STALE.</div>
+            </div>
+          </li>
+          <li class="step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <div class="step-title">Human approves or cancels</div>
+              <div class="step-desc"><span class="cmd">!change-approve</span> proceeds. <span class="cmd">!change-cancel</span> discards the change and resumes normal pipeline.</div>
+            </div>
+          </li>
+          <li class="step">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <div class="step-title">CHANGE_LOG.md updated; affected tasks marked STALE</div>
+              <div class="step-desc">The Builder detects STALE tasks and re-derives their implementation before execution.</div>
+            </div>
+          </li>
+        </ol>
+
+        <h2>Pattern Library Commands</h2>
+        <p>The Orchestrator manages the Pattern Library across projects.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Command</th><th>Behavior</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="cmd">!pattern-add</span></td>
+                <td>Captures the most recently completed task's implementation as a <code>PATTERN-NNN</code> entry in <code>PATTERN_LIBRARY.md</code> and indexes it in <code>PATTERN_INDEX.md</code>.</td>
+              </tr>
+              <tr>
+                <td><span class="cmd">!pattern-list</span></td>
+                <td>Displays all patterns in the library with their domain, stack, and reuse signal keywords.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Living Documentation</h2>
+        <p>The <code>!docs</code> command generates human-readable documentation from the current pipeline artifacts — useful for onboarding, handoffs, and project wikis.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Command</th><th>Generates</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><span class="cmd">!docs</span></td><td><code>artifacts/docs/OVERVIEW.md</code> — project summary, tech stack, features, and deployment notes derived from TDD.md, feature-spec.md, and HANDOFF.json</td></tr>
+              <tr><td><span class="cmd">!docs changelog</span></td><td><code>artifacts/docs/CHANGELOG.md</code> — human-readable change history from CHANGE_LOG.md and DECISIONS.md</td></tr>
+              <tr><td><span class="cmd">!docs api</span></td><td><code>artifacts/docs/API.md</code> — endpoint reference derived from openapi.yaml</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Platform Routing</h2>
+        <p>The Orchestrator detects the target platform from the project brief and surfaces the correct toolchain, signing, and distribution requirements. See <a href="platform-capabilities.html">Platform Capabilities</a> for the full reference.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Detected Platform</th><th>Toolchain surfaced</th><th>Notes</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>🌐 Web</td><td>Next.js / React / Node.js</td><td>Design contract auto-activated</td></tr>
+              <tr><td>🐧 Linux</td><td>GTK4 / Tauri / Python/PySide6 / Rust</td><td>Packaging format selected at Planning</td></tr>
+              <tr><td>🪟 Windows</td><td>WinUI 3 / .NET / Tauri / Electron</td><td>Authenticode signing required for release</td></tr>
+              <tr><td>🍎 macOS</td><td>Swift/SwiftUI / Tauri / Electron</td><td>⚠ Requires macOS hardware for signing/notarization</td></tr>
+              <tr><td>🤖 Android</td><td>Kotlin/Compose / Flutter / React Native</td><td>Keystore signing required for Play Store</td></tr>
+              <tr><td>📱 iOS</td><td>Swift/SwiftUI / Flutter / React Native</td><td>⚠ Requires macOS/Xcode for build and signing</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>All Orchestrator Commands</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Command</th><th>Behavior</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><span class="cmd">!help</span></td><td>Show available commands for the current stage</td></tr>
+              <tr><td><span class="cmd">!status</span></td><td>Display pipeline stage and agent status</td></tr>
+              <tr><td><span class="cmd">!state</span></td><td>Full pipeline state including HANDOFF version and task summary</td></tr>
+              <tr><td><span class="cmd">!pipeline</span></td><td>Visual pipeline diagram with current stage highlighted</td></tr>
+              <tr><td><span class="cmd">!budget</span></td><td>Token budget usage for current stage</td></tr>
+              <tr><td><span class="cmd">!plan</span></td><td>Gate: Discovery → Planning</td></tr>
+              <tr><td><span class="cmd">!build</span></td><td>Gate: Planning → Builder</td></tr>
+              <tr><td><span class="cmd">!critic</span></td><td>Gate: Builder → Critic</td></tr>
+              <tr><td><span class="cmd">!security</span></td><td>Gate: Critic → Security</td></tr>
+              <tr><td><span class="cmd">!verify</span></td><td>Gate: Security → Verifier</td></tr>
+              <tr><td><span class="cmd">!change [desc]</span></td><td>Initiate spec change review; produces blast radius report</td></tr>
+              <tr><td><span class="cmd">!change-approve</span></td><td>Approve pending spec change; mark affected tasks STALE</td></tr>
+              <tr><td><span class="cmd">!change-cancel</span></td><td>Discard pending spec change; resume normal pipeline</td></tr>
+              <tr><td><span class="cmd">!pattern-add</span></td><td>Capture current implementation as PATTERN-NNN entry</td></tr>
+              <tr><td><span class="cmd">!pattern-list</span></td><td>List all patterns in PATTERN_LIBRARY.md</td></tr>
+              <tr><td><span class="cmd">!docs</span></td><td>Generate OVERVIEW.md from current artifacts</td></tr>
+              <tr><td><span class="cmd">!docs changelog</span></td><td>Generate CHANGELOG.md from CHANGE_LOG.md</td></tr>
+              <tr><td><span class="cmd">!docs api</span></td><td>Generate API.md from openapi.yaml</td></tr>
+              <tr><td><span class="cmd">!fork [name]</span></td><td>Create a named pipeline branch for parallel exploration</td></tr>
+              <tr><td><span class="cmd">!pause</span></td><td>Pause the current agent and save state</td></tr>
+              <tr><td><span class="cmd">!reset</span></td><td>Reset pipeline to initial state (requires confirmation)</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Session Forking (!fork)</h2>
+        <p>The <code>!fork</code> command creates two isolated copies of the current project, each on its own git branch, and runs two independent pipeline paths in parallel.</p>
+
+        <ol class="steps">
+          <li class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <div class="step-title">Human issues <span class="cmd">!fork [name]</span></div>
+              <div class="step-desc">The Orchestrator calls <code>session_fork.py</code>, which creates two project copies with branches <code>fork/[name]-A</code> and <code>fork/[name]-B</code>.</div>
+            </div>
+          </li>
+          <li class="step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <div class="step-title">Orchestrator spawns two parallel Agent calls</div>
+              <div class="step-desc">Both branches execute concurrently in a single Claude Code response — each with its own isolated working directory and pipeline state.</div>
+            </div>
+          </li>
+          <li class="step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <div class="step-title">Human reviews both branches and issues <span class="cmd">!merge [A|B]</span></div>
+              <div class="step-desc"><code>session_fork.py</code> merges the winning branch back into main and cleans up the losing branch. The pipeline resumes on the merged codebase.</div>
+            </div>
+          </li>
+        </ol>
+
+        <div class="callout callout-info">
+          <span class="callout-icon">ℹ️</span>
+          <div class="callout-content">
+            <div class="callout-title">Use forking for high-uncertainty architecture decisions</div>
+            <p>When two implementation approaches are both viable and it's not clear which will be faster or cleaner, fork and build both. The parallel execution cost is lower than the cost of choosing wrong and refactoring later.</p>
+          </div>
+        </div>
+
+        <h2>Pipeline Replay (!replay)</h2>
+        <p>The <code>!replay</code> command restores the codebase to the git checkpoint immediately after a specific task completed, then resumes the Builder from that point.</p>
+
+        <pre><code>!replay TASK-003</code></pre>
+
+        <p>Internally, <code>pipeline_replay.py</code>:</p>
+        <ol>
+          <li>Reads the git commit SHA stored in <code>TASK-003</code>'s checkpoint entry in HANDOFF.json</li>
+          <li>Performs a git reset to that commit</li>
+          <li>Marks all tasks after TASK-003 as PENDING in TASK-GRAPH.md</li>
+          <li>Resumes Builder execution from TASK-004</li>
+        </ol>
+
+        <div class="callout callout-warn">
+          <span class="callout-icon">⚠️</span>
+          <div class="callout-content">
+            <div class="callout-title">Replay is destructive</div>
+            <p>All code written after the replay target task is discarded. Ensure <code>commit_by_task.py</code> has been run so each task has a clean checkpoint to restore to.</p>
+          </div>
+        </div>
+
+        <h2>Natural Language Gate Hints</h2>
+        <p>The Orchestrator monitors user messages for intent phrases that indicate readiness to advance the pipeline. When detected, it surfaces the correct gate command without auto-advancing.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Detected phrase</th><th>Suggested command</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>"looks good", "that looks right", "happy with this" (after Discovery)</td><td><span class="cmd">!plan</span></td></tr>
+              <tr><td>"let's build", "start building", "go ahead and build"</td><td><span class="cmd">!build</span></td></tr>
+              <tr><td>"ready to ship", "looks shippable", "we're done"</td><td><span class="cmd">!verify</span></td></tr>
+              <tr><td>"check security", "run the security review"</td><td><span class="cmd">!security</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout callout-info">
+          <span class="callout-icon">ℹ️</span>
+          <div class="callout-content">
+            <div class="callout-title">Hints, not auto-advance</div>
+            <p>Natural language detection never automatically advances the pipeline. It only displays a suggestion like: <em>"It sounds like you're ready to proceed — type <code>!build</code> to activate the Builder."</em> The human must still type the gate command.</p>
+          </div>
+        </div>
+
+        <h2>Token Budget (!budget)</h2>
+        <p>The <code>!budget</code> command runs <code>token_tracker.py</code> and displays a real-time cost summary for the current session.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Metric</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Context window %</td><td>Current context fill as a percentage of the model's maximum window</td></tr>
+              <tr><td>Cumulative tokens</td><td>Total input + output tokens consumed since session start</td></tr>
+              <tr><td>Per-agent breakdown</td><td>Token count attributed to each agent (0–6) in this session</td></tr>
+              <tr><td>Total cost (USD)</td><td>Estimated spend based on current model pricing</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p><code>token_tracker.py</code> runs automatically after every agent turn and appends a telemetry row to <code>artifacts/telemetry/token_log.jsonl</code>. Use <code>!budget</code> at any time to see the live summary.</p>
+
+        <h2>Migration Sub-Commands</h2>
+        <p>When <code>migration_safety.py</code> detects a HIGH severity schema change risk, it emits a Migration Risk Report and the pipeline pauses. Two sub-commands become available — they exist only while an active migration risk report is pending:</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Command</th><th>Behavior</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="cmd">!migration-approve</span></td>
+                <td>Confirms the migration plan. Records the acceptance in HANDOFF.json and unblocks the pipeline. The Builder proceeds with the schema change and its generated SQL.</td>
+              </tr>
+              <tr>
+                <td><span class="cmd">!migration-cancel</span></td>
+                <td>Discards the schema change. The SCHEMA.md edit is reverted and the task is marked STALE for replanning without the risky migration.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout callout-warn">
+          <span class="callout-icon">⚠️</span>
+          <div class="callout-content">
+            <div class="callout-title">These commands are context-sensitive</div>
+            <p><code>!migration-approve</code> and <code>!migration-cancel</code> are only valid when a Migration Risk Report is active. Issuing them outside that context produces an error.</p>
+          </div>
+        </div>
+
+        <div class="doc-footer">
+          <a class="doc-footer-link" href="architecture.html">
+            <span class="doc-footer-dir">← Previous</span>
+            <span class="doc-footer-title">Architecture</span>
+          </a>
+          <a class="doc-footer-link next" href="discovery.html">
+            <span class="doc-footer-dir">Next →</span>
+            <span class="doc-footer-title">Discovery</span>
+          </a>
+        </div>
+
+      </div>
+    </main>
+  </div>
+  <script src="nav.js"></script>
+</body>
+</html>

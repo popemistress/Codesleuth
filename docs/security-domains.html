@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Security Domains — CodeSleuth AI Docs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="header" id="site-header"></header>
+  <div class="main-layout">
+    <nav class="sidebar" id="site-sidebar"></nav>
+    <main class="content">
+      <div class="content-inner">
+
+        <div class="breadcrumb">
+          <a href="index.html">Docs</a>
+          <span class="breadcrumb-sep">›</span>
+          <a href="security.html">Security</a>
+          <span class="breadcrumb-sep">›</span>
+          <span class="breadcrumb-current">Security Domains</span>
+        </div>
+
+        <div class="page-tag">🔒 Agent 5 — Reference</div>
+        <h1>Security Domains</h1>
+        <p class="lead">
+          The Security Agent reviews every codebase across up to 20 distinct security domains.
+          Which domains run depends on the project's <strong>complexity tier</strong> — but you can
+          always force all 20 with <code>!security --full</code>, or re-run a single domain after
+          a fix with <code>!security domain [N]</code>.
+        </p>
+
+        <!-- Domain targeting -->
+        <h2>Domain Targeting Commands</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Command</th><th>Behavior</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>!security</code></td>
+                <td>Activate Security Agent; run the tier-appropriate domain set (Simple = 5 domains, Standard = critical+high domains, Complex = all 20)</td>
+              </tr>
+              <tr>
+                <td><code>!security --full</code></td>
+                <td>Force all 20 domains regardless of complexity tier — use after large feature additions or for pre-production audit</td>
+              </tr>
+              <tr>
+                <td><code>!security domain [N]</code></td>
+                <td>Re-run a specific domain only (e.g. <code>!security domain 8</code> re-runs Dependency &amp; Supply Chain after you've upgraded a vulnerable package). The domain number corresponds to the table below.</td>
+              </tr>
+              <tr>
+                <td><code>!security-review</code></td>
+                <td>Run or route a targeted security review task outside the main gate flow</td>
+              </tr>
+              <tr>
+                <td><code>!security accept [ID]</code></td>
+                <td>Formally accept a HIGH or MEDIUM finding with documented rationale — records the accepted risk in SECURITY_REPORT.md and HANDOFF v5</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Tier breakdown -->
+        <h2>Review Tiers</h2>
+        <p>The agent selects domains automatically based on the project complexity tier recorded in HANDOFF:</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Tier</th><th>Domains Run</th><th>Trigger</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>Simple</strong></td><td>1, 5, 6, 8, 13</td><td>Single platform, CRUD-only, no auth</td></tr>
+              <tr><td><strong>Standard</strong></td><td>All critical + high priority domains</td><td>Multi-platform, auth, payments, or real-time</td></tr>
+              <tr><td><strong>Complex</strong></td><td>All 20 domains</td><td>3+ platforms, enterprise, compliance, native billing</td></tr>
+              <tr><td><strong>Forced</strong></td><td>All 20 domains</td><td><code>!security --full</code> regardless of tier</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Domain listing -->
+        <h2>All 20 Security Domains</h2>
+
+        <!-- Domain 1 -->
+        <div class="card" id="domain-1">
+          <div class="card-header" style="display:flex;align-items:center;gap:12px;">
+            <span class="badge badge-blue">Domain 1</span>
+            <h3 style="margin:0;">Defense in Depth</h3>
+            <span class="badge badge-success" style="margin-left:auto;">All Projects</span>
+          </div>
+          <div class="card-body">
+            <p>Verifies that multiple independent security layers exist — no single failure can compromise the system.</p>
+            <h4>Required Checks</h4>
+            <ul>
+              <li>Independent authentication layer (verify identity is checked separately from authorization)</li>
+              <li>Independent authorization layer (verify permissions are checked on every route/action, not just at login)</li>
+              <li>Input validation at API/IPC/native boundaries (not just client-side)</li>
+              <li>Rate limiting present and independent of application logic</li>
+              <li>Structured logging of auth, authorization, and data mutation events</li>
+              <li>Database-level permissions (app user has least-privilege access, no superuser in prod)</li>
+              <li>Release integrity layer (signed artifacts, dependency pinning)</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Domain 2 -->
+        <div class="card" id="domain-2">
+          <div class="card-header" style="display:flex;align-items:center;gap:12px;">
+            <span class="badge badge-blue">Domain 2</span>
+            <h3 style="margin:0;">Identity &amp; Access Management</h3>
+            <span class="badge badge-warning">Projects with Users/Roles</span>
+          </div>
+          <div class="card-body">
+            <p>Reviews the complete IAM surface — role model, permission matrix, and account lifecycle security.</p>
+            <h4>Required Checks</h4>
+            <ul>
+              <li>MFA support present where risk warrants (admin accounts, payment-related actions)</li>
+              <li>Password policy: minimum length, complexity requirements, breach-check option (Have I Been Pwned API)</li>
+              <li>Password reset flow: secure token, short TTL (≤15 min), single-use, rate-limited</li>
+              <li>OAuth 2.0 flows use PKCE (Proof Key for Code Exchange) — not implicit flow</li>
+              <li>Role and permission model: roles map to discrete permission sets, no catch-all admin role in code</li>
+              <li>Horizontal access control: user A cannot access user B's resources by guessing IDs</li>
+              <li>Admin account separation: admin operations require explicit privilege, not role-checked implicitly</li>
+              <li>Account lockout or progressive delay after repeated failed login attempts</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Domain 3 -->
+        <div class="card" id="domain-3">
+          <div class="card-header" style="display:flex;align-items:center;gap:12px;">
+            <span class="badge badge-blue">Domain 3</span>
+            <h3 style="margin:0;">Authentication &amp; Session Security</h3>
+            <span class="badge badge-warning">Auth Systems</span>
+          </div>
+          <div class="card-body">
+            <p>Covers session lifecycle, token storage, and platform-specific auth credential security.</p>
+            <h4>Required Checks — Web</h4>
+            <ul>
+              <li>Session cookies: <code>HttpOnly</code>, <code>Secure</code>, <code>SameSite=Strict</code> or <code>Lax</code></li>
+              <li>JWT lifetime: short access token (≤15 min), refresh token rotation on use</li>
+              <li>Refresh token revocation path exists (database-backed, not stateless-only)</li>
+              <li>CSRF protection on all state-mutating endpoints (token or SameSite cookie)</li>
+              <li>No auth tokens stored in <code>localStorage</code> or <code>sessionStorage</code> (XSS exposure)</li>
+            </ul>
+            <h4>Required Checks — Native / Desktop</h4>
+            <ul>
+              <li>iOS: credentials stored in Keychain, not UserDefaults or plist</li>
+              <li>Android: credentials in <code>EncryptedSharedPreferences</code> or Android Keystore, not SharedPreferences</li>
+              <li>Windows: use Windows Credential Manager or DPAPI, not plain registry</li>
+              <li>macOS: use Keychain Services, not user defaults</li>
+              <li>Linux: use libsecret / system keyring, not plaintext config files</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Domain 4 -->
+        <div class="card" id="domain-4">
+          <div class="card-header" style="display:flex;align-items:center;gap:12px;">
+            <span class="badge badge-blue">Domain 4</span>
+            <h3 style="margin:0;">Network Security</h3>
+            <span class="badge badge-success">All Networked Apps</span>
+          </div>
+          <div class="card-body">
+            <p>Ensures all transport channels are encrypted and configured with correct security headers.</p>
+            <h4>Required Checks</h4>
+            <ul>
+              <li>TLS 1.2+ enforced; TLS 1.0/1.1 disabled</li>
+              <li>HSTS header present (<code>max-age ≥ 31536000</code>, <code>includeSubDomains</code>)</li>
+              <li>Content-Security-Policy (CSP) header present and restrictive — no <code>unsafe-inline</code> or <code>unsafe-eval</code> except where documented</li>
+              <li>No mixed content (HTTP resources loaded on HTTPS pages)</li>
+              <li>iOS: App Transport Security (ATS) enabled — no <code>NSAllowsArbitraryLoads</code></li>
+              <li>Android: <code>android:usesCleartextTraffic="false"</code> in manifest</li>
+              <li>Certificate validation not disabled in any environment (including dev/test stubs)</li>
+              <li>AbuseIPDB API check on any suspicious IP ranges in CORS allowlists or firewall rules</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Domain 5 -->
+        <div class="card" id="domain-5">
+          <div class="card-header" style="display:flex;align-items:center;gap:12px;">
+            <span class="badge badge-blue">Domain 5</span>
+            <h3 style="margin:0;">Input Validation &amp; Injection</h3>
+            <span class="badge badge-success">All Projects</span>
+          </div>
+          <div class="card-body">
+            <p>Guards every trust boundary against injection attacks (SQL, XSS, command, path traversal, and more).</p>
+            <h4>Required Checks</h4>
+            <ul>
+              <li>Server/API boundary validation on all incoming data (Zod, Joi, Yup, class-validator, or equivalent)</li>
+              <li>All database queries use parameterized queries or ORM-provided escaping — zero raw string interpolation</li>
+              <li>IPC/native bridge inputs validated before use on all desktop platforms</li>
+              <li>Output encoding: user-supplied content HTML-encoded before rendering (React's JSX handles this by default; custom <code>dangerouslySetInnerHTML</code> audited)</li>
+              <li>File upload: MIME type validated server-side; file extensions allowlisted; files stored outside web root</li>
+              <li>Path traversal: no user-supplied values used to construct file system paths without sanitization</li>
+              <li>No <code>eval()</code>, <code>exec()</code>, or <code>child_process.exec()</code> with user input without strict validation</li>
+              <li>Command injection: shell arguments quoted and escaped; prefer <code>execFile()</code> over <code>exec()</code></li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Domain 6 -->
+        <div class="card" id="domain-6">
+          <div class="card-header" style="display:flex;align-items:center;gap:12px;">
+            <span class="badge badge-blue">Domain 6</span>
+            <h3 style="margin:0;">Cryptography</h3>
+            <span class="badge badge-success">All Projects with Secrets / Sensitive Data</span>
+          </div>
+          <div class="card-body">
+            <p>Ensures only modern, audited cryptographic primitives are used throughout the codebase.</p>
+            <h4>Required Checks</h4>
+            <ul>
+              <li>Passwords hashed with bcrypt (cost ≥ 12), Argon2id, or scrypt — never MD5, SHA1, or SHA256 alone</li>
+              <li>No custom cryptographic implementations — use vetted libraries only</li>
+              <li>JWT signed with RS256 or ES256 — never HS256 with a short or guessable secret</li>
+              <li>Encryption at rest: sensitive database fields encrypted; key stored outside the database</li>
+              <li>Secure randomness: use <code>crypto.randomBytes()</code>, <code>SecureRandom</code>, <code>arc4random()</code> — never <code>Math.random()</code> for security-critical values</li>
+              <li>No MD5 or SHA1 for integrity or MAC purposes (CRC/checksum uses are acceptable but must be labeled)</li>
+              <li>Deprecated algorithms: RC4, DES, 3DES — flag any use as Critical</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Domain 7 -->
+        <div class="card" id="domain-7">
+          <div class="card-header" style="display:flex;align-items:center;gap:12px;">
+            <span class="badge badge-blue">Domain 7</span>
+            <h3 style="margin:0;">Data Protection &amp; PII</h3>
+            <span class="badge badge-warning">PII / Sensitive Data Projects</span>
+          </div>
+          <div class="card-body">
+            <p>Validates that personal data is classified, protected, and handled according to applicable regulations.</p>
+            <h4>Required Checks</h4>
+            <ul>
+              <li>PII classified in SCHEMA.md with explicit sensitivity labels (public, internal, sensitive, restricted)</li>
+              <li>Sensitive fields encrypted at rest (SSNs, payment card data, health records)</li>
+              <li>Logs redacted: PII fields not present in application logs; use structured log with field allow-list</li>
+              <li>Retention policy implemented: records deleted or anonymized after declared retention window</li>
+              <li>User data deletion path: GDPR right-to-erasure fulfilled, including cascades</li>
+              <li>GDPR/CCPA: lawful basis for processing documented; consent mechanism implemented where required</li>
+              <li>HIPAA: BAA established with all SaaS vendors who process PHI; PHI never logged</li>
+              <li>PCI DSS: card numbers not stored; use tokenization (Stripe, Adyen) for all card data</li>
+              <li>iOS: <code>PrivacyInfo.xcprivacy</code> present and accurate</li>
+              <li>Android: Data Safety form content matches actual data collection</li>
+              <li>DBHub (read-only): audit schema for unencrypted PII columns and overly broad row-level access</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Domain 8 -->
+        <div class="card" id="domain-8">
+          <div class="card-header" style="display:flex;align-items:center;gap:12px;">
+            <span class="badge badge-blue">Domain 8</span>
+            <h3 style="margin:0;">Dependency &amp; Supply Chain</h3>
+            <span class="badge badge-success">All Projects</span>
+          </div>
+          <div class="card-body">
+            <p>The most automated domain — uses four external services to systematically check every dependency for known vulnerabilities, malware, and secret leakage.</p>
+            <h4>Automated Dependency Intelligence Step (runs first)</h4>
+            <ol>
+              <li><strong>Extract dependencies</strong> from lockfiles: <code>package-lock.json</code>, <code>yarn.lock</code>, <code>pnpm-lock.yaml</code>, <code>Cargo.lock</code>, <code>go.sum</code>, <code>Podfile.lock</code>, <code>build.gradle</code></li>
+              <li><strong>OSV.dev</strong> (free, always runs): POST each package+version to <code>https://api.osv.dev/v1/query</code> — covers npm, PyPI, Maven, Go, Rust, Swift. Collects all vulnerability IDs and severity scores.</li>
+              <li><strong>NIST NVD</strong> (free, always runs): Fetch CVE details for any OSV-identified vulnerabilities from <code>https://services.nvd.nist.gov/rest/json/cves/2.0</code>. Records CVSS v3 base score, attack vector, and fix version.</li>
+              <li><strong>GitGuardian</strong> (API key required): Full repo + git history scan. Detects secrets by type, location, and commit hash.</li>
+              <li><strong>VirusTotal</strong> (API key required): Hash-checks native binaries and pre-compiled artifacts.</li>
+              <li><strong>URLScan.io</strong> (API key required): Scans external API URLs for known malicious patterns and cert validity.</li>
+            </ol>
+            <h4>Required Manual Checks</h4>
+            <ul>
+              <li>Run platform-native audit: <code>npm audit --audit-level=high</code>, <code>cargo audit</code>, <code>dotnet list package --vulnerable</code>, Gradle dependency-check</li>
+              <li>Classify all CVEs by CVSS score: Critical (≥9.0) and High (7.0–8.9) block SHIP</li>
+              <li>Verify lockfiles are committed (no floating <code>^</code> ranges for production dependencies)</li>
+              <li>Check for abandoned packages: zero releases in 2+ years + no named maintainer = flag</li>
+              <li>GitHub MCP (read-only): inspect recent commits to key dependencies for supply-chain signs</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Domain 9 -->
+        <div class="card" id="domain-9">
+          <div class="card-header" style="display:flex;align-items:center;gap:12px;">
+            <span class="badge badge-blue">Domain 9</span>
+            <h3 style="margin:0;">Logging &amp; Monitoring</h3>
+            <span class="badge badge-success">All Production Systems</span>
+          </div>
+          <div class="card-body">
+            <p>Validates that the application produces meaningful, tamper-resistant security-relevant events.</p>
+            <h4>Required Checks</h4>
+            <ul>
+              <li>Authentication events logged: successful login, failed login (with IP/user-agent, without credentials), logout</li>
+              <li>Authorization failures logged: access denied events include resource, action, and identity</li>
+              <li>Data mutation events logged: create/update/delete of sensitive records include user identity and timestamp</li>
+              <li>Structured logging format (JSON or key-value) — not free-text strings</li>
+              <li>PII redaction: log pipeline strips or masks sensitive fields before persistence</li>
+              <li>Alerting: critical auth failures trigger an alert within 5 minutes (SIEM, PagerDuty, or equivalent)</li>
+              <li>Crash reporting configured (Sentry, Bugsnag, or equivalent) for production</li>
+              <li>Log integrity: logs forwarded to external system; local logs not the only copy</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Domain 10 -->
+        <div class="card" id="domain-10">
+          <div class="card-header" style="display:flex;align-items:center;gap:12px;">
+            <span class="badge badge-blue">Domain 10</span>
+            <h3 style="margin:0;">Error Handling</h3>
+            <span class="badge badge-success">All Projects</span>
+          </div>
+          <div class="card-body">
+            <p>Ensures that errors are safe — they inform the user without exposing internal state to attackers.</p>
+            <h4>Required Checks</h4>
+            <ul>
+              <li>No stack traces returned to clients in production responses</li>
+              <li>No internal paths, library versions, or SQL query fragments in error messages</li>
+              <li>Consistent error response shape across all API endpoints (no leaking which fields failed validation beyond the safe message)</li>
+              <li>Unhandled promise rejections and uncaught exceptions caught globally and logged safely</li>
+              <li>404 vs 403: returning 404 for unauthorized access is acceptable (avoids enumeration); returning 403 is also fine but never 500</li>
+              <li>External service errors (timeouts, downstream failures) handled with safe generic messages</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Domain 11 -->
+        <div class="card" id="domain-11">
+          <div class="card-header" style="display:flex;align-items:center;gap:12px;">
+            <span class="badge badge-blue">Domain 11</span>
+            <h3 style="margin:0;">Tenant Isolation</h3>
+            <span class="badge badge-warning">Multi-Tenant Projects</span>
+          </div>
+          <div class="card-body">
+            <p>For SaaS products with multiple organizations or accounts — verifies every data access is scoped.</p>
+            <h4>Required Checks</h4>
+            <ul>
+              <li>All database queries include a <code>tenant_id</code>, <code>org_id</code>, or <code>account_id</code> WHERE clause — no queries that can accidentally return cross-tenant data</li>
+              <li>Row-level security (RLS) enabled in Postgres where applicable — verified via DBHub read-only scan</li>
+              <li>Cross-tenant access test: manually attempt to access resource of org A using authenticated token of org B (should 403/404, never 200)</li>
+              <li>Admin impersonation (if present) requires explicit audit log entry and separate elevated permission</li>
+              <li>File/blob storage: paths include tenant scope; no path traversal to other tenants' files</li>
+              <li>API rate limits applied per-tenant, not per-IP (which is easily shared/spoofed)</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Domain 12 -->
+        <div class="card" id="domain-12">
+          <div class="card-header" style="display:flex;align-items:center;gap:12px;">
+            <span class="badge badge-blue">Domain 12</span>
+            <h3 style="margin:0;">Release Integrity &amp; Updates</h3>
+            <span class="badge badge-success">All Distributed Apps</span>
+          </div>
+          <div class="card-body">
+            <p>Ensures distributed artifacts are signed and updates are delivered securely — preventing supply-chain attacks via the distribution channel.</p>
+            <h4>Required Checks by Platform</h4>
+            <ul>
+              <li><strong>iOS</strong>: Valid codesign, provisioning profile, App Store Connect archive</li>
+              <li><strong>Android</strong>: APK/AAB signed with release keystore; keystore not committed to repo</li>
+              <li><strong>Windows</strong>: Authenticode signing on installer and binaries (EV certificate for SmartScreen pass rate)</li>
+              <li><strong>macOS</strong>: Hardened Runtime + notarization + stapling (Gatekeeper-compliant)</li>
+              <li><strong>Linux</strong>: Package signing (GPG for APT/RPM; Flatpak verified bundle)</li>
+              <li><strong>Desktop auto-update</strong>: Sparkle (macOS) or Tauri updater validate signature before applying; no unsigned update accepted</li>
+              <li><strong>Web</strong>: Subresource Integrity (SRI) for any CDN-hosted scripts; <code>package-lock.json</code> committed</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Domain 13 -->
+        <div class="card" id="domain-13">
+          <div class="card-header" style="display:flex;align-items:center;gap:12px;">
+            <span class="badge badge-blue">Domain 13</span>
+            <h3 style="margin:0;">Client-Side Data &amp; Secrets</h3>
+            <span class="badge badge-success">All Projects</span>
+          </div>
+          <div class="card-body">
+            <p>Prevents secrets from leaking into the client layer — browser bundles, mobile binaries, renderer processes, localStorage, and git history.</p>
+            <h4>Required Checks</h4>
+            <ul>
+              <li>No API keys, tokens, or private keys in frontend JavaScript bundles (verified by grep + source map inspection)</li>
+              <li>No secrets in mobile app binary (decompile check for common patterns)</li>
+              <li>No secrets in Electron renderer process or Tauri WebView content</li>
+              <li>No sensitive data in <code>localStorage</code> or <code>sessionStorage</code> (XSS-accessible)</li>
+              <li>Source maps: disabled in production or served behind authentication — never public</li>
+              <li>No committed <code>.env</code> files with real values; <code>.env</code> in <code>.gitignore</code></li>
+              <li><strong>GitGuardian full repo + git history scan</strong>: any GitGuardian finding in this domain is automatically Critical severity — even if the secret was later removed from HEAD, it exists in git history and must be purged</li>
+            </ul>
+            <div class="callout callout-danger">
+              <span class="callout-icon">🚨</span>
+              <div class="callout-content">
+                <div class="callout-title">Git history secrets are Critical</div>
+                <p>Removing a secret from HEAD does not remove it from git history. GitGuardian findings in git history require a force-push purge (<code>git filter-repo</code>) and key rotation — not just a new commit.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Domain 14 -->
+        <div class="card" id="domain-14">
+          <div class="card-header" style="display:flex;align-items:center;gap:12px;">
+            <span class="badge badge-blue">Domain 14</span>
+            <h3 style="margin:0;">External Interface Surface</h3>
+            <span class="badge badge-warning">APIs / Webhooks / Deep Links</span>
+          </div>
+          <div class="card-body">
+            <p>Audits every external-facing interface — public API endpoints, webhooks, deep links — for exposure and abuse vectors.</p>
+            <h4>Required Checks</h4>
+            <ul>
+              <li>OpenAPI/Swagger documentation: all public endpoints documented; no undocumented endpoints reachable</li>
+              <li>Admin routes protected: <code>/admin</code>, <code>/internal</code>, <code>/__debug</code> routes require elevated auth and are not guessable</li>
+              <li>Webhooks: HMAC signature verification on all inbound webhook payloads (Stripe, GitHub, Twilio, etc.)</li>
+              <li>Deep links / OAuth redirect URIs: strict allowlist; no open redirect vulnerabilities</li>
+              <li>Unused endpoints removed: no legacy routes left active after feature deprecation</li>
+              <li>URLScan.io: submit all external API base URLs and webhook URLs for known malicious pattern check</li>
+              <li>GraphQL (if present): query depth limiting and query cost analysis enabled; introspection disabled in production</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Domain 15 -->
+        <div class="card" id="domain-15">
+          <div class="card-header" style="display:flex;align-items:center;gap:12px;">
+            <span class="badge badge-blue">Domain 15</span>
+            <h3 style="margin:0;">Security Test Cases</h3>
+            <span class="badge badge-success">All Projects</span>
+          </div>
+          <div class="card-body">
+            <p>Verifies that automated security tests exist — not just functional tests. Security test coverage is checked in the test suite.</p>
+            <h4>Required Test Coverage</h4>
+            <ul>
+              <li><strong>Auth bypass</strong>: test that unauthenticated requests to protected endpoints return 401</li>
+              <li><strong>Horizontal escalation</strong>: test that user A cannot access user B's resources</li>
+              <li><strong>Injection</strong>: test that SQL/XSS payloads are rejected or safely escaped</li>
+              <li><strong>CSRF</strong>: test that state-mutating requests without CSRF token are rejected</li>
+              <li><strong>Expired token rejection</strong>: test that expired JWT/session tokens return 401</li>
+              <li><strong>Rate limiting</strong>: test that the rate limit triggers after N requests in T seconds</li>
+              <li><strong>IPC/bridge tampering</strong> (desktop/mobile): test that native bridge inputs are validated before reaching native code</li>
+              <li><strong>Input validation</strong>: test that invalid inputs (missing fields, wrong types, oversized payloads) return 400, not 500</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Domain 16 -->
+        <div class="card" id="domain-16">
+          <div class="card-header" style="display:flex;align-items:center;gap:12px;">
+            <span class="badge badge-blue">Domain 16</span>
+            <h3 style="margin:0;">Privacy &amp; Compliance</h3>
+            <span class="badge badge-warning">Regulated / Privacy-Relevant Apps</span>
+          </div>
+          <div class="card-body">
+            <p>Checks regulatory compliance requirements — GDPR, CCPA, HIPAA, PCI, COPPA, and platform privacy rules.</p>
+            <h4>Required Checks</h4>
+            <ul>
+              <li><strong>GDPR</strong>: lawful basis for each data category documented; consent banner present where required; data deletion endpoint implemented</li>
+              <li><strong>CCPA</strong>: "Do Not Sell My Personal Information" link if selling data to third parties; opt-out mechanism</li>
+              <li><strong>HIPAA</strong>: BAAs established with all vendors touching PHI; PHI not in logs; encryption in transit and at rest</li>
+              <li><strong>PCI DSS</strong>: cardholder data not stored; tokenization used; compliance scope documented</li>
+              <li><strong>COPPA</strong>: age verification present if service is accessible to users under 13</li>
+              <li><strong>iOS</strong>: <code>PrivacyInfo.xcprivacy</code> manifest present; App Store privacy nutrition label accurate</li>
+              <li><strong>Android</strong>: Data Safety form completed and accurate; declared permissions justified</li>
+              <li><strong>Privacy policy</strong>: accessible without login; covers all data collection categories</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Domain 17 -->
+        <div class="card" id="domain-17">
+          <div class="card-header" style="display:flex;align-items:center;gap:12px;">
+            <span class="badge badge-blue">Domain 17</span>
+            <h3 style="margin:0;">Incident Response Readiness</h3>
+            <span class="badge badge-warning">Production Systems</span>
+          </div>
+          <div class="card-body">
+            <p>Verifies that the team can respond to a security incident — not just prevent one.</p>
+            <h4>Required Checks</h4>
+            <ul>
+              <li>Incident response runbook exists in <code>docs/</code> or internal wiki: steps for common scenarios (data breach, credential compromise, DDoS)</li>
+              <li>Kill switch exists: ability to revoke all active sessions and rotate secrets within 15 minutes</li>
+              <li>Token/API key revocation path: each external API key can be rotated independently without downtime</li>
+              <li>Emergency contacts documented: security-specific contacts separate from general on-call</li>
+              <li>Vulnerability disclosure path: <code>security.txt</code> or <code>/.well-known/security.txt</code> present on web apps</li>
+              <li>Backup and restore verified: last restore tested within 30 days (or documented date)</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Domain 18 -->
+        <div class="card" id="domain-18">
+          <div class="card-header" style="display:flex;align-items:center;gap:12px;">
+            <span class="badge badge-blue">Domain 18</span>
+            <h3 style="margin:0;">Electron / Tauri IPC Security</h3>
+            <span class="badge badge-warning">Desktop Hybrid Apps</span>
+          </div>
+          <div class="card-body">
+            <p>Desktop hybrid apps have a unique attack surface — the bridge between the web renderer and native OS. This domain covers both Electron and Tauri.</p>
+            <h4>Electron Required Checks</h4>
+            <ul>
+              <li><code>nodeIntegration: false</code> — no direct Node.js access from renderer</li>
+              <li><code>contextIsolation: true</code> — renderer cannot access Electron internals</li>
+              <li><code>sandbox: true</code> where possible</li>
+              <li><code>webSecurity: true</code> (never disable, even in dev)</li>
+              <li>contextBridge exposes minimal surface — no broad Node.js APIs exposed</li>
+              <li>Zod/typed schema validation on all IPC messages before processing</li>
+              <li>CSP header set via <code>session.setPermissionRequestHandler</code></li>
+              <li>Navigation validated: <code>will-navigate</code> and <code>new-window</code> events restrict to known origins</li>
+              <li><code>shell.openExternal()</code> called only with allowlisted URLs</li>
+            </ul>
+            <h4>Tauri Required Checks</h4>
+            <ul>
+              <li>Minimal allowlist: only required capabilities enabled in <code>tauri.conf.json</code></li>
+              <li>Restrictive CSP configured</li>
+              <li>All Tauri commands (Rust side) typed and validated — no raw string exec</li>
+              <li>No broad file system or shell access (<code>fs.all</code>, <code>shell.all</code>) without justification</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Domain 19 -->
+        <div class="card" id="domain-19">
+          <div class="card-header" style="display:flex;align-items:center;gap:12px;">
+            <span class="badge badge-blue">Domain 19</span>
+            <h3 style="margin:0;">React Native Bridge Security</h3>
+            <span class="badge badge-warning">React Native Mobile Apps</span>
+          </div>
+          <div class="card-body">
+            <p>The React Native bridge is a privileged channel between the JS thread and native code — each native module is a potential attack surface.</p>
+            <h4>Required Checks</h4>
+            <ul>
+              <li>Native modules expose minimal API — no passthrough to arbitrary OS calls</li>
+              <li>All inputs crossing the bridge validated on the native side (JS validation alone is insufficient)</li>
+              <li>WebView (if used): strict origin allowlist; <code>onMessage</code> handler validates sender origin before processing</li>
+              <li>Deep links: all deep link parameters validated and sanitized before routing</li>
+              <li>No sensitive data stored in AsyncStorage (unencrypted on device) — use <code>react-native-encrypted-storage</code> or equivalent</li>
+              <li>Third-party native modules audited: inspect source or published version for supply-chain risk</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Domain 20 -->
+        <div class="card" id="domain-20">
+          <div class="card-header" style="display:flex;align-items:center;gap:12px;">
+            <span class="badge badge-blue">Domain 20</span>
+            <h3 style="margin:0;">Node.js / Express API Security</h3>
+            <span class="badge badge-warning">Express / Node.js APIs</span>
+          </div>
+          <div class="card-body">
+            <p>Express applications have a specific set of middleware requirements that, when missing, leave the API vulnerable to well-known attacks.</p>
+            <h4>Required Checks</h4>
+            <ul>
+              <li><strong>Helmet.js</strong>: configured and covering CSP, HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy</li>
+              <li><strong>CORS</strong>: restricted to known origins — not <code>origin: '*'</code> in production</li>
+              <li><strong>CSRF</strong>: <code>csurf</code> middleware or equivalent for session-based auth flows</li>
+              <li><strong>Rate limiting</strong>: <code>express-rate-limit</code> on auth endpoints and public APIs</li>
+              <li><strong>Body size limits</strong>: <code>express.json({ limit: '10kb' })</code> or appropriate limit — prevents memory exhaustion</li>
+              <li><strong>HPP (HTTP Parameter Pollution)</strong>: <code>hpp</code> middleware present when query parameters are processed</li>
+              <li><strong>Input validation</strong>: all route handlers use Zod/Joi/express-validator before reaching business logic</li>
+              <li><strong>Auth/session</strong>: session secret is env-var-sourced, minimum 32 chars, regenerated on privilege elevation</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Finding format -->
+        <h2>Finding Format</h2>
+        <p>Every finding in <code>SECURITY_REPORT.md</code> must use this exact structure:</p>
+        <pre><code>## FINDING-NNN
+**Severity:** Critical / High / Medium / Low
+**Platform(s):** web / ios / android / desktop / all
+**Domain:** N — [Domain Name]
+**Evidence:** [exact file, line, or API response that demonstrates the issue]
+**Exploit path:** [how an attacker could leverage this finding]
+**Exact fix:** [specific code change or configuration update required]
+**Acceptance criteria:** [how to verify the fix is complete]
+**Status:** Open / Mitigated / Fixed / Accepted Risk</code></pre>
+
+        <!-- Launch gate -->
+        <h2>Launch Gate Decisions</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Decision</th><th>Meaning</th><th>Condition</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="badge badge-success">APPROVE</span></td>
+                <td>No blocking critical or high findings</td>
+                <td>All critical findings resolved; all high findings either resolved or formally accepted via <code>!security accept [ID]</code></td>
+              </tr>
+              <tr>
+                <td><span class="badge badge-warning">CONDITIONAL</span></td>
+                <td>Remaining risk is explicitly accepted and non-critical</td>
+                <td>Only when documented mitigations exist and business risk is formally accepted by the user</td>
+              </tr>
+              <tr>
+                <td><span class="badge badge-danger">BLOCK</span></td>
+                <td>Pipeline cannot advance to Verifier</td>
+                <td>Any unresolved Critical finding; exploitable auth/authz flaw; exposed secret in code or git history; unsigned release where signing is required; severe dependency CVE</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </main>
+  </div>
+  <script src="nav.js"></script>
+</body>
+</html>

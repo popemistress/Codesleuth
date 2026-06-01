@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Critic — CodeSleuth AI Docs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="header" id="site-header"></header>
+  <div class="main-layout">
+    <nav class="sidebar" id="site-sidebar"></nav>
+    <main class="content">
+      <div class="content-inner">
+
+        <div class="breadcrumb">
+          <a href="index.html">Docs</a>
+          <span class="breadcrumb-sep">›</span>
+          <span>Agents</span>
+          <span class="breadcrumb-sep">›</span>
+          <span class="breadcrumb-current">Critic</span>
+        </div>
+
+        <div class="page-tag">📊 Agent 4</div>
+        <h1>Codebase + Product Critic</h1>
+        <p class="lead">
+          The Critic runs immediately after the Builder — before security hardening and QA —
+          judging whether the built product should exist, whether it is positioned well, and what must
+          change before real launch. It uses the 12-Dimension Product Scorecard as its primary judgment framework.
+        </p>
+
+        <div class="callout callout-warning">
+          <span class="callout-icon">⚠️</span>
+          <div class="callout-content">
+            <div class="callout-title">Truth over comfort</div>
+            <p>The Critic does not provide false reassurance. If the product has fundamental problems — unclear value proposition, broken monetization, or uncompetitive positioning — the Critic says so directly with evidence.</p>
+          </div>
+        </div>
+
+        <h2>12-Dimension Product Scorecard</h2>
+        <p>The scorecard is completed immediately after Phase 0 market intelligence. Every dimension is scored 1–5. A score of <strong>1 on any dimension is an automatic HOLD</strong>.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>#</th><th>Dimension</th><th>What it measures</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>D1</strong></td><td>First-Run Experience</td><td>Can a new user understand the product and complete their first action within 60 seconds, with no documentation?</td></tr>
+              <tr><td><strong>D2</strong></td><td>Activation Funnel Clarity</td><td>Is the path from landing/signup to first delivered value obvious and frictionless?</td></tr>
+              <tr><td><strong>D3</strong></td><td>Core Loop Retention</td><td>Does the product give users a compelling reason to return tomorrow?</td></tr>
+              <tr><td><strong>D4</strong></td><td>Error Recovery UX</td><td>When something fails, can the user recover without leaving the product or contacting support?</td></tr>
+              <tr><td><strong>D5</strong></td><td>Feature Discoverability</td><td>Can users find secondary features without being told they exist?</td></tr>
+              <tr><td><strong>D6</strong></td><td>Monetization Fit</td><td>Does the paywall hit at the right moment? Is the free tier compelling but limited enough to convert?</td></tr>
+              <tr><td><strong>D7</strong></td><td>Competitive Differentiation</td><td>Does the product do one thing demonstrably better than named competitors, visible on the first screen?</td></tr>
+              <tr><td><strong>D8</strong></td><td>Onboarding Completeness</td><td>Does every declared user type have a path to their first success?</td></tr>
+              <tr><td><strong>D9</strong></td><td>Empty State Quality</td><td>What does the app show before any data exists? Does it guide the user forward?</td></tr>
+              <tr><td><strong>D10</strong></td><td>Mobile / Responsive Execution</td><td>Was mobile designed or just adapted? Does every critical flow work at 390px?</td></tr>
+              <tr><td><strong>D11</strong></td><td>Trust Signal Quality</td><td>Does the product look production-ready? Are there obvious "made by AI" tells?</td></tr>
+              <tr><td><strong>D12</strong></td><td>Spec Fidelity</td><td>What was in the spec that didn't ship? What shipped that wasn't in the spec?</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Scoring Scale</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Score</th><th>Meaning</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><span class="badge badge-green">5</span></td><td>Excellent — clearly better than most products in this category</td></tr>
+              <tr><td><span class="badge badge-blue">4</span></td><td>Good — solid, a few rough edges</td></tr>
+              <tr><td><span class="badge badge-gray">3</span></td><td>Adequate — functional but unremarkable</td></tr>
+              <tr><td><span class="badge badge-yellow">2</span></td><td>Weak — material problems that reduce the product's viability</td></tr>
+              <tr><td><span class="badge badge-red">1</span></td><td>Broken / Missing — this dimension is absent or severely defective</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Scorecard Verdict</h2>
+        <pre><code>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📊 12-Dimension Product Scorecard — [Project Name]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+D1  First-Run Experience         4/5 — clear onboarding, first action in ~45s
+D2  Activation Funnel Clarity    4/5 — single CTA, minimal friction
+D3  Core Loop Retention          3/5 — some reason to return, not reinforced
+D4  Error Recovery UX            3/5 — most errors informative, some dead ends
+D5  Feature Discoverability      3/5 — core features accessible, secondary hidden
+D6  Monetization Fit             4/5 — paywall at value moment, free tier compelling
+D7  Competitive Differentiation  3/5 — differentiation exists but not prominent
+D8  Onboarding Completeness      4/5 — primary user well-served, admin gaps
+D9  Empty State Quality          2/5 — raw "no data" messages on 3 screens
+D10 Mobile/Responsive Execution  3/5 — usable but clearly secondary
+D11 Trust Signal Quality         4/5 — polished, consistent, no obvious AI tells
+D12 Spec Fidelity                5/5 — all MVP features shipped
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Mean score: 3.5/5
+Dimensions at risk (score ≤ 2): D9 Empty State Quality
+Auto-HOLD triggers (score = 1): none
+
+Scorecard verdict: CONDITIONAL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</code></pre>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Condition</th><th>Verdict</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Mean ≥ 4.0, no dimension ≤ 2</td><td><span class="badge badge-green">SHIP_READY</span></td></tr>
+              <tr><td>Mean ≥ 3.0, no dimension = 1</td><td><span class="badge badge-yellow">CONDITIONAL</span></td></tr>
+              <tr><td>Any dimension = 1, or mean &lt; 3.0</td><td><span class="badge badge-red">HOLD</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Market Intelligence Tools</h2>
+        <p>The Critic uses live market data during Phase 0 to ground critique in external reality, not just artifact analysis:</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Tool</th><th>Used for</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Brave Search MCP</td><td>Verify stated differentiation against actual search results; surface competitors</td></tr>
+              <tr><td>Firecrawl MCP</td><td>Scrape competitor pricing pages and feature tables for direct comparison</td></tr>
+              <tr><td>Playwright MCP</td><td>Load the built app; take first-impression screenshots at desktop and mobile</td></tr>
+              <tr><td>Reddit API</td><td>Search product-category subreddits for pain points and competitor mentions</td></tr>
+              <tr><td>Hacker News API</td><td>Search "Ask HN" threads for comparable products; surface community perception</td></tr>
+              <tr><td>GitHub API</td><td>Check star counts and contributor velocity for open-source competitors</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Review Workflow</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Phase</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>0</strong></td><td>Orientation — stack, platforms, users, monetization, design contract. Run market intelligence pre-scan.</td></tr>
+              <tr><td><strong>0B</strong></td><td>Product Scorecard — complete 12-Dimension Scorecard with evidence per dimension.</td></tr>
+              <tr><td><strong>1</strong></td><td>System Map — architecture, data flow, major modules, state ownership, dependency risks.</td></tr>
+              <tr><td><strong>2</strong></td><td>Assumption Stress Test — for each core assumption: how it fails, cost of failure, platform affected.</td></tr>
+              <tr><td><strong>3A–L</strong></td><td>Deep Review — Correctness, Security, Performance, Maintainability, DX, Observability, Testing, Product/GTM, Platform Fit, Cross-Platform, Monetization, UI/UX.</td></tr>
+              <tr><td><strong>4</strong></td><td>Prioritization — Top 10 Fix-First, Stop-Doing, Keep-Doing lists. Every finding includes severity, effort, and acceptance criteria.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Final Verdict Vocabulary</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Verdict</th><th>Meaning</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><span class="badge badge-green">SHIP [platform]</span></td><td>Genuinely ready for production launch on this platform</td></tr>
+              <tr><td><span class="badge badge-yellow">CONDITIONAL</span></td><td>Launch requires contained fixes; documented conditions must be met first</td></tr>
+              <tr><td><span class="badge badge-red">HOLD [platform]</span></td><td>Platform implementation is not ready for production</td></tr>
+              <tr><td><span class="badge badge-purple">RESTYLE</span></td><td>UI trust is below launch quality; visual redesign required</td></tr>
+              <tr><td><span class="badge badge-yellow">REDESIGN</span></td><td>Foundation or product architecture is wrong; rebuild required</td></tr>
+              <tr><td><span class="badge badge-red">KILL</span></td><td>The product concept should not proceed as built</td></tr>
+              <tr><td><span class="badge badge-red">PAUSE</span></td><td>Shipping would be irresponsible; specific risks must be mitigated first</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>CRITICISM.md Report Structure</h2>
+        <ol>
+          <li>Executive Summary (scorecard verdict as first line)</li>
+          <li>12-Dimension Product Scorecard (complete table)</li>
+          <li>Assessment per Platform</li>
+          <li>Critical Flaws</li>
+          <li>Risks</li>
+          <li>Top 10 Fix-First List (ordered by scorecard dimension impact)</li>
+          <li>Stop-Doing List</li>
+          <li>Keep-Doing List (evidence required)</li>
+          <li>Product &amp; Growth Gaps</li>
+          <li>Platform-Specific Critique</li>
+          <li>Cross-Platform Consistency Assessment</li>
+          <li>Monetization Architecture Assessment</li>
+          <li>UI/UX Design Contract Assessment</li>
+          <li>What You're Avoiding</li>
+          <li>Product Improvement Examples (3–10)</li>
+          <li>Stress Question &amp; Answer</li>
+          <li>Assumptions Stress Test</li>
+          <li>Review Category Summary (A–L)</li>
+          <li>Per-Platform Verdict</li>
+          <li>Overall Verdict (references scorecard verdict)</li>
+          <li>One Next Action (targets lowest-scoring dimension)</li>
+          <li>Audit Checklist</li>
+        </ol>
+
+        <div class="doc-footer">
+          <a class="doc-footer-link" href="builder.html">
+            <span class="doc-footer-dir">← Previous</span>
+            <span class="doc-footer-title">Application Builder</span>
+          </a>
+          <a class="doc-footer-link next" href="security.html">
+            <span class="doc-footer-dir">Next →</span>
+            <span class="doc-footer-title">Security</span>
+          </a>
+        </div>
+
+      </div>
+    </main>
+  </div>
+  <script src="nav.js"></script>
+</body>
+</html>

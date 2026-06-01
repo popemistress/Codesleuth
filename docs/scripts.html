@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pipeline Scripts Reference — CodeSleuth AI Docs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="header" id="site-header"></header>
+  <div class="main-layout">
+    <nav class="sidebar" id="site-sidebar"></nav>
+    <main class="content">
+      <div class="content-inner">
+
+        <div class="breadcrumb">
+          <a href="index.html">Docs</a>
+          <span class="breadcrumb-sep">›</span>
+          <span>Reference</span>
+          <span class="breadcrumb-sep">›</span>
+          <span class="breadcrumb-current">Pipeline Scripts</span>
+        </div>
+
+        <div class="page-tag">🐍 Reference</div>
+        <h1>Pipeline Scripts Reference</h1>
+        <p class="lead">
+          18 Python and Go infrastructure scripts that power the CodeSleuth AI pipeline.
+          These scripts handle environment bootstrapping, file write safety, parallel execution,
+          intelligence, database safety, pipeline operations, and post-build verification.
+        </p>
+
+        <div class="callout callout-warn">
+          <span class="callout-icon">⚠️</span>
+          <div class="callout-content">
+            <div class="callout-title">Script path convention</div>
+            <p>All script paths use <code>/home/user/codesleuth/scripts/</code> — the agents directory, not the project directory. Always use absolute paths when calling scripts from within a project. Examples in this reference use relative <code>python scripts/</code> notation for readability; resolve to absolute paths in practice.</p>
+          </div>
+        </div>
+
+        <h2>Environment &amp; Bootstrap</h2>
+
+        <h3>bootstrap.py</h3>
+        <p>Validates toolchain, installs dependencies, and generates <code>.env.example</code>. Run at Agent 3 activation before any build tasks proceed.</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Detail</th><th>Value</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>Usage</strong></td><td><code>python scripts/bootstrap.py --project-dir . --tdd artifacts/build/TDD.md</code></td></tr>
+              <tr><td><strong>Exit 0</strong></td><td>Environment validated, deps installed, <code>.env.example</code> generated</td></tr>
+              <tr><td><strong>Exit 1</strong></td><td>Blocked — missing toolchain component; error message identifies what is missing</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>spec_validate.py</h3>
+        <p>Validates <code>TASK-GRAPH.md</code> consistency before the <code>!build</code> gate opens. Catches structural issues before the Builder begins execution.</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Check</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>task_type</td><td>Every task has a valid <code>task_type</code> field (api, auth, data, infra, ui, test, docs)</td></tr>
+              <tr><td>output_files</td><td>Every task declares at least one <code>output_files</code> entry</td></tr>
+              <tr><td>TC status</td><td>Test contracts reference valid task IDs</td></tr>
+              <tr><td>Circular deps</td><td>Dependency graph has no cycles</td></tr>
+              <tr><td>Parallelism map</td><td>Every task in the parallelism map exists in the task graph</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <pre><code>python scripts/spec_validate.py --task-graph artifacts/build/TASK-GRAPH.md</code></pre>
+        <p>Exit 0 = pass. Exit 1 = fail with specific error messages per failing check.</p>
+
+        <h2>File Write Pipeline</h2>
+        <p>Every file write by the Builder passes through a 5-step pipeline: secret scan → staged write → hot compilation → SAST scan → write log. Each step is a separate script.</p>
+
+        <h3>staged_write.py</h3>
+        <p>Stage a file write with a terminal diff and an Apply / Edit / Reject prompt. The human sees exactly what will change before any file is touched.</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Detail</th><th>Value</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>Usage</strong></td><td><code>python scripts/staged_write.py stage --task TASK-NNN --file path --content /tmp/proposed.txt</code></td></tr>
+              <tr><td><strong>Exit 0</strong></td><td>Write applied — user chose Apply or Edit-then-Apply</td></tr>
+              <tr><td><strong>Exit 1</strong></td><td>Write rejected — repair context printed to stdout; Builder re-enters implementation step</td></tr>
+              <tr><td><strong>Exit 2</strong></td><td>Error — file lock, permissions issue, or malformed arguments</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>secret_scan.py</h3>
+        <p>Pre-write secret scanner. Runs before every file write and hard-blocks the write if any secret pattern is found. Repair context is returned to the Builder.</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Detail</th><th>Value</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>Usage</strong></td><td><code>python scripts/secret_scan.py &lt;target&gt; [--log path]</code></td></tr>
+              <tr><td><strong>Patterns</strong></td><td>14 regex patterns including OpenAI keys, Anthropic keys, AWS credentials, GitHub tokens, Stripe keys, Twilio tokens, and generic high-entropy strings</td></tr>
+              <tr><td><strong>Exit 0</strong></td><td>Clean — no secrets detected</td></tr>
+              <tr><td><strong>Exit 1</strong></td><td>Found — secret location and pattern name reported; write is blocked</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>write_log.py</h3>
+        <p>Records every approved write to <code>WRITE_LOG.jsonl</code>. This log is consumed by <code>commit_by_task.py</code> to group commits by task.</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Sub-command</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>record</code></td><td>Append a write entry: task ID, file path, timestamp, hash</td></tr>
+              <tr><td><code>list</code></td><td>Show all writes recorded in this session</td></tr>
+              <tr><td><code>task</code></td><td>Show all writes for a specific task ID</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <pre><code>python scripts/write_log.py record --task TASK-NNN --file path/to/file.py</code></pre>
+
+        <h3>sast_scan.py</h3>
+        <p>Post-write SAST scan. Runs non-blocking after each approved write. Uses gosec, bandit, or semgrep when available, with an inline regex fallback. Findings accumulate in <code>SAST_FINDINGS.jsonl</code> for the Security agent to review.</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Detail</th><th>Value</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>Usage</strong></td><td><code>python scripts/sast_scan.py &lt;target&gt; --task TASK-NNN</code></td></tr>
+              <tr><td><strong>Exit</strong></td><td>Always exits 0 (non-blocking). Findings written to <code>SAST_FINDINGS.jsonl</code>.</td></tr>
+              <tr><td><strong>Backends</strong></td><td>gosec (Go), bandit (Python), semgrep (multi-language), inline regex fallback</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>check_coverage.py</h3>
+        <p>Enforces a minimum coverage threshold after test contracts pass. A result below the threshold blocks DONE marking for the task.</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Detail</th><th>Value</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>Usage</strong></td><td><code>python scripts/check_coverage.py --threshold 70 --task TASK-NNN</code></td></tr>
+              <tr><td><strong>Supported stacks</strong></td><td>go (go test -cover), node (nyc/c8), python (pytest-cov), rust (cargo-tarpaulin)</td></tr>
+              <tr><td><strong>Exit 0</strong></td><td>Coverage at or above threshold</td></tr>
+              <tr><td><strong>Exit 1</strong></td><td>Coverage below threshold — current % and required % reported</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Parallel Execution</h2>
+
+        <h3>parallel_runner.go</h3>
+        <p>Go goroutine batch executor. Runs multiple tasks simultaneously using goroutines and automatically detects write conflicts before execution begins.</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Detail</th><th>Value</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>Usage</strong></td><td><code>go run scripts/parallel_runner.go -tasks TASK-001,TASK-002 -cmd "..." -task-graph artifacts/build/TASK-GRAPH.md</code></td></tr>
+              <tr><td><strong>Conflict detection</strong></td><td>Reads <code>FILE_OWNERSHIP_MAP.md</code>; refuses to run tasks that write to the same file in the same batch</td></tr>
+              <tr><td><strong>Exit 0</strong></td><td>All tasks in the batch passed</td></tr>
+              <tr><td><strong>Exit 1</strong></td><td>One or more tasks failed; per-task output captured and reported</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout callout-info">
+          <span class="callout-icon">ℹ️</span>
+          <div class="callout-content">
+            <div class="callout-title">Two parallel execution methods</div>
+            <p><strong>Method A</strong> (Go goroutines): <code>parallel_runner.go</code> — best for independent build/test commands. <strong>Method B</strong> (Agent tool calls): Agent 3 issues multiple parallel tool calls in a single response — best for independent file writes across non-overlapping task groups.</p>
+          </div>
+        </div>
+
+        <h2>Intelligence</h2>
+
+        <h3>semantic_search.py</h3>
+        <p>Embedding-based RAG search over the codebase. Agent 3 queries this before each architecture-class task to find relevant prior code and avoid duplication.</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Sub-command</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>index</code></td><td>Build semantic index from source files; writes to <code>SEMANTIC_INDEX.json</code></td></tr>
+              <tr><td><code>search</code></td><td>Query the index; returns top-N relevant file snippets</td></tr>
+              <tr><td><code>update</code></td><td>Incrementally update the index after new files are written</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <pre><code>python scripts/semantic_search.py search --query "validate user input" --index artifacts/build/SEMANTIC_INDEX.json</code></pre>
+        <p>Uses Ollama <code>nomic-embed-text</code> when available; falls back to TF-IDF if Ollama is not running.</p>
+
+        <h2>Database</h2>
+
+        <h3>migration_safety.py</h3>
+        <p>Schema delta detection, bidirectional SQL generation, and data-loss risk assessment. HIGH-risk migrations block the pipeline until <code>!migration-approve</code> is issued.</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Sub-command</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>generate</code></td><td>Diff current schema against previous; generate UP and DOWN SQL</td></tr>
+              <tr><td><code>check</code></td><td>Classify risk level (LOW / MEDIUM / HIGH / DATA-LOSS) and print report</td></tr>
+              <tr><td><code>dry-run</code></td><td>Apply migration to a shadow database and verify it succeeds without data loss</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout callout-warn">
+          <span class="callout-icon">⚠️</span>
+          <div class="callout-content">
+            <div class="callout-title">HIGH risk blocks pipeline</div>
+            <p>When <code>migration_safety.py check</code> returns a HIGH or DATA-LOSS risk rating, the pipeline halts and prints a risk report. The human must issue <code>!migration-approve</code> to proceed or <code>!migration-cancel</code> to discard the schema change.</p>
+          </div>
+        </div>
+
+        <h2>Pipeline Operations</h2>
+
+        <h3>pipeline_replay.py</h3>
+        <p>Restore the codebase to the git checkpoint created after a specific task, then reset all later tasks to PENDING. Requires <code>commit_by_task.py</code> to have run, so each task has a corresponding git commit.</p>
+        <pre><code>python scripts/pipeline_replay.py --task TASK-NNN --project-dir .</code></pre>
+        <p>Invoked by the <code>!replay TASK-NNN</code> Orchestrator command. See <a href="commands.html">Command Reference</a>.</p>
+
+        <h3>session_fork.py</h3>
+        <p>Fork the pipeline into two parallel branches for side-by-side comparison of alternative implementations or architectures.</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Sub-command</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>create</code></td><td>Fork the project directory into two branch directories (fork-a, fork-b)</td></tr>
+              <tr><td><code>compare</code></td><td>Diff the two branches and summarize structural differences</td></tr>
+              <tr><td><code>merge</code></td><td>Copy the winning branch back to the project directory and remove both fork dirs</td></tr>
+              <tr><td><code>status</code></td><td>Show current fork state: which branch is ahead, task counts, test results</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Invoked by <code>!fork</code> and <code>!merge</code> Orchestrator commands.</p>
+
+        <h3>register_project.py</h3>
+        <p>
+          Registers or updates a project entry in <code>config/context.json → registered_projects</code>.
+          Called by Agents 3–6 at each stage completion to keep the registry current, and by Agent 7
+          after every maintenance cycle. Enables the always-resident pipeline — registered projects
+          auto-resume on the next <code>Start agent 0</code> without requiring re-activation.
+        </p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Detail</th><th>Value</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>Usage</strong></td><td><code>python scripts/register_project.py --project-dir /path --project-name "MyApp" --stage built --last-agent 3 --handoff artifacts/build/HANDOFF.json</code></td></tr>
+              <tr><td><strong>Stages</strong></td><td><code>built</code> → <code>critiqued</code> → <code>secured</code> → <code>shipped</code> → <code>maintenance</code></td></tr>
+              <tr><td><strong>Stage protection</strong></td><td>Refuses to regress a stage — calling with an earlier stage than the current value is a no-op with a warning</td></tr>
+              <tr><td><strong>Safety check</strong></td><td>Blocks registration if <code>--project-dir</code> resolves inside the agents directory</td></tr>
+              <tr><td><strong>Exit 0</strong></td><td>Project registered or updated successfully</td></tr>
+              <tr><td><strong>Exit 1</strong></td><td>Safety violation (path inside agents dir) or config file missing/corrupt</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>pipeline_improve.py</h3>
+        <p>Post-run telemetry analyzer. After a pipeline completes, analyzes timing, failure rates, and retry patterns to generate <code>PROP-NNN</code> improvement proposals.</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Invocation</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>python scripts/pipeline_improve.py</code></td><td>Default: analyze current session and emit proposals to <code>PROP_LOG.md</code></td></tr>
+              <tr><td><code>python scripts/pipeline_improve.py --health</code></td><td>Show existing proposals ranked by impact score</td></tr>
+              <tr><td><code>python scripts/pipeline_improve.py --promote PROP-NNN</code></td><td>Apply a specific proposal to the agents directory</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Invoked by <code>!pipeline-health</code> and <code>!pipeline-promote</code> commands.</p>
+
+        <h3>token_tracker.py</h3>
+        <p>Session token usage tracking and <code>!budget</code> reporting. Reads per-model pricing from <code>config/pricing.json</code>.</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Sub-command</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>record</code></td><td>Record token counts for a completed agent turn</td></tr>
+              <tr><td><code>budget</code></td><td>Print session summary: total tokens, context window %, estimated cost, per-agent breakdown</td></tr>
+              <tr><td><code>breakdown</code></td><td>Per-task token breakdown with cache hit/miss analysis</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Pricing data from <code>config/pricing.json</code> supports multiple Claude models with separate input/output/cache rates.</p>
+
+        <h2>Post-Build</h2>
+
+        <h3>container_verify.py</h3>
+        <p>Build the Docker image and run the full test suite inside the container. Auto-generates a <code>Dockerfile.test</code> if none exists. A passing test suite that fails inside the container indicates a genuine environment mismatch.</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Detail</th><th>Value</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>Usage</strong></td><td><code>python scripts/container_verify.py --project-dir .</code></td></tr>
+              <tr><td><strong>Exit 0</strong></td><td>Image built and all tests pass inside container</td></tr>
+              <tr><td><strong>Exit 1</strong></td><td>Tests fail in container — container logs and diff vs. local results printed</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Invoked by the Verifier agent in Phase 12B. See <a href="verifier.html">Verifier</a>.</p>
+
+        <h3>contract_test.py</h3>
+        <p>Start the application, call every endpoint declared in <code>INTERFACES.md</code> with minimal requests, and validate status codes and response fields. Provides runtime API contract verification beyond static type checking.</p>
+        <pre><code>python scripts/contract_test.py --interfaces artifacts/build/INTERFACES.md --base-url http://localhost:8080</code></pre>
+        <p>Invoked by the Verifier agent in Phase 6D.</p>
+
+        <h3>commit_by_task.py</h3>
+        <p>Read <code>WRITE_LOG.jsonl</code>, group all writes by task ID, create one conventional git commit per task, and generate <code>PR_BODY.md</code> with a structured pull-request description.</p>
+        <pre><code>python scripts/commit_by_task.py --project-dir .</code></pre>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Output</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Git commits</td><td>One conventional commit per task (feat:, fix:, test:, etc.) in task order</td></tr>
+              <tr><td><code>PR_BODY.md</code></td><td>Structured PR description with task list, test summary, and change log</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Also required by <code>pipeline_replay.py</code> — each task needs a commit reference for checkpoint restoration.</p>
+
+        <div class="doc-footer">
+          <a class="doc-footer-link" href="design-contract.html">
+            <span class="doc-footer-dir">← Previous</span>
+            <span class="doc-footer-title">Design Contract</span>
+          </a>
+          <a class="doc-footer-link next" href="suggestions.html">
+            <span class="doc-footer-dir">Next →</span>
+            <span class="doc-footer-title">Suggestion Tracker</span>
+          </a>
+        </div>
+
+      </div>
+    </main>
+  </div>
+  <script src="nav.js"></script>
+</body>
+</html>

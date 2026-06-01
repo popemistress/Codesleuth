@@ -41,7 +41,7 @@ const recentActivity = [
     {
         id: 1,
         agent: "Product Discovery",
-        action: "Completed 13-phase discovery for new feature",
+        action: "Completed 16-phase discovery for new feature",
         time: "2 hours ago",
     },
     {
